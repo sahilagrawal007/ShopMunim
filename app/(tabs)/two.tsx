@@ -1,6 +1,7 @@
 // app/(tabs)/two.tsx
 import { iconMap } from '@/constants/iconMap';
 import React, { useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   View,
   Text,
@@ -44,9 +45,24 @@ export default function CustomersScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-[#F7F7F7]">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* ── HEADER ── */}
+        <View className="flex-row justify-between items-center mb-6">
+          <View className="flex-row items-center">
+            <Image
+              source={iconMap['shop.png']}
+              className="w-6 h-6 mr-2"
+            />
+            <Text className="text-xl font-bold text-gray-900">ShopMunim</Text>
+          </View>
+          <TouchableOpacity>
+            <Image
+              source={iconMap['bell.png']}
+              className="w-6 h-6"
+            />
+          </TouchableOpacity>
+        </View>
         <View className="flex-row items-center mb-6">
           <TouchableOpacity>
             <Image
@@ -59,26 +75,29 @@ export default function CustomersScreen() {
         </View>
 
         {/* ── ADD NEW PRODUCT FORM ── */}
-        <Text className="text-gray-700 font-semibold mb-2">+ Add New Product</Text>
-        <View className="bg-gray-100 rounded-xl p-4 mb-6">
+        <Text className="text-gray-500 mb-2">Manage all your shop's products and prices</Text>
+        <View className="bg-white rounded-xl p-4 mb-6">
+          <Text className="text-gray-700 text-lg font-bold mb-4">+ Add New Product</Text>
           {/* Product Name */}
+          <Text className="text-gray-400 mb-2 text-sm" >Product Name</Text>
           <TextInput
-            placeholder="Product Name (e.g. Tea)"
+            placeholder="e.g. Tea"
             value={productName}
             onChangeText={setProductName}
-            className="border border-gray-300 rounded-lg px-3 py-2 mb-3 text-gray-700"
+            className="border border-gray-300 rounded-lg px-3 py-3 mb-3 text-gray-700"
           />
           {/* Price */}
+          <Text className="text-gray-400 mb-2 text-sm" >Price (₹)</Text>
           <TextInput
-            placeholder="Price (e.g. 10)"
+            placeholder="e.g. 10"
             value={price}
             onChangeText={setPrice}
             keyboardType="numeric"
-            className="border border-gray-300 rounded-lg px-3 py-2 mb-3 text-gray-700"
+            className="border border-gray-300 rounded-lg px-3 py-3 mb-3 text-gray-700"
           />
 
           {/* Icon Picker */}
-          <Text className="text-gray-700 mb-2">Icon</Text>
+          <Text className="text-gray-400 mb-2">Icon</Text>
           <View className="flex-row justify-between mb-4">
             {[
               'tea.png',
@@ -105,9 +124,15 @@ export default function CustomersScreen() {
 
           <TouchableOpacity
             onPress={addProduct}
-            className="bg-gradient-to-r from-blue-500 to-purple-500 py-3 rounded-lg"
-          >
-            <Text className="text-center text-white font-semibold">Add Product</Text>
+            className="rounded-lg overflow-hidden">
+              <LinearGradient
+                colors={['#3b82f6', '#8b5cf6']} // blue-500 to purple-500
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                className="py-3 rounded-lg mb-4 mt-3"
+              >
+              <Text className="text-center text-white font-semibold">Add Product</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
 
@@ -116,7 +141,7 @@ export default function CustomersScreen() {
         {products.map((p) => (
           <View
             key={p.id}
-            className="flex-row items-center bg-white p-3 rounded-xl mb-3 shadow-sm"
+            className="flex-row items-center bg-white p-3 rounded-xl mb-1.5 shadow-sm"
           >
             <Image
               source={iconMap[p.icon]}

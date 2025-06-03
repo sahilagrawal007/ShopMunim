@@ -17,4 +17,5 @@ export const iconMap: Record<string, any> = {
   "check.png": require("../assets/images/check.png"),
   "shop.png": require("../assets/images/shop.png"),
   "user.png": require("../assets/images/user.png"),
+  "wallet.png": require("../assets/images/wallet.png"),
 };

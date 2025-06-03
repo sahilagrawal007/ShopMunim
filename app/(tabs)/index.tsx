@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { PieChart } from 'react-native-chart-kit'; // for placeholder pie chart
 import { Dimensions } from 'react-native';
 import { iconMap } from '../../constants/iconMap';
@@ -74,18 +75,21 @@ export default function DashboardScreen() {
           <View className="flex-1">
             <Text className="text-xs text-gray-500">Your Shop Link</Text>
             <Text
-              className="text-sm text-gray-700 truncate w-[200px]"
+              className="text-sm text-gray-700 truncate w-[200px] mb-3"
               numberOfLines={1}
             >
               https://shopmunim.me/rohit
             </Text>
+          
+            <View className="flex-row space-x-2" >
+              <TouchableOpacity className="bg-[#4b91f3] px-3 py-1 rounded-lg mr-2">
+                <Text className="text-xs text-white">Copy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="bg-white px-3 py-1 rounded-lg border border-gray-200">
+                <Text className="text-xs text-[#4b91f3]">Share</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <TouchableOpacity className="bg-indigo-600 px-3 py-1 rounded-lg mr-2">
-            <Text className="text-xs text-white">Copy</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="bg-white px-3 py-1 rounded-lg border border-gray-200">
-            <Text className="text-xs text-indigo-600">Share</Text>
-          </TouchableOpacity>
         </View>
 
         {/* ── ANALYTICS GRID ── */}
@@ -99,7 +103,7 @@ export default function DashboardScreen() {
                 className="w-5 h-5"
               />
             </View>
-            <Text className="text-lg font-bold text-gray-900">37</Text>
+            <Text className="text-lg font-bold text-indigo-500">37</Text>
             <Text className="text-sm text-gray-500">Customers</Text>
           </View>
 
@@ -160,19 +164,34 @@ export default function DashboardScreen() {
         </View> */}
 
         {/* ── CREDIT SUMMARY BAR ── */}
-        <View className="bg-gradient-to-r from-blue-500 to-purple-500 p-4 rounded-xl mb-6">
-          <Text className="text-white text-lg font-bold">
-            Total Credit Given
-          </Text>
-          <Text className="text-white text-2xl font-extrabold mb-3">
-            ₹12,350
-          </Text>
-          <TouchableOpacity className="bg-white rounded-lg py-2 px-4 w-36">
-            <Text className="text-center text-blue-600 font-semibold">
-              Collect Payment
+
+        <LinearGradient
+          colors={['#6468E5', '#5FA0F9']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          className="rounded-2xl p-4 mb-6 flex-row justify-between items-center"
+        >
+          <View>
+            <Text className="text-white text-sm font-medium">
+              Total Credit Given
             </Text>
-          </TouchableOpacity>
-        </View>
+            <Text className="text-white text-2xl font-extrabold mt-3">
+              ₹12,350
+            </Text>
+          </View>
+
+          <View className="flex-col items-end">
+            <Image
+              source={iconMap['wallet.png']} // Make sure this exists
+              className="w-6 h-6 mb-2 mr-2"
+            />
+            <TouchableOpacity className="bg-white rounded-full py-2 px-4 mt-2">
+              <Text className="text-[#6468E5] font-semibold text-sm ">
+                Collect Payment
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
 
         {/* ── QUICK ACTIONS ── */}
         <View className="flex-row justify-between mb-6">
@@ -234,7 +253,7 @@ export default function DashboardScreen() {
           ].map((cust) => (
             <View
               key={cust.id}
-              className="flex-row items-center bg-white p-3 rounded-xl mb-3 shadow-sm"
+              className="flex-row items-center bg-white p-3 rounded-xl mb-1 shadow-sm"
             >
               <Image
                 source={{ uri: cust.avatar }}
@@ -303,7 +322,7 @@ export default function DashboardScreen() {
           ].map((txn) => (
             <View
               key={txn.id}
-              className="flex-row items-center bg-white p-3 rounded-xl mb-3 shadow-sm"
+              className="flex-row items-center bg-white p-3 rounded-xl mb-1 shadow-sm"
             >
               <View className="bg-gray-50 p-2 rounded-full mr-3">
                 <Image
@@ -360,25 +379,32 @@ export default function DashboardScreen() {
         </View>
 
         {/* ── REMINDER BANNER ── */}
-        <View className="bg-gradient-to-r from-yellow-200 to-red-200 p-4 rounded-xl mb-8">
-          <View className="flex-row items-center mb-2">
-            <Image
-              source={iconMap['reminder-bell.png']}
-              className="w-5 h-5 mr-2"
-            />
-            <Text className="text-base font-semibold text-red-600">
-              Remind customers for due payments
-            </Text>
-          </View>
-          <Text className="text-xs text-gray-700 mb-3">
-            Send payment reminders to customers with pending dues.
-          </Text>
-          <TouchableOpacity className="bg-white px-4 py-2 rounded-lg w-36">
-            <Text className="text-center text-red-600 font-semibold">
-              Remind Now
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <LinearGradient
+          colors={['#FDDE8E', '#FBA5A4']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          className="p-4 rounded-xl mb-8 flex-row items-center"
+        >
+          <Image
+            source={iconMap['reminder-bell.png']}
+            className="w-10 h-10 mr-4 self-start"
+            resizeMode="contain"
+          />
+
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-red-600 mb-1">
+                Remind customers for due payments
+              </Text>
+              <Text className="text-sm text-gray-800 mb-3">
+                Send payment reminders to customers with pending dues.
+              </Text>
+              <TouchableOpacity className="bg-white px-4 py-2 rounded-lg w-36">
+                <Text className="text-center text-red-600 font-semibold">
+                  Remind Now
+                </Text>
+              </TouchableOpacity>
+            </View>
+        </LinearGradient>
       </ScrollView>
     </SafeAreaView>
   );
