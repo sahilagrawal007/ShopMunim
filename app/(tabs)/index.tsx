@@ -27,7 +27,7 @@ export default function DashboardScreen() {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-[#F7F7F7]">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* ── HEADER ── */}
         <View className="flex-row justify-between items-center mb-6">
@@ -46,8 +46,25 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
+
+        {/* ── WELCOME & AVATAR ── */}
+        <View className="flex-row items-center justify-between mb-6">
+          <View>
+            <Text className="text-gray-500 text-sm">Welcome back,</Text>
+            <Text className="text-lg font-bold text-gray-900">
+              Rohit Sharma
+            </Text>
+          </View>
+          <Image
+            source={{
+              uri: 'https://randomuser.me/api/portraits/men/32.jpg',
+            }}
+            className="w-12 h-12 rounded-full"
+          />
+        </View>
+
         {/* ── SHOP LINK CARD ── */}
-        <View className="bg-gray-100 rounded-xl p-4 mb-6 flex-row items-center">
+        <View className="bg-white rounded-xl p-4 mb-6 flex-row items-center">
           <View className="bg-indigo-100 p-3 rounded-full mr-3">
             <Image
               source={iconMap['link.png']}
@@ -75,7 +92,7 @@ export default function DashboardScreen() {
         <Text className="text-gray-700 font-semibold mb-2">Analytics</Text>
         <View className="flex-row flex-wrap justify-between mb-6">
           {/* Customers */}
-          <View className="w-[48%] bg-gray-100 p-4 rounded-xl mb-4">
+          <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow-lg items-center">
             <View className="bg-indigo-100 p-3 rounded-full mb-2 w-10 h-10 items-center justify-center">
               <Image
                 source={iconMap['user.png']}
@@ -87,7 +104,7 @@ export default function DashboardScreen() {
           </View>
 
           {/* Paid */}
-          <View className="w-[48%] bg-gray-100 p-4 rounded-xl mb-4">
+          <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
             <View className="bg-green-100 p-3 rounded-full mb-2 w-10 h-10 items-center justify-center">
               <Image
                 source={iconMap['check.png']}
@@ -99,7 +116,7 @@ export default function DashboardScreen() {
           </View>
 
           {/* With Due */}
-          <View className="w-[48%] bg-gray-100 p-4 rounded-xl mb-4">
+          <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
             <View className="bg-yellow-100 p-3 rounded-full mb-2 w-10 h-10 items-center justify-center">
               <Image
                 source={iconMap['clock.png']}
@@ -111,7 +128,7 @@ export default function DashboardScreen() {
           </View>
 
           {/* Total Due */}
-          <View className="w-[48%] bg-gray-100 p-4 rounded-xl mb-4">
+          <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
             <View className="bg-red-100 p-3 rounded-full mb-2 w-10 h-10 items-center justify-center">
               <Image
                 source={iconMap['rupee.png']}
@@ -141,23 +158,6 @@ export default function DashboardScreen() {
             </View>
           </View>
         </View> */}
-        
-
-        {/* ── WELCOME & AVATAR ── */}
-        <View className="flex-row items-center justify-between mb-6">
-          <View>
-            <Text className="text-gray-500 text-sm">Welcome back,</Text>
-            <Text className="text-lg font-bold text-gray-900">
-              Rohit Sharma
-            </Text>
-          </View>
-          <Image
-            source={{
-              uri: 'https://randomuser.me/api/portraits/men/32.jpg',
-            }}
-            className="w-12 h-12 rounded-full"
-          />
-        </View>
 
         {/* ── CREDIT SUMMARY BAR ── */}
         <View className="bg-gradient-to-r from-blue-500 to-purple-500 p-4 rounded-xl mb-6">
@@ -176,26 +176,26 @@ export default function DashboardScreen() {
 
         {/* ── QUICK ACTIONS ── */}
         <View className="flex-row justify-between mb-6">
-          <TouchableOpacity className="items-center bg-gray-100 p-3 rounded-xl w-[30%]">
+          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[30%]">
             <Image
               source={iconMap['add-customer.png']}
               className="w-6 h-6 mb-1"
             />
-            <Text className="text-xs text-gray-700">Add Customer</Text>
+            <Text className="text-xs text-center text-gray-700">Add Customer</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="items-center bg-gray-100 p-3 rounded-xl w-[30%]">
+          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[30%]">
             <Image
               source={iconMap['rupee-circle.png']}
               className="w-6 h-6 mb-1"
             />
-            <Text className="text-xs text-gray-700">New Credit</Text>
+            <Text className="text-xs text-center text-gray-700">New Credit</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="items-center bg-gray-100 p-3 rounded-xl w-[30%]">
+          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[30%]">
             <Image
               source={iconMap['menu.png']}
               className="w-6 h-6 mb-1"
             />
-            <Text className="text-xs text-gray-700">Products</Text>
+            <Text className="text-xs text-center text-gray-700">Products</Text>
           </TouchableOpacity>
         </View>
 
