@@ -1,23 +1,25 @@
 // app/(tabs)/index.tsx
 
-import React, { useState, useEffect } from 'react';
+import * as Clipboard from 'expo-clipboard';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
+  Alert,
   Image,
-  TouchableOpacity,
   ScrollView,
   Share,
-  Alert,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Clipboard from 'expo-clipboard';
 import { iconMap } from '../../constants/iconMap';
 
 export default function DashboardScreen() {
   // ── STEP 0: Replace this with real user/shop data once you have login ──
   const [shopLink, setShopLink] = useState<string>('');
+  const router = useRouter();
 
   // Simulate fetching the logged-in user's shop link
   useEffect(() => {
@@ -209,6 +211,11 @@ export default function DashboardScreen() {
             <TouchableOpacity
               key={i}
               className="items-center bg-white p-3 rounded-xl w-[30%]"
+              onPress={() => {
+                if (action.label === 'Add Customer') {
+                  router.push('/add-customer');
+                }
+              }}
             >
               <Image 
                 source={iconMap[action.icon]} 
