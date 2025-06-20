@@ -1,180 +1,133 @@
-import * as Clipboard from 'expo-clipboard'; // Assuming you have expo-clipboard installed for copy functionality
-import { Link, router } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, Image, TouchableOpacity, ScrollView, Alert, Share, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { auth, db } from '../../firebaseConfig'; // Correct import path
+import { LinearGradient } from 'expo-linear-gradient';
+import { PieChart } from 'react-native-chart-kit';
+import * as Clipboard from 'expo-clipboard';
+import { useRouter, Link } from 'expo-router';
+import { onAuthStateChanged } from 'firebase/auth';
+import { collection, doc, onSnapshot, query, where, orderBy, limit } from 'firebase/firestore';
+import { auth, db } from '../../firebaseConfig';
+import { iconMap } from '../../constants/iconMap';
+import { Ionicons } from '@expo/vector-icons';
 
-const ownerDashboard = () => {
+export default function DashboardScreen() {
+  const router = useRouter();
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [analyticsData, setAnalyticsData] = useState<any>(null);
-  const [totalCreditGiven, setTotalCreditGiven] = useState<number>(0);
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [analyticsData, setAnalyticsData] = useState<any>({ paidCustomers: 0, customersWithDue: 0, totalDue: 0, totalCreditGiven: 0 });
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+
+  const pieData = [
+    { key: 1, value: analyticsData?.paidCustomers || 0, svg: { fill: '#10B981' } },
+    { key: 2, value: analyticsData?.customersWithDue || 0, svg: { fill: '#F59E0B' } },
+    { key: 3, value: analyticsData?.totalDue || 0, svg: { fill: '#EF4444' } },
+  ];
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Fetch User Profile from 'owners' collection
-        const userDocRef = doc(db, 'owners', user.uid);
-        const unsubscribeUserProfile = onSnapshot(userDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            setUserProfile(docSnap.data());
-            console.log("User profile fetched:", docSnap.data());
-          } else {
-            console.log("No user profile found in Firestore for UID:", user.uid);
-            setUserProfile(null);
-          }
-        }, (error) => {
-          console.error("Error fetching user profile:", error);
-        });
+  const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const uid = user.uid;
+      console.log('Authenticated UID:', uid);
 
-        // Fetch Analytics Data
-        const analyticsCollectionRef = collection(db, 'analytics');
-        const qAnalytics = query(analyticsCollectionRef, where('ownerId', '==', user.uid));
-        const unsubscribeAnalytics = onSnapshot(qAnalytics, (querySnapshot) => {
-          const data: any[] = [];
-          querySnapshot.forEach((doc) => {
-            data.push({ id: doc.id, ...doc.data() });
-          });
-          setAnalyticsData(data.length > 0 ? data[0] : null); // Assuming one analytics document per owner
-          console.log("Analytics data fetched:", data);
-          if (data.length === 0) {
-            console.log("No analytics data found for this owner.");
-          }
-        }, (error) => {
-          console.error("Error fetching analytics data:", error);
-        });
+      const ownerRef = doc(db, 'owners', uid);
+      const analyticsRef = doc(db, 'analytics', uid);
+      const productsRef = query(collection(db, 'products'), where('ownerId', '==', uid));
+      const transactionsRef = query(
+        collection(db, 'transactions'),
+        where('ownerId', '==', uid),
+        orderBy('date', 'desc'),
+        limit(5)
+      );
+      const customersRef = query(
+        collection(db, 'customers'),
+        where('shopsJoined', 'array-contains', uid) // ✅ correct logic: using owner's UID
+      );
 
-        // Fetch Total Credit Given
-        // Assuming 'totalCredit' is a field in the analytics document, or a separate collection
-        const totalCreditRef = collection(db, 'totalCredit'); // Example collection, adjust if needed
-        const qTotalCredit = query(totalCreditRef, where('ownerId', '==', user.uid));
-        const unsubscribeTotalCredit = onSnapshot(qTotalCredit, (querySnapshot) => {
-          const data: any[] = [];
-          querySnapshot.forEach((doc) => {
-            data.push({ id: doc.id, ...doc.data() });
-          });
-          if (data.length > 0 && data[0].amount) {
-            setTotalCreditGiven(data[0].amount);
-          } else {
-            setTotalCreditGiven(0);
-            console.log("No total credit given data found for this owner.");
-          }
-        }, (error) => {
-          console.error("Error fetching total credit given:", error);
-        });
+      const cleanupFns: (() => void)[] = [];
 
-        // Fetch Customers
-        const customersCollectionRef = collection(db, 'customers');
-        const qCustomers = query(customersCollectionRef, where('ownerId', '==', user.uid));
-        const unsubscribeCustomers = onSnapshot(qCustomers, (querySnapshot) => {
-          const data: any[] = [];
-          querySnapshot.forEach((doc) => {
-            data.push({ id: doc.id, ...doc.data() });
-          });
-          setCustomers(data);
-          console.log("Customers fetched:", data);
-          if (data.length === 0) {
-            console.log("No customers found for this owner.");
-          }
-        }, (error) => {
-          console.error("Error fetching customers:", error);
-        });
+      const unsubProfile = onSnapshot(ownerRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setUserProfile(docSnap.data());
+        }
+        setLoading(false);
+      });
 
-        // Fetch Recent Transactions (last 5, sorted by date)
-        const transactionsCollectionRef = collection(db, 'transactions');
-        const qTransactions = query(transactionsCollectionRef, where('ownerId', '==', user.uid));
-        const unsubscribeTransactions = onSnapshot(qTransactions, (querySnapshot) => {
-          const data: any[] = [];
-          querySnapshot.forEach((doc) => {
-            data.push({ id: doc.id, ...doc.data() });
-          });
-          setRecentTransactions(data.sort((a, b) => b.date?.seconds - a.date?.seconds).slice(0, 5));
-          console.log("Recent transactions fetched:", data);
-          if (data.length === 0) {
-            console.log("No recent transactions found for this owner.");
-          }
-        }, (error) => {
-          console.error("Error fetching recent transactions:", error);
+      const unsubCustomers = onSnapshot(customersRef, (querySnapshot) => {
+        const list: any[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          list.push({ id: doc.id, ...data, due: data.due || 0 });
         });
+        console.log('Fetched customers based on UID:', list);
+        setCustomers(list);
+      });
 
-        // Fetch Products
-        const productsCollectionRef = collection(db, 'products');
-        const qProducts = query(productsCollectionRef, where('ownerId', '==', user.uid));
-        const unsubscribeProducts = onSnapshot(qProducts, (querySnapshot) => {
-          const data: any[] = [];
-          querySnapshot.forEach((doc) => {
-            data.push({ id: doc.id, ...doc.data() });
-          });
-          setProducts(data);
-          console.log("Products fetched:", data);
-          if (data.length === 0) {
-            console.log("No products found for this owner.");
-          }
-          setLoading(false);
-        }, (error) => {
-          console.error("Error fetching products:", error);
-          setLoading(false);
-        });
+      const unsubAnalytics = onSnapshot(analyticsRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          console.log('Fetched analytics data:', data);
+          setAnalyticsData(data);
+        } else {
+          console.log('No analytics data found, using defaults');
+          setAnalyticsData({ paidCustomers: 0, customersWithDue: 0, totalDue: 0, totalCreditGiven: 0 });
+        }
+      });
 
-        return () => {
-          unsubscribeUserProfile();
-          unsubscribeAnalytics();
-          unsubscribeTotalCredit();
-          unsubscribeCustomers();
-          unsubscribeTransactions();
-          unsubscribeProducts();
-        };
-      } else {
-        router.replace('/(auth)/login');
-      }
+      const unsubProducts = onSnapshot(productsRef, (querySnapshot) => {
+        const list: any[] = [];
+        querySnapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
+        console.log('Fetched products:', list);
+        setProducts(list);
+      });
+
+      const unsubTransactions = onSnapshot(transactionsRef, (querySnapshot) => {
+        const list: any[] = [];
+        querySnapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
+        console.log('Fetched transactions:', list);
+        setRecentTransactions(list);
+      });
+
+      cleanupFns.push(unsubProfile, unsubCustomers, unsubAnalytics, unsubProducts, unsubTransactions);
+
+      return () => {
+        cleanupFns.forEach((fn) => fn());
+        unsubscribeAuth();
+      };
+    } else {
       setLoading(false);
-    });
+    }
+  });
 
-    return () => unsubscribeAuth();
-  }, []);
+  return () => unsubscribeAuth();
+}, []);
+
 
   const copyToClipboard = useCallback(async () => {
     if (userProfile?.shopLink) {
-      const link = `https://yourshop.com/${userProfile.shopLink}`;
+      const link = `${userProfile.shopLink}`;
       await Clipboard.setStringAsync(link);
       Alert.alert('Copied!', 'Shop link copied to clipboard.');
     } else {
-      Alert.alert('Error', 'No shop link to copy.');
+      Alert.alert('Error', 'No shop link found.');
     }
   }, [userProfile?.shopLink]);
 
   const onShare = useCallback(async () => {
-    try {
-      if (userProfile?.shopLink) {
-        const result = await Share.share({
-          message: `Check out my shop: https://yourshop.com/${userProfile.shopLink} - ${userProfile.shopName}`,
-          url: `https://yourshop.com/${userProfile.shopLink}`,
-          title: 'My Shop Link'
+    if (userProfile?.shopLink && userProfile?.shopName) {
+      try {
+        await Share.share({
+          message: `Check out my shop: ${userProfile.shopLink} - ${userProfile.shopName}`,
         });
-        if (result.action === Share.sharedAction) {
-          if (result.activityType) {
-            // shared with activity type of result.activityType
-          } else {
-            // shared
-          }
-        } else if (result.action === Share.dismissedAction) {
-          // dismissed
-        }
-      } else {
-        Alert.alert('Error', 'No shop link to share.');
+      } catch (error: any) {
+        Alert.alert('Error', error.message);
       }
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
+    } else {
+      Alert.alert('Error', 'Shop details not available.');
     }
   }, [userProfile?.shopLink, userProfile?.shopName]);
-
 
   if (loading) {
     return (
@@ -184,120 +137,115 @@ const ownerDashboard = () => {
     );
   }
 
+  const dueCustomers = Array.isArray(customers)
+    ? customers.filter(c => Number(c?.due || 0) > 0)
+    : [];
+  console.log('dueCustomers count:', dueCustomers.length, 'list:', dueCustomers);
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="flex-1 p-4 bg-gray-100">
-        <StatusBar style="dark" />
+    <SafeAreaView className="flex-1 bg-[#F7F7F7]">
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
-          <Text className="text-2xl font-bold text-gray-800">ShopMunim</Text>
-          <TouchableOpacity onPress={() => router.push('/(ownerTabs)/settings')}>
-            <Image source={require('../../assets/images/bell.png')} className="w-6 h-6" resizeMode="contain" />
+          <View className="flex-row items-center">
+            <Image source={iconMap['shop.png']} className="w-6 h-6 mr-2" />
+            <Text className="text-xl font-bold text-gray-900">ShopMunim</Text>
+          </View>
+          <TouchableOpacity>
+            <Image source={iconMap['bell.png']} className="w-6 h-6" />
           </TouchableOpacity>
         </View>
 
-        {/* Welcome and Avatar */}
-        <View className="flex-row justify-between items-center mb-8 bg-blue-100 p-4 rounded-lg shadow-sm">
+        {/* Welcome */}
+        <View className="flex-row items-center justify-between mb-6">
           <View>
-            <Text className="text-base text-gray-600">
-              Welcome back,
-            </Text>
-            <Text className="text-xl font-semibold text-blue-800">
-              {userProfile?.name || 'Owner'}!
-            </Text>
+            <Text className="text-gray-500 text-sm">Welcome back,</Text>
+            <Text className="text-lg font-bold text-gray-900">{userProfile?.name || 'Owner'}</Text>
           </View>
-          <Image source={require('../../assets/images/user.png')} className="w-16 h-16 rounded-full border-2 border-blue-500" />
+          <Image
+            source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }}
+            className="w-12 h-12 rounded-full"
+          />
         </View>
 
         {/* Shop Link Card */}
-        <View className="bg-white p-5 rounded-lg shadow-md mb-6 border border-gray-200">
-          <View className="flex-row items-center mb-3">
-            {/* Placeholder for QR Code */}
-            <Image source={require('../../assets/images/icon.png')} className="w-16 h-16 mr-4" resizeMode="contain" />
-            <View className="flex-1">
-              <Text className="text-gray-600 text-sm font-semibold mb-1">Your Shop Link</Text>
-              <Text className="text-blue-600 text-base font-medium">
-                {userProfile?.shopLink ? `https://yourshop.com/${userProfile.shopLink}` : 'No shop link available'}
-              </Text>
-            </View>
+        <View className="bg-white rounded-xl p-4 mb-6 flex-row items-center">
+          <View className="bg-indigo-100 p-3 rounded-full mr-3">
+            <Image source={iconMap['link.png']} className="w-5 h-5" />
           </View>
-          <View className="flex-row justify-end items-center mt-3">
-            <TouchableOpacity onPress={copyToClipboard} className="mr-3 p-2 rounded-md bg-blue-500 flex-row items-center">
-              <Image source={require('../../assets/images/link.png')} className="w-4 h-4 mr-1 tint-white" resizeMode="contain" />
-              <Text className="text-white font-semibold">Copy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onShare} className="p-2 rounded-md bg-blue-500 flex-row items-center">
-              <Image source={require('../../assets/images/arrow-right.png')} className="w-4 h-4 mr-1 tint-white" resizeMode="contain" />
-              <Text className="text-white font-semibold">Share</Text>
-            </TouchableOpacity>
+          <View className="flex-1">
+            <Text className="text-xs text-gray-500">Your Shop Link</Text>
+            <Text className="text-sm text-gray-700 truncate w-[200px] mb-3">
+              {userProfile?.shopLink ? `${userProfile.shopLink}` : 'No shop link available'}
+            </Text>
+            <View className="flex-row space-x-2">
+              <TouchableOpacity className="bg-[#4b91f3] px-3 py-1 rounded-lg" onPress={copyToClipboard}>
+                <Text className="text-xs text-white">Copy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="bg-white px-3 py-1 rounded-lg border border-gray-200" onPress={onShare}>
+                <Text className="text-xs text-[#4b91f3]">Share</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
         {/* Analytics Grid */}
+        <Text className="text-gray-700 font-semibold mb-2">Analytics</Text>
         <View className="flex-row flex-wrap justify-between mb-6">
-          <View className="w-[48%] bg-white p-4 rounded-lg shadow-md border border-gray-200 items-center justify-center mb-4">
-            <Image source={require('../../assets/images/user.png')} className="w-10 h-10 mb-2" resizeMode="contain" />
-            <Text className="text-sm text-gray-500 mb-1">Customers</Text>
-            <Text className="text-xl font-bold text-purple-600">{customers.length}</Text>
+          <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow-lg items-center">
+            <View className="bg-indigo-100 p-3 rounded-full mb-2">
+              <Image source={iconMap['user.png']} className="w-5 h-5" />
+            </View>
+            <Text className="text-lg font-bold text-indigo-500">{customers.length}</Text>
+            <Text className="text-sm text-gray-500">Customers</Text>
           </View>
-          <View className="w-[48%] bg-white p-4 rounded-lg shadow-md border border-gray-200 items-center justify-center mb-4">
-            <Image source={require('../../assets/images/check.png')} className="w-10 h-10 mb-2" resizeMode="contain" />
-            <Text className="text-sm text-gray-500 mb-1">Paid</Text>
-            <Text className="text-xl font-bold text-blue-600">{analyticsData?.paidCustomers || '0'}</Text>
+          <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
+            <View className="bg-green-100 p-3 rounded-full mb-2">
+              <Image source={iconMap['check.png']} className="w-5 h-5" />
+            </View>
+            <Text className="text-lg font-bold text-green-600">{analyticsData?.paidCustomers || 0}</Text>
+            <Text className="text-sm text-gray-500">Paid</Text>
           </View>
-          <View className="w-[48%] bg-white p-4 rounded-lg shadow-md border border-gray-200 items-center justify-center">
-            <Image source={require('../../assets/images/clock.png')} className="w-10 h-10 mb-2" resizeMode="contain" />
-            <Text className="text-sm text-gray-500 mb-1">With Due</Text>
-            <Text className="text-xl font-bold text-red-600">{analyticsData?.customersWithDue || '0'}</Text>
+          <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
+            <View className="bg-yellow-100 p-3 rounded-full mb-2">
+              <Image source={iconMap['clock.png']} className="w-5 h-5" />
+            </View>
+            <Text className="text-lg font-bold text-yellow-600">{analyticsData?.customersWithDue || 0}</Text>
+            <Text className="text-sm text-gray-500">With Due</Text>
           </View>
-          <View className="w-[48%] bg-white p-4 rounded-lg shadow-md border border-gray-200 items-center justify-center">
-            <Image source={require('../../assets/images/rupee.png')} className="w-10 h-10 mb-2" resizeMode="contain" />
-            <Text className="text-sm text-gray-500 mb-1">Total Due</Text>
-            <Text className="text-xl font-bold text-red-600">₹{analyticsData?.totalDue?.toFixed(2) || '0.00'}</Text>
+          <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
+            <View className="bg-red-100 p-3 rounded-full mb-2">
+              <Image source={iconMap['rupee.png']} className="w-5 h-5" />
+            </View>
+            <Text className="text-lg font-bold text-red-600">₹{analyticsData?.totalDue?.toFixed(2) || '0.00'}</Text>
+            <Text className="text-sm text-gray-500">Total Due</Text>
           </View>
         </View>
 
-        {/* Credit Summary Bar */}
-        <View className="bg-blue-600 p-4 rounded-lg flex-row justify-between items-center mb-6 shadow-md">
+        {/* Credit Summary */}
+        <LinearGradient colors={['#6468E5', '#5FA0F9']} className="rounded-2xl p-4 mb-6 flex-row justify-between items-center">
           <View>
-            <Text className="text-white text-base">Total Credit Given</Text>
-            <Text className="text-white text-2xl font-bold">₹{totalCreditGiven.toFixed(2)}</Text>
+            <Text className="text-white text-sm font-medium">Total Credit Given</Text>
+            <Text className="text-white text-2xl font-extrabold mt-3">₹{analyticsData?.totalCreditGiven?.toFixed(2) || '0.00'}</Text>
           </View>
-          <TouchableOpacity className="bg-white px-4 py-2 rounded-full flex-row items-center">
-            <Image source={require('../../assets/images/wallet.png')} className="w-5 h-5 mr-2" resizeMode="contain" />
-            <Text className="text-blue-600 font-semibold">Collect Payment</Text>
+          <TouchableOpacity className="bg-white rounded-full py-2 px-4 mt-2">
+            <Text className="text-[#6468E5] font-semibold text-sm">Collect Payment</Text>
           </TouchableOpacity>
-        </View>
+        </LinearGradient>
 
         {/* Quick Actions */}
-        <View className="mb-6">
-          <View className="flex-row justify-around">
-            <TouchableOpacity className="items-center bg-white p-3 rounded-lg shadow-sm w-1/4 mx-1">
-              <Image source={require('../../assets/images/add-customer.png')} className="w-10 h-10 mb-2" resizeMode="contain" />
-              <Text className="text-center text-xs text-gray-700">Add Customer</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="items-center bg-white p-3 rounded-lg shadow-sm w-1/4 mx-1">
-              <Image source={require('../../assets/images/rupee-circle.png')} className="w-10 h-10 mb-2" resizeMode="contain" />
-              <Text className="text-center text-xs text-gray-700">New Credit</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="items-center bg-white p-3 rounded-lg shadow-sm w-1/4 mx-1">
-              <Image source={require('../../assets/images/biscuit.png')} className="w-10 h-10 mb-2" resizeMode="contain" />
-              <Text className="text-center text-xs text-gray-700">Products</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Remind Customers Banner */}
-        <View className="bg-red-100 p-4 rounded-lg flex-row justify-between items-center mb-6 shadow-sm">
-          <View className="flex-row items-center flex-1">
-            <Image source={require('../../assets/images/reminder-bell.png')} className="w-8 h-8 mr-3 tint-orange-500" resizeMode="contain" />
-            <View className="flex-1">
-              <Text className="text-orange-800 font-semibold text-base">Remind customers for due payments</Text>
-              <Text className="text-orange-600 text-sm mt-1">Send payment reminders to customers with pending dues.</Text>
-            </View>
-          </View>
-          <TouchableOpacity className="bg-orange-500 px-4 py-2 rounded-full ml-4">
-            <Text className="text-white font-semibold">Remind Now</Text>
+        <View className="flex-row justify-between mb-6">
+          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[30%]">
+            <Image source={iconMap['add-customer.png']} className="w-6 h-6 mb-1" />
+            <Text className="text-xs text-center text-gray-700">Add Customer</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[30%]">
+            <Image source={iconMap['rupee-circle.png']} className="w-6 h-6 mb-1" />
+            <Text className="text-xs text-center text-gray-700">New Credit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[30%]">
+            <Ionicons name="cube" size={24} color="#3b91f3" style={{ marginBottom: 4 }} />
+            <Text className="text-xs text-center text-gray-700">Products</Text>
           </TouchableOpacity>
         </View>
 
@@ -305,68 +253,51 @@ const ownerDashboard = () => {
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
           <Text className="text-lg font-bold text-gray-800 mb-4">Customers</Text>
           {customers.length > 0 ? (
-            customers.map((cust, index) => (
+            customers.slice(0, 3).map((cust, index) => (
               <View key={index} className="flex-row justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
                 <View className="flex-row items-center">
-                  <Image source={require('../../assets/images/user.png')} className="w-10 h-10 rounded-full mr-3" resizeMode="contain" />
+                  <Image source={iconMap['user.png']} className="w-10 h-10 rounded-full mr-3" />
                   <View>
                     <Text className="text-gray-700 font-medium">{cust.name}</Text>
                     <Text className="text-xs text-gray-500">Last: {cust.lastActivity || 'N/A'}</Text>
                   </View>
                 </View>
-                <View className="flex-row items-center">
-                  <Text className={`font-bold ${cust.due === 0 ? 'text-green-600' : 'text-red-600'} mr-2`}>
-                    {cust.due === 0 ? 'Paid' : `Due ₹${cust.due?.toFixed(2)}`}
-                  </Text>
-                  <TouchableOpacity>
-                    <Image source={require('../../assets/images/arrow-right.png')} className="w-4 h-4 tint-gray-500" resizeMode="contain" />
-                  </TouchableOpacity>
-                </View>
+                <Text className={`font-bold ${cust.due === 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {cust.due === 0 ? 'Paid' : `Due ₹${cust.due?.toFixed(2)}`}
+                </Text>
               </View>
             ))
           ) : (
             <Text className="text-gray-500">No customers found.</Text>
           )}
-          <Link href="/customers" className="text-blue-600 text-sm mt-3 self-end">
-            View All
-          </Link>
+          <Link href="./customers" className="text-blue-600 text-sm mt-3 self-end">View All</Link>
         </View>
 
         {/* Recent Transactions */}
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
           <Text className="text-lg font-bold text-gray-800 mb-4">Recent Transactions</Text>
           {recentTransactions.length > 0 ? (
-            recentTransactions.map((transaction, index) => (
+            recentTransactions.map((txn, index) => (
               <View key={index} className="flex-row justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
                 <View className="flex-row items-center">
-                  {/* Assuming you have a way to map transaction types to icons, or use a default */}
                   <Image
-                    source={(() => {
-                      switch (transaction.productName) {
-                        case 'Tea': return require('../../assets/images/tea.png');
-                        case 'Biscuits': return require('../../assets/images/biscuit.png');
-                        case 'Cigarettes': return require('../../assets/images/cigarette.png');
-                        default: return require('../../assets/images/rupee.png');
-                      }
-                    })()} 
-                    className="w-8 h-8 mr-3" resizeMode="contain" 
+                    source={iconMap[txn.productName?.toLowerCase() + '.png'] || iconMap['rupee.png']}
+                    className="w-8 h-8 mr-3"
                   />
                   <View>
-                    <Text className="text-gray-700 font-medium">{transaction.description || transaction.productName || 'Transaction'}</Text>
-                    <Text className="text-gray-500 text-xs">{transaction.date?.toDate ? new Date(transaction.date.toDate()).toLocaleDateString() : 'N/A'}</Text>
+                    <Text className="text-gray-700 font-medium">{txn.description || txn.productName || 'Transaction'}</Text>
+                    <Text className="text-gray-500 text-xs">{txn.date?.toDate ? new Date(txn.date.toDate()).toLocaleDateString() : 'N/A'}</Text>
                   </View>
                 </View>
-                <Text className={`font-bold ${transaction.type === 'credit' || transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  ₹{transaction.amount?.toFixed(2) || '0.00'}
+                <Text className={`font-bold ${txn.type === 'credit' || txn.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  ₹{txn.amount?.toFixed(2) || '0.00'}
                 </Text>
               </View>
             ))
           ) : (
             <Text className="text-gray-500">No recent transactions.</Text>
           )}
-          <Link href="/(customerTabs)/history" className="text-blue-600 text-sm mt-3 self-end">
-            See All
-          </Link>
+          <Link href="/(customerTabs)/history" className="text-blue-600 text-sm mt-3 self-end">See All</Link>
         </View>
 
         {/* Products */}
@@ -376,20 +307,11 @@ const ownerDashboard = () => {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="py-2">
               {products.map((product, index) => (
                 <View key={index} className="w-32 bg-gray-50 p-3 rounded-lg mr-3 items-center border border-gray-100">
-                  <Image 
-                    source={(() => {
-                      switch (product.name) {
-                        case 'Tea': return require('../../assets/images/tea.png');
-                        case 'Biscuits': return require('../../assets/images/biscuit.png');
-                        case 'Cigarettes': return require('../../assets/images/cigarette.png');
-                        case 'Burger': return require('../../assets/images/burger.png');
-                        default: return require('../../assets/images/shop.png'); // Generic icon for other products
-                      }
-                    })()} 
-                    className="w-16 h-16 mb-2" 
-                    resizeMode="contain" 
+                  <Image
+                    source={iconMap[product.name?.toLowerCase() + '.png'] || iconMap['shop.png']}
+                    className="w-16 h-16 mb-2"
                   />
-                  <Text className="text-gray-800 font-medium text-center">{product.name || 'Product'}</Text>
+                  <Text className="text-gray-800 font-medium text-center">{product.name}</Text>
                   <Text className="text-gray-600 text-sm">₹{product.price?.toFixed(2) || '0.00'}</Text>
                 </View>
               ))}
@@ -397,14 +319,51 @@ const ownerDashboard = () => {
           ) : (
             <Text className="text-gray-500">No products found.</Text>
           )}
-          <Link href="/(ownerTabs)/products" className="text-blue-600 text-sm mt-3 self-end">
-            Manage
-          </Link>
+          <Link href="./products" className="text-blue-600 text-sm mt-3 self-end">Manage</Link>
         </View>
 
+        {/* ── REMINDER BANNER ── */}
+        {Array.isArray(customers) && customers.filter(c => Number(c?.due || 0) > 0).length > 0 && (
+          <LinearGradient
+            colors={['#FDDE8E', '#FBA5A4']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            className="p-4 rounded-xl mb-8 flex-row items-center"
+          >
+            <Image
+              source={iconMap['reminder-bell.png']}
+              className="w-10 h-10 mr-4 self-start"
+              resizeMode="contain"
+            />
+
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-red-600 mb-1">
+                Remind customers for due payments
+              </Text>
+              <Text className="text-sm text-gray-800 mb-3">
+                Send payment reminders to customers with pending dues.
+              </Text>
+              <TouchableOpacity
+                className="bg-white px-4 py-2 rounded-lg w-36"
+                onPress={() => {
+                  const dueCustomers = customers.filter(c => Number(c?.due || 0) > 0);
+                  if (dueCustomers.length === 0) return;
+
+                  dueCustomers.forEach((cust) => {
+                    console.log(`Reminder sent to ${cust.name} - ₹${cust.due.toFixed(2)}`);
+                  });
+
+                  Alert.alert('Reminders Sent', `${dueCustomers.length} customer(s) reminded.`);
+                }}
+              >
+                <Text className="text-center text-red-600 font-semibold">
+                  Remind Now
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
-};
-
-export default ownerDashboard;
+}
