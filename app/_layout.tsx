@@ -1,10 +1,10 @@
-import { Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { Stack, useRouter } from 'expo-router';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth, db } from '../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
-import { useRouter } from 'expo-router';
-import { View, ActivityIndicator } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { AppPreferencesProvider } from '../components/AppPreferencesContext';
+import { auth, db } from '../firebaseConfig';
 
 export default function RootLayout() {
   const [user, setUser] = useState<User | null>(null);
@@ -52,10 +52,12 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(ownerTabs)" />
-      <Stack.Screen name="(customerTabs)" />
-    </Stack>
+    <AppPreferencesProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(ownerTabs)" />
+        <Stack.Screen name="(customerTabs)" />
+      </Stack>
+    </AppPreferencesProvider>
   );
 }

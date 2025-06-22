@@ -1,18 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, Alert, Share, Dimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { PieChart } from 'react-native-chart-kit';
-import * as Clipboard from 'expo-clipboard';
-import { useRouter, Link } from 'expo-router';
-import { onAuthStateChanged } from 'firebase/auth';
-import { collection, doc, onSnapshot, query, where, orderBy, limit } from 'firebase/firestore';
-import { auth, db } from '../../firebaseConfig';
-import { iconMap } from '../../constants/iconMap';
 import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Link, useRouter } from 'expo-router';
+import { onAuthStateChanged } from 'firebase/auth';
+import { collection, doc, limit, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, Image, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAppPreferences } from '../../components/AppPreferencesContext';
+import { iconMap } from '../../constants/iconMap';
+import { auth, db } from '../../firebaseConfig';
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const { preferences } = useAppPreferences();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [analyticsData, setAnalyticsData] = useState<any>({ paidCustomers: 0, customersWithDue: 0, totalDue: 0, totalCreditGiven: 0 });
@@ -191,6 +192,9 @@ export default function DashboardScreen() {
 
         {/* Analytics Grid */}
         <Text className="text-gray-700 font-semibold mb-2">Analytics</Text>
+        
+        
+        
         <View className="flex-row flex-wrap justify-between mb-6">
           <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow-lg items-center">
             <View className="bg-indigo-100 p-3 rounded-full mb-2">

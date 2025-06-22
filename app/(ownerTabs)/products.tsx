@@ -1,20 +1,20 @@
 // app/(tabs)/two.tsx
 
-import { db } from '../../firebaseConfig';
 import { iconMap } from '@/constants/iconMap';
-import React, { useState, useEffect } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  View,
-  Text,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { getAuth } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import {
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { db } from '../../firebaseConfig';
 
 export default function CustomersScreen() {
   const [productName, setProductName] = useState('');
@@ -48,7 +48,7 @@ export default function CustomersScreen() {
   }, []);
 
   async function addProduct() {
-    if (!productName || !price || !selectedIcon) return;
+    if (!productName || !price ) return;
 
     const auth = getAuth();
     const user = auth.currentUser;
@@ -59,7 +59,6 @@ export default function CustomersScreen() {
       id: Date.now().toString(),
       name: productName,
       price: Number(price),
-      icon: selectedIcon,
       createdAt: new Date(),
     };
 
@@ -86,7 +85,6 @@ export default function CustomersScreen() {
 
       setProductName('');
       setPrice('');
-      setSelectedIcon(null);
     } catch (e) {
       console.error('Error adding product:', e);
     }
@@ -169,27 +167,7 @@ export default function CustomersScreen() {
             className="border border-gray-300 rounded-lg px-3 py-3 mb-3 text-gray-700"
           />
 
-          <Text className="text-gray-400 mb-2">Icon</Text>
-          <View className="flex-row justify-between mb-4">
-            {[
-              'tea.png',
-              'biscuit.png',
-              'cigarette.png',
-              'burger.png',
-              'water.png',
-              'apple.png',
-            ].map((iconName) => (
-              <TouchableOpacity
-                key={iconName}
-                onPress={() => setSelectedIcon(iconName)}
-                className={`p-2 rounded-lg ${
-                  selectedIcon === iconName ? 'bg-indigo-100' : 'bg-gray-50'
-                }`}
-              >
-                <Image source={iconMap[iconName]} className="w-8 h-8" />
-              </TouchableOpacity>
-            ))}
-          </View>
+       
 
           <TouchableOpacity
             onPress={addProduct}
@@ -215,7 +193,7 @@ export default function CustomersScreen() {
             key={p.id}
             className="flex-row items-center bg-white p-3 rounded-xl mb-1.5 shadow-sm"
           >
-            <Image source={iconMap[p.icon]} className="w-8 h-8 rounded-full mr-3" />
+            
             <View className="flex-1">
               <Text className="text-base text-gray-900 font-medium">{p.name}</Text>
             </View>

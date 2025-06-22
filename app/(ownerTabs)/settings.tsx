@@ -1,11 +1,15 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { signOut } from 'firebase/auth';
-import { auth } from '../../firebaseConfig';
 import { useRouter } from 'expo-router';
+import { signOut } from 'firebase/auth';
+import React from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Feather from 'react-native-vector-icons/Feather';
+import { useAppPreferences } from '../../components/AppPreferencesContext';
+import { auth } from '../../firebaseConfig';
 
 export default function OwnerSettings() {
   const router = useRouter();
+  const { preferences } = useAppPreferences();
+  
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -22,18 +26,30 @@ export default function OwnerSettings() {
       </View>
       
       <View style={styles.section}>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Shop Information</Text>
+        <TouchableOpacity style={styles.settingItem} onPress={() => router.navigate('/(ownerTabs)/EditProfile' as any)}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Feather name="user" size={20} color="#555" style={{ marginRight: 12 }} />
+            <Text style={styles.settingText}>Edit Profile</Text>
+          </View>
         </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Share Shop Link</Text>
+        <TouchableOpacity style={styles.settingItem} onPress={() => router.navigate('/(ownerTabs)/ChangePassword' as any)}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Feather name="lock" size={20} color="#555" style={{ marginRight: 12 }} />
+            <Text style={styles.settingText}>Change Password</Text>
+          </View>
         </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Export Data</Text>
+        <TouchableOpacity style={styles.settingItem} onPress={() => router.navigate('/(ownerTabs)/ShopInformation' as any)}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Feather name="shopping-bag" size={20} color="#555" style={{ marginRight: 12 }} />
+            <Text style={styles.settingText}>Shop Information</Text>
+          </View>
         </TouchableOpacity>
-        
+        <TouchableOpacity style={styles.settingItem} onPress={() => router.navigate('/(ownerTabs)/Notifications' as any)}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Feather name="bell" size={20} color="#555" style={{ marginRight: 12 }} />
+            <Text style={styles.settingText}>Notifications</Text>
+          </View>
+        </TouchableOpacity>
         <TouchableOpacity style={[styles.settingItem, styles.signOutButton]} onPress={handleSignOut}>
           <Text style={[styles.settingText, styles.signOutText]}>Sign Out</Text>
         </TouchableOpacity>
@@ -242,5 +258,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     elevation: 2,
   },
-
+  preferencesDisplay: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  preferencesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#333',
+  },
+  preferencesText: {
+    fontSize: 16,
+    color: '#666',
+  },
 });
