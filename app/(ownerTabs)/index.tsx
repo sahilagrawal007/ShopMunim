@@ -7,13 +7,11 @@ import { collection, doc, limit, onSnapshot, orderBy, query, where } from 'fireb
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAppPreferences } from '../../components/AppPreferencesContext';
 import { iconMap } from '../../constants/iconMap';
 import { auth, db } from '../../firebaseConfig';
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { preferences } = useAppPreferences();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [analyticsData, setAnalyticsData] = useState<any>({ paidCustomers: 0, customersWithDue: 0, totalDue: 0, totalCreditGiven: 0 });

@@ -3,12 +3,10 @@ import { signOut } from 'firebase/auth';
 import React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
-import { useAppPreferences } from '../../components/AppPreferencesContext';
 import { auth } from '../../firebaseConfig';
 
 export default function OwnerSettings() {
   const router = useRouter();
-  const { preferences } = useAppPreferences();
   
   const handleSignOut = async () => {
     try {
