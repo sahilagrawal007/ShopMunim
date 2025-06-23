@@ -3,7 +3,6 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { AppPreferencesProvider } from '../components/AppPreferencesContext';
 import { auth, db } from '../firebaseConfig';
 
 export default function RootLayout() {
@@ -51,13 +50,6 @@ export default function RootLayout() {
     );
   }
 
-  return (
-    <AppPreferencesProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(ownerTabs)" />
-        <Stack.Screen name="(customerTabs)" />
-      </Stack>
-    </AppPreferencesProvider>
-  );
+  // Render the Stack navigator when not loading
+  return <Stack />;
 }
