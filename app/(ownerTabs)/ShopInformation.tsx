@@ -97,7 +97,7 @@ export default function ShopInformation() {
 
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+      <TouchableOpacity onPress={() => router.navigate('/settings')} style={styles.backButton}>
         <Feather name="arrow-left" size={24} color="#333" />
       </TouchableOpacity>
       

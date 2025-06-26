@@ -188,6 +188,18 @@ export default function DashboardScreen() {
           </View>
         </View>
 
+        {/* Quick Actions */}
+        <View className="flex-row justify-between mb-6">
+          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[49%]">
+            <Image source={iconMap['rupee-circle.png']} className="w-6 h-6 mb-1" />
+            <Text className="text-xs text-center p-2 text-gray-700">New Credit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[49%]">
+            <Ionicons name="cube" size={24} color="#3b91f3" style={{ marginBottom: 4 }} />
+            <Text className="text-xs text-center p-2 text-gray-700">Shop QR</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Analytics Grid */}
         <Text className="text-gray-700 font-semibold mb-2">Analytics</Text>
         
@@ -234,22 +246,6 @@ export default function DashboardScreen() {
             <Text className="text-[#6468E5] font-semibold text-sm">Collect Payment</Text>
           </TouchableOpacity>
         </LinearGradient>
-
-        {/* Quick Actions */}
-        <View className="flex-row justify-between mb-6">
-          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[30%]">
-            <Image source={iconMap['add-customer.png']} className="w-6 h-6 mb-1" />
-            <Text className="text-xs text-center text-gray-700">Add Customer</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[30%]">
-            <Image source={iconMap['rupee-circle.png']} className="w-6 h-6 mb-1" />
-            <Text className="text-xs text-center text-gray-700">New Credit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[30%]">
-            <Ionicons name="cube" size={24} color="#3b91f3" style={{ marginBottom: 4 }} />
-            <Text className="text-xs text-center text-gray-700">Products</Text>
-          </TouchableOpacity>
-        </View>
 
         {/* Customer List */}
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">

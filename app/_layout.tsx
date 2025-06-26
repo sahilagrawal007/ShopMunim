@@ -50,6 +50,11 @@ export default function RootLayout() {
     );
   }
 
-  // Render the Stack navigator when not loading
-  return <Stack />;
+  return (
+  <Stack screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="(auth)" />
+    <Stack.Screen name="(ownerTabs)" />
+    <Stack.Screen name="(customerTabs)" />
+  </Stack>
+    );
 }
