@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { auth, db } from '../../firebaseConfig';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { Transaction } from '../../types';
+import * as MailComposer from 'expo-mail-composer';
 
 export default function CustomerHistory() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -37,6 +40,21 @@ export default function CustomerHistory() {
   const filteredTransactions = transactions.filter(transaction => 
     filter === 'all' || transaction.type === filter
   );
+
+  const handleDownloadReceipt = async (transaction: Transaction) => {
+    const receiptText = `Receipt\n\nTransaction ID: ${transaction.id}\nDate: ${new Date(transaction.createdAt).toLocaleString()}\nType: ${transaction.type}\nAmount: ₹${transaction.amount.toFixed(2)}\nDescription: ${transaction.description || 'N/A'}`;
+    const fileUri = FileSystem.cacheDirectory + `receipt-${transaction.id}.txt`;
+    await FileSystem.writeAsStringAsync(fileUri, receiptText);
+    await Sharing.shareAsync(fileUri, { dialogTitle: 'Share or Save Receipt' });
+  };
+
+  const handleEmailReceipt = async (transaction: Transaction) => {
+    const receiptText = `Receipt\n\nTransaction ID: ${transaction.id}\nDate: ${new Date(transaction.createdAt).toLocaleString()}\nType: ${transaction.type}\nAmount: ₹${transaction.amount.toFixed(2)}\nDescription: ${transaction.description || 'N/A'}`;
+    await MailComposer.composeAsync({
+      subject: `Receipt for Transaction ${transaction.id}`,
+      body: receiptText,
+    });
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -81,13 +99,27 @@ export default function CustomerHistory() {
                   Type: {transaction.type.toUpperCase()}
                 </Text>
               </View>
-              <Text style={[
-                styles.transactionAmount,
-                transaction.type === 'due' ? styles.dueAmount : 
-                transaction.type === 'advance' ? styles.advanceAmount : styles.paidAmount
-              ]}>
-                ₹{transaction.amount.toFixed(2)}
-              </Text>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={[
+                  styles.transactionAmount,
+                  transaction.type === 'due' ? styles.dueAmount : 
+                  transaction.type === 'advance' ? styles.advanceAmount : styles.paidAmount
+                ]}>
+                  ₹{transaction.amount.toFixed(2)}
+                </Text>
+                <TouchableOpacity
+                  style={styles.downloadButton}
+                  onPress={() => handleDownloadReceipt(transaction)}
+                >
+                  <Text style={styles.downloadButtonText}>Download Receipt</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.downloadButton, { backgroundColor: '#34C759', marginTop: 4 }]}
+                  onPress={() => handleEmailReceipt(transaction)}
+                >
+                  <Text style={styles.downloadButtonText}>Email Receipt</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ))
         )}
@@ -299,5 +331,17 @@ const styles = StyleSheet.create({
   filterButtonTextActive: {
   color: '#fff',
   fontWeight: 'bold',
-}
+},
+  downloadButton: {
+    marginTop: 8,
+    backgroundColor: '#007AFF',
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  downloadButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });

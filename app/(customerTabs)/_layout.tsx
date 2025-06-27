@@ -1,5 +1,5 @@
-import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 
 export default function CustomerTabsLayout() {
   return (
@@ -29,15 +29,6 @@ export default function CustomerTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="history"
-        options={{
-          title: 'History',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="time" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
@@ -46,6 +37,9 @@ export default function CustomerTabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="history" options={{ href: null }} />
+      <Tabs.Screen name="editProfile" options={{ href: null }} />
+      <Tabs.Screen name="changePassword" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { collection, doc, getDocs, limit, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { auth, db } from '../../firebaseConfig';
-import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { Customer, Transaction } from '../../types';
 
 export default function CustomerHome() {
@@ -11,23 +11,17 @@ export default function CustomerHome() {
   const [totalAdvance, setTotalAdvance] = useState(0);
 
   useEffect(() => {
-    loadCustomerData();
-    loadRecentTransactions();
-  }, []);
-
-  const loadCustomerData = async () => {
     const user = auth.currentUser;
     if (!user) return;
-
-    try {
-      const customerDoc = await getDoc(doc(db, 'customers', user.uid));
+    // Real-time listener for customer profile
+    const unsub = onSnapshot(doc(db, 'customers', user.uid), (customerDoc) => {
       if (customerDoc.exists()) {
         setCustomer(customerDoc.data() as Customer);
       }
-    } catch (error) {
-      console.error('Error loading customer data:', error);
-    }
-  };
+    });
+    loadRecentTransactions();
+    return () => unsub();
+  }, []);
 
   const loadRecentTransactions = async () => {
     const user = auth.currentUser;
@@ -80,6 +74,11 @@ export default function CustomerHome() {
       <View style={styles.header}>
         <Text style={styles.welcomeText}>Welcome back!</Text>
         <Text style={styles.nameText}>{customer?.name}</Text>
+        {/* {customer?.photoURL ? (
+          <Image source={{ uri: customer.photoURL }} style={styles.profileImageCorner} />
+        ) : (
+          <View style={styles.placeholderImageCorner} />
+        )} */}
       </View>
 
       <View style={styles.summaryContainer}>
@@ -304,5 +303,25 @@ const styles = StyleSheet.create({
   transactionAmount: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  profileImageCorner: {
+    position: 'absolute',
+    top: 30,
+    right: 0,
+    width: 50,
+    height: 50,
+    borderRadius: 24,
+    margin: 16,
+    backgroundColor: '#ddd',
+  },
+  placeholderImageCorner: {
+    position: 'absolute',
+    top: 30,
+    right: 0,
+    width: 50,
+    height: 50,
+    borderRadius: 24,
+    margin: 16,
+    backgroundColor: '#ddd',
   },
 });
