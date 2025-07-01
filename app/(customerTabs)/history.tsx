@@ -1,15 +1,15 @@
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { auth, db } from '../../firebaseConfig';
-import { Transaction } from '../../types';
-import * as MailComposer from 'expo-mail-composer';
+// import * as FileSystem from 'expo-file-system';
+// import * as Sharing from 'expo-sharing';
+import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { auth, db } from "../../firebaseConfig";
+import { Transaction } from "../../types";
+// import * as MailComposer from 'expo-mail-composer';
 
 export default function CustomerHistory() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [filter, setFilter] = useState<'all' | 'paid' | 'due' | 'advance'>('all');
+  const [filter, setFilter] = useState<"all" | "paid" | "due" | "advance">("all");
 
   useEffect(() => {
     loadTransactions();
@@ -21,40 +21,40 @@ export default function CustomerHistory() {
 
     try {
       const transactionsQuery = query(
-        collection(db, 'transactions'),
-        where('customerId', '==', user.uid),
-        orderBy('createdAt', 'desc')
+        collection(db, "transactions"),
+        where("customerId", "==", user.uid),
+        orderBy("createdAt", "desc")
       );
-      
+
       const transactionsSnapshot = await getDocs(transactionsQuery);
-      const transactionsData = transactionsSnapshot.docs.map(doc => 
-        ({ id: doc.id, ...doc.data() } as Transaction)
+      const transactionsData = transactionsSnapshot.docs.map(
+        (doc) => ({ id: doc.id, ...doc.data() } as Transaction)
       );
-      
+
       setTransactions(transactionsData);
     } catch (error) {
-      console.error('Error loading transactions:', error);
+      console.error("Error loading transactions:", error);
     }
   };
 
-  const filteredTransactions = transactions.filter(transaction => 
-    filter === 'all' || transaction.type === filter
+  const filteredTransactions = transactions.filter(
+    (transaction) => filter === "all" || transaction.type === filter
   );
 
-  const handleDownloadReceipt = async (transaction: Transaction) => {
-    const receiptText = `Receipt\n\nTransaction ID: ${transaction.id}\nDate: ${new Date(transaction.createdAt).toLocaleString()}\nType: ${transaction.type}\nAmount: ₹${transaction.amount.toFixed(2)}\nDescription: ${transaction.description || 'N/A'}`;
-    const fileUri = FileSystem.cacheDirectory + `receipt-${transaction.id}.txt`;
-    await FileSystem.writeAsStringAsync(fileUri, receiptText);
-    await Sharing.shareAsync(fileUri, { dialogTitle: 'Share or Save Receipt' });
-  };
+  // const handleDownloadReceipt = async (transaction: Transaction) => {
+  //   const receiptText = `Receipt\n\nTransaction ID: ${transaction.id}\nDate: ${new Date(transaction.createdAt).toLocaleString()}\nType: ${transaction.type}\nAmount: ₹${transaction.amount.toFixed(2)}\nDescription: ${transaction.description || 'N/A'}`;
+  //   const fileUri = FileSystem.cacheDirectory + `receipt-${transaction.id}.txt`;
+  //   await FileSystem.writeAsStringAsync(fileUri, receiptText);
+  //   await Sharing.shareAsync(fileUri, { dialogTitle: 'Share or Save Receipt' });
+  // };
 
-  const handleEmailReceipt = async (transaction: Transaction) => {
-    const receiptText = `Receipt\n\nTransaction ID: ${transaction.id}\nDate: ${new Date(transaction.createdAt).toLocaleString()}\nType: ${transaction.type}\nAmount: ₹${transaction.amount.toFixed(2)}\nDescription: ${transaction.description || 'N/A'}`;
-    await MailComposer.composeAsync({
-      subject: `Receipt for Transaction ${transaction.id}`,
-      body: receiptText,
-    });
-  };
+  // const handleEmailReceipt = async (transaction: Transaction) => {
+  //   const receiptText = `Receipt\n\nTransaction ID: ${transaction.id}\nDate: ${new Date(transaction.createdAt).toLocaleString()}\nType: ${transaction.type}\nAmount: ₹${transaction.amount.toFixed(2)}\nDescription: ${transaction.description || 'N/A'}`;
+  //   await MailComposer.composeAsync({
+  //     subject: `Receipt for Transaction ${transaction.id}`,
+  //     body: receiptText,
+  //   });
+  // };
 
   return (
     <ScrollView style={styles.container}>
@@ -63,19 +63,18 @@ export default function CustomerHistory() {
       </View>
 
       <View style={styles.filterContainer}>
-        {['all', 'paid', 'due', 'advance'].map((filterType) => (
+        {["all", "paid", "due", "advance"].map((filterType) => (
           <TouchableOpacity
             key={filterType}
-            style={[
-              styles.filterButton,
-              filter === filterType && styles.filterButtonActive
-            ]}
+            style={[styles.filterButton, filter === filterType && styles.filterButtonActive]}
             onPress={() => setFilter(filterType as any)}
           >
-            <Text style={[
-              styles.filterButtonText,
-              filter === filterType && styles.filterButtonTextActive
-            ]}>
+            <Text
+              style={[
+                styles.filterButtonText,
+                filter === filterType && styles.filterButtonTextActive,
+              ]}
+            >
               {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
             </Text>
           </TouchableOpacity>
@@ -90,23 +89,27 @@ export default function CustomerHistory() {
             <View key={transaction.id} style={styles.transactionCard}>
               <View style={styles.transactionInfo}>
                 <Text style={styles.transactionDescription}>
-                  {transaction.description || 'Transaction'}
+                  {transaction.description || "Transaction"}
                 </Text>
                 <Text style={styles.transactionDate}>
                   {new Date(transaction.createdAt).toLocaleDateString()}
                 </Text>
-                <Text style={styles.transactionType}>
-                  Type: {transaction.type.toUpperCase()}
-                </Text>
+                <Text style={styles.transactionType}>Type: {transaction.type.toUpperCase()}</Text>
               </View>
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text style={[
-                  styles.transactionAmount,
-                  transaction.type === 'due' ? styles.dueAmount : 
-                  transaction.type === 'advance' ? styles.advanceAmount : styles.paidAmount
-                ]}>
+              <View style={{ alignItems: "flex-end" }}>
+                <Text
+                  style={[
+                    styles.transactionAmount,
+                    transaction.type === "due"
+                      ? styles.dueAmount
+                      : transaction.type === "advance"
+                      ? styles.advanceAmount
+                      : styles.paidAmount,
+                  ]}
+                >
                   ₹{transaction.amount.toFixed(2)}
                 </Text>
+                {/* <TouchableOpacity
                 <TouchableOpacity
                   style={styles.downloadButton}
                   onPress={() => handleDownloadReceipt(transaction)}
@@ -118,7 +121,8 @@ export default function CustomerHistory() {
                   onPress={() => handleEmailReceipt(transaction)}
                 >
                   <Text style={styles.downloadButtonText}>Email Receipt</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
+                {/* </TouchableOpacity> */}
               </View>
             </View>
           ))
@@ -131,56 +135,56 @@ export default function CustomerHistory() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     padding: 16,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 8,
-    color: '#333',
+    color: "#333",
   },
   subtitle: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 32,
-    color: '#666',
+    color: "#666",
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
     fontSize: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     borderRadius: 8,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 16,
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   linkButton: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   linkText: {
-    color: '#007AFF',
+    color: "#007AFF",
     fontSize: 16,
   },
   roleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginBottom: 32,
   },
   roleButton: {
@@ -189,21 +193,21 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: '#ddd',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    borderColor: "#ddd",
+    alignItems: "center",
+    backgroundColor: "white",
   },
   roleButtonSelected: {
-    borderColor: '#007AFF',
-    backgroundColor: '#007AFF',
+    borderColor: "#007AFF",
+    backgroundColor: "#007AFF",
   },
   roleButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   roleButtonTextSelected: {
-    color: 'white',
+    color: "white",
   },
   formContainer: {
     marginTop: 16,
@@ -214,26 +218,26 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   nameText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   summaryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 24,
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 16,
     borderRadius: 8,
     marginHorizontal: 4,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -241,28 +245,28 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 8,
   },
   summaryAmount: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   dueAmount: {
-    color: '#FF3B30',
+    color: "#FF3B30",
   },
   advanceAmount: {
-    color: '#34C759',
+    color: "#34C759",
   },
   paidAmount: {
-    color: '#007AFF',
+    color: "#007AFF",
   },
   section: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -270,78 +274,78 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
-    color: '#333',
+    color: "#333",
   },
   emptyText: {
-    textAlign: 'center',
-    color: '#666',
-    fontStyle: 'italic',
+    textAlign: "center",
+    color: "#666",
+    fontStyle: "italic",
   },
   transactionCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   transactionInfo: {
     flex: 1,
   },
   transactionDescription: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: "500",
+    color: "#333",
   },
   transactionDate: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   transactionAmount: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   filterContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginVertical: 12,
   },
   filterButton: {
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 20,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: "#e0e0e0",
   },
   filterButtonActive: {
-    backgroundColor: '#1e88e5',
+    backgroundColor: "#1e88e5",
   },
   filterButtonText: {
-    color: '#333',
+    color: "#333",
     fontSize: 14,
   },
   transactionType: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     marginTop: 4,
-    color: '#555',
+    color: "#555",
   },
   filterButtonTextActive: {
-  color: '#fff',
-  fontWeight: 'bold',
-},
+    color: "#fff",
+    fontWeight: "bold",
+  },
   downloadButton: {
     marginTop: 8,
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     borderRadius: 6,
     paddingVertical: 6,
     paddingHorizontal: 12,
   },
   downloadButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
