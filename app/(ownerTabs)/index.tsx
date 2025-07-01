@@ -11,6 +11,7 @@ import { iconMap } from '../../constants/iconMap';
 import { auth, db } from '../../firebaseConfig';
 
 export default function DashboardScreen() {
+  const ownerUid = auth.currentUser?.uid; //for storing owner id in transaction collection
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -49,7 +50,7 @@ export default function DashboardScreen() {
 
       const unsubProfile = onSnapshot(ownerRef, (docSnap) => {
         if (docSnap.exists()) {
-          setUserProfile(docSnap.data());
+          setUserProfile({ uid: docSnap.id, ...docSnap.data() });
         }
         setLoading(false);
       });
@@ -252,7 +253,23 @@ export default function DashboardScreen() {
           <Text className="text-lg font-bold text-gray-800 mb-4">Customers</Text>
           {customers.length > 0 ? (
             customers.slice(0, 3).map((cust, index) => (
-              <View key={index} className="flex-row justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+              <TouchableOpacity
+                key={index}
+                className="flex-row justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
+                onPress={() => {
+                  if (!ownerUid) {
+                    Alert.alert('Error', 'Unable to identify shop. Please sign in again.');
+                    return;
+                  }
+                  router.push({
+                    pathname: '/(ownerTabs)/CustomerProfile',
+                    params: {
+                      customerId: cust.id,
+                      shopId: ownerUid,
+                    },
+                  });
+                }}
+              >
                 <View className="flex-row items-center">
                   <Image source={iconMap['user.png']} className="w-10 h-10 rounded-full mr-3" />
                   <View>
@@ -263,7 +280,7 @@ export default function DashboardScreen() {
                 <Text className={`font-bold ${cust.due === 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {cust.due === 0 ? 'Paid' : `Due ₹${cust.due?.toFixed(2)}`}
                 </Text>
-              </View>
+              </TouchableOpacity>
             ))
           ) : (
             <Text className="text-gray-500">No customers found.</Text>

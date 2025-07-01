@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput 
 import { auth, db } from '../../firebaseConfig';
 import { doc, getDoc, updateDoc, arrayUnion, collection, query, where, getDocs } from 'firebase/firestore';
 import { Customer, Shop } from '../../types';
+import { useRouter } from 'expo-router';
 
 export default function CustomerShops() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [shops, setShops] = useState<Shop[]>([]);
   const [shopLink, setShopLink] = useState('');
   const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
   useEffect(() => {
     loadCustomerData();
@@ -107,6 +109,10 @@ export default function CustomerShops() {
     }
   };
 
+  const handleQRScan = () => {
+    router.push('/(customerTabs)/scan');
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -130,6 +136,13 @@ export default function CustomerShops() {
           <Text style={styles.buttonText}>
             {loading ? 'Joining...' : 'Join Shop'}
           </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.button, styles.scanButton]}
+          onPress={handleQRScan}
+        >
+          <Text style={styles.buttonText}>Join via QR</Text>
         </TouchableOpacity>
       </View>
 
@@ -362,5 +375,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-
+   scanButton: {
+    backgroundColor: '#4B91F3',
+  },
 });
