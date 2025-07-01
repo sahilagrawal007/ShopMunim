@@ -58,7 +58,7 @@ export default function ScanScreen() {
       const result = await joinShopByLink(data.trim(), currentUser.uid);
 
       handleJoinResult(result, () => {
-        router.back();
+        router.navigate("/(customerTabs)/shops");
       });
     } catch (error) {
       console.error("Error processing QR code:", error);
@@ -134,30 +134,34 @@ export default function ScanScreen() {
       </View>
 
       <View style={styles.cameraContainer}>
-        <CameraView
-          style={styles.camera}
-          facing="back"
-          onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
-          onCameraReady={() => setCameraReady(true)}
-          barcodeScannerSettings={{
-            barcodeTypes: ["qr"],
-          }}
-        >
-          <View style={styles.overlay}>
-            <View style={styles.unfocusedContainer}>
-              <View style={styles.middleContainer}>
-                <View style={styles.focusedContainer}>
-                  {loading && (
-                    <View style={styles.loadingOverlay}>
-                      <ActivityIndicator size="large" color="#fff" />
-                      <Text style={styles.loadingText}>Processing...</Text>
-                    </View>
-                  )}
+        {!scanned && (
+          <View style={styles.cameraWrapper}>
+            <CameraView
+              style={StyleSheet.absoluteFill}
+              facing="back"
+              onBarcodeScanned={handleBarCodeScanned}
+              onCameraReady={() => setCameraReady(true)}
+              barcodeScannerSettings={{
+                barcodeTypes: ["qr"],
+              }}
+            />
+
+            <View style={styles.overlay}>
+              <View style={styles.unfocusedContainer}>
+                <View style={styles.middleContainer}>
+                  <View style={styles.focusedContainer}>
+                    {loading && (
+                      <View style={styles.loadingOverlay}>
+                        <ActivityIndicator size="large" color="#fff" />
+                        <Text style={styles.loadingText}>Processing...</Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
               </View>
             </View>
           </View>
-        </CameraView>
+        )}
       </View>
 
       <View style={styles.bottomContainer}>
@@ -221,10 +225,6 @@ const styles = StyleSheet.create({
   camera: {
     width: width,
     flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
   },
   unfocusedContainer: {
     flex: 1,
@@ -303,5 +303,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
     marginTop: 10,
+  },
+  cameraWrapper: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    position: "relative",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

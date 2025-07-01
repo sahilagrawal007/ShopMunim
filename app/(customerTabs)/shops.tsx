@@ -1,34 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
-import { auth, db } from '../../firebaseConfig';
-import { doc, getDoc, updateDoc, arrayUnion, collection, query, where, getDocs } from 'firebase/firestore';
-import { Customer, Shop } from '../../types';
-import { useRouter } from 'expo-router';
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+} from "react-native";
+import { auth, db } from "../../firebaseConfig";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { Customer, Shop } from "../../types";
+import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function CustomerShops() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [shops, setShops] = useState<Shop[]>([]);
-  const [shopLink, setShopLink] = useState('');
+  const [shopLink, setShopLink] = useState("");
   const [loading, setLoading] = useState(false);
-    const router = useRouter();
+  const router = useRouter();
 
-  useEffect(() => {
-    loadCustomerData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadCustomerData();
+    }, [])
+  );
 
   const loadCustomerData = async () => {
     const user = auth.currentUser;
     if (!user) return;
 
     try {
-      const customerDoc = await getDoc(doc(db, 'customers', user.uid));
+      const customerDoc = await getDoc(doc(db, "customers", user.uid));
       if (customerDoc.exists()) {
         const customerData = customerDoc.data() as Customer;
         setCustomer(customerData);
         await loadJoinedShops(customerData.shopsJoined);
       }
     } catch (error) {
-      console.error('Error loading customer data:', error);
+      console.error("Error loading customer data:", error);
     }
   };
 
@@ -36,25 +56,19 @@ export default function CustomerShops() {
     if (shopIds.length === 0) return;
 
     try {
-      const shopsQuery = query(
-        collection(db, 'shops'),
-        where('id', 'in', shopIds)
-      );
-      
+      const shopsQuery = query(collection(db, "shops"), where("link", "in", shopIds));
+
       const shopsSnapshot = await getDocs(shopsQuery);
-      const shopsData = shopsSnapshot.docs.map(doc => 
-        ({ ...doc.data() } as Shop)
-      );
-      
+      const shopsData = shopsSnapshot.docs.map((doc) => ({ ...doc.data() } as Shop));
       setShops(shopsData);
     } catch (error) {
-      console.error('Error loading shops:', error);
+      console.error("Error loading shops:", error);
     }
   };
 
   const joinShop = async () => {
     if (!shopLink.trim()) {
-      Alert.alert('Error', 'Please enter a shop link');
+      Alert.alert("Error", "Please enter a shop link");
       return;
     }
 
@@ -64,15 +78,12 @@ export default function CustomerShops() {
     setLoading(true);
     try {
       // Find shop by link
-      const shopsQuery = query(
-        collection(db, 'shops'),
-        where('link', '==', shopLink.trim())
-      );
-      
+      const shopsQuery = query(collection(db, "shops"), where("link", "==", shopLink.trim()));
+
       const shopsSnapshot = await getDocs(shopsQuery);
-      
+
       if (shopsSnapshot.empty) {
-        Alert.alert('Error', 'Shop not found with this link');
+        Alert.alert("Error", "Shop not found with this link");
         setLoading(false);
         return;
       }
@@ -82,35 +93,35 @@ export default function CustomerShops() {
 
       // Check if already joined
       if (customer.shopsJoined.includes(shopData.id)) {
-        Alert.alert('Info', 'You are already a member of this shop');
+        Alert.alert("Info", "You are already a member of this shop");
         setLoading(false);
         return;
       }
 
       // Update customer's shopsJoined array
-      await updateDoc(doc(db, 'customers', user.uid), {
+      await updateDoc(doc(db, "customers", user.uid), {
         shopsJoined: arrayUnion(shopData.id),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
 
       // Update shop's customers array
-      await updateDoc(doc(db, 'shops', shopData.id), {
+      await updateDoc(doc(db, "shops", shopData.id), {
         customers: arrayUnion(user.uid),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       });
 
-      Alert.alert('Success', `You have joined ${shopData.name}!`);
-      setShopLink('');
+      Alert.alert("Success", `You have joined ${shopData.name}!`);
+      setShopLink("");
       loadCustomerData(); // Refresh data
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert("Error", error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleQRScan = () => {
-    router.push('/(customerTabs)/scan');
+    router.navigate("/(customerTabs)/scan");
   };
 
   return (
@@ -128,20 +139,15 @@ export default function CustomerShops() {
           onChangeText={setShopLink}
           autoCapitalize="none"
         />
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={joinShop}
           disabled={loading}
         >
-          <Text style={styles.buttonText}>
-            {loading ? 'Joining...' : 'Join Shop'}
-          </Text>
+          <Text style={styles.buttonText}>{loading ? "Joining..." : "Join Shop"}</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.button, styles.scanButton]}
-          onPress={handleQRScan}
-        >
+
+        <TouchableOpacity style={[styles.button, styles.scanButton]} onPress={handleQRScan}>
           <Text style={styles.buttonText}>Join via QR</Text>
         </TouchableOpacity>
       </View>
@@ -169,56 +175,56 @@ export default function CustomerShops() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     padding: 16,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 8,
-    color: '#333',
+    color: "#333",
   },
   subtitle: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 32,
-    color: '#666',
+    color: "#666",
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
     fontSize: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     borderRadius: 8,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 16,
   },
   buttonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: "#ccc",
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   linkButton: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   linkText: {
-    color: '#007AFF',
+    color: "#007AFF",
     fontSize: 16,
   },
   roleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginBottom: 32,
   },
   roleButton: {
@@ -227,21 +233,21 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: '#ddd',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    borderColor: "#ddd",
+    alignItems: "center",
+    backgroundColor: "white",
   },
   roleButtonSelected: {
-    borderColor: '#007AFF',
-    backgroundColor: '#007AFF',
+    borderColor: "#007AFF",
+    backgroundColor: "#007AFF",
   },
   roleButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   roleButtonTextSelected: {
-    color: 'white',
+    color: "white",
   },
   formContainer: {
     marginTop: 16,
@@ -252,26 +258,26 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   nameText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   summaryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 24,
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 16,
     borderRadius: 8,
     marginHorizontal: 4,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -279,28 +285,28 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 8,
   },
   summaryAmount: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   dueAmount: {
-    color: '#FF3B30',
+    color: "#FF3B30",
   },
   advanceAmount: {
-    color: '#34C759',
+    color: "#34C759",
   },
   paidAmount: {
-    color: '#007AFF',
+    color: "#007AFF",
   },
   section: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -308,46 +314,46 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 16,
-    color: '#333',
+    color: "#333",
   },
   emptyText: {
-    textAlign: 'center',
-    color: '#666',
-    fontStyle: 'italic',
+    textAlign: "center",
+    color: "#666",
+    fontStyle: "italic",
   },
   transactionCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   transactionInfo: {
     flex: 1,
   },
   transactionDescription: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: "500",
+    color: "#333",
   },
   transactionDate: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   transactionAmount: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   shopCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     marginVertical: 8,
     borderRadius: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 6,
@@ -355,27 +361,27 @@ const styles = StyleSheet.create({
   },
   shopName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   shopLink: {
     fontSize: 14,
-    color: '#1e88e5',
+    color: "#1e88e5",
     marginTop: 4,
   },
   viewButton: {
     marginTop: 10,
     padding: 10,
-    backgroundColor: '#1e88e5',
+    backgroundColor: "#1e88e5",
     borderRadius: 6,
-    alignItems: 'center',
+    alignItems: "center",
   },
   viewButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
-   scanButton: {
-    backgroundColor: '#4B91F3',
+  scanButton: {
+    backgroundColor: "#4B91F3",
   },
 });
