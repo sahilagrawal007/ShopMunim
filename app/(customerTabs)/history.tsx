@@ -108,6 +108,7 @@ export default function CustomerHistory() {
                   ₹{transaction.amount.toFixed(2)}
                 </Text>
                 {/* <TouchableOpacity
+                <TouchableOpacity
                   style={styles.downloadButton}
                   onPress={() => handleDownloadReceipt(transaction)}
                 >
@@ -119,6 +120,7 @@ export default function CustomerHistory() {
                 >
                   <Text style={styles.downloadButtonText}>Email Receipt</Text>
                 </TouchableOpacity> */}
+                </TouchableOpacity>
               </View>
             </View>
           ))

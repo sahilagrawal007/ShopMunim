@@ -8,7 +8,14 @@ import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { PieChart } from 'react-native-chart-kit';
 import { iconMap } from '@/constants/iconMap';
 
+import { collection, doc, getDocs, limit, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { auth, db } from '../../firebaseConfig';
+import { Customer, Transaction } from '../../types';
+
 const screenWidth = Dimensions.get('window').width;
+
 
 export default function CustomerHomeScreen() {
   const [customer, setCustomer] = useState<any>(null);
@@ -18,6 +25,20 @@ export default function CustomerHomeScreen() {
   const [spent, setSpent] = useState(1820);
   const [due, setDue] = useState(1200);
 
+      useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+    // Real-time listener for customer profile
+    const unsub = onSnapshot(doc(db, 'customers', user.uid), (customerDoc) => {
+      if (customerDoc.exists()) {
+        setCustomer(customerDoc.data() as Customer);
+      }
+    });
+    loadRecentTransactions();
+    return () => unsub();
+  }, []);
+      
+      
   useEffect(() => {
     const fetchCustomerData = async () => {
       const user = getAuth().currentUser;
@@ -169,6 +190,7 @@ export default function CustomerHomeScreen() {
           ))}
         </View>
 
+
         {/* Recent Transactions */}
         <View className="mb-6">
           <Text className="text-gray-700 font-semibold text-lg mb-2">Recent Transactions</Text>
@@ -201,3 +223,201 @@ export default function CustomerHomeScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+    color: '#333',
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 32,
+    color: '#666',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    fontSize: 16,
+    backgroundColor: 'white',
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  linkButton: {
+    alignItems: 'center',
+  },
+  linkText: {
+    color: '#007AFF',
+    fontSize: 16,
+  },
+  roleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 32,
+  },
+  roleButton: {
+    flex: 1,
+    marginHorizontal: 8,
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  roleButtonSelected: {
+    borderColor: '#007AFF',
+    backgroundColor: '#007AFF',
+  },
+  roleButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  roleButtonTextSelected: {
+    color: 'white',
+  },
+  formContainer: {
+    marginTop: 16,
+  },
+  header: {
+    marginBottom: 24,
+    paddingTop: 40,
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  nameText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  summaryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  summaryCard: {
+    flex: 1,
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 8,
+    marginHorizontal: 4,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+  },
+  summaryAmount: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  dueAmount: {
+    color: '#FF3B30',
+  },
+  advanceAmount: {
+    color: '#34C759',
+  },
+  paidAmount: {
+    color: '#007AFF',
+  },
+  section: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#333',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#666',
+    fontStyle: 'italic',
+  },
+  transactionCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  transactionInfo: {
+    flex: 1,
+  },
+  transactionDescription: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+  },
+  transactionDate: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  transactionAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  profileImageCorner: {
+    position: 'absolute',
+    top: 30,
+    right: 0,
+    width: 50,
+    height: 50,
+    borderRadius: 24,
+    margin: 16,
+    backgroundColor: '#ddd',
+  },
+  placeholderImageCorner: {
+    position: 'absolute',
+    top: 30,
+    right: 0,
+    width: 50,
+    height: 50,
+    borderRadius: 24,
+    margin: 16,
+    backgroundColor: '#ddd',
+  },
+});

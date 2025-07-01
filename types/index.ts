@@ -17,6 +17,7 @@ export interface Customer {
   shopsJoined: string[];
   createdAt: Date;
   updatedAt: Date;
+  photoURL?: string;
 }
 
 export interface Shop {
