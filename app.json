@@ -37,7 +37,7 @@
       ],
       "expo-router",
       "expo-web-browser",
-      "expo-barcode-scanner"
+      "expo-barcode-scanner",
       "expo-mail-composer"
     ],
     "experiments": {
