@@ -34,7 +34,7 @@ export default function DashboardScreen() {
 
       const ownerRef = doc(db, 'owners', uid);
       const analyticsRef = doc(db, 'analytics', uid);
-      const productsRef = query(collection(db, 'products'), where('ownerId', '==', uid));
+      const productsDocRef = doc(db, 'products', uid);
       const transactionsRef = query(
         collection(db, 'transactions'),
         where('ownerId', '==', uid),
@@ -76,11 +76,19 @@ export default function DashboardScreen() {
         }
       });
 
-      const unsubProducts = onSnapshot(productsRef, (querySnapshot) => {
-        const list: any[] = [];
-        querySnapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
-        console.log('Fetched products:', list);
-        setProducts(list);
+      const unsubProducts = onSnapshot(productsDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const productList = docSnap.data().products || [];
+          const formatted = productList.map((item: any) => ({
+            ...item,
+            price: Number(item.price),
+          }));
+          console.log('Fetched products:', formatted);
+          setProducts(formatted);
+        } else {
+          console.log('No products found for owner');
+          setProducts([]);
+        }
       });
 
       const unsubTransactions = onSnapshot(transactionsRef, (querySnapshot) => {
@@ -322,10 +330,6 @@ export default function DashboardScreen() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="py-2">
               {products.map((product, index) => (
                 <View key={index} className="w-32 bg-gray-50 p-3 rounded-lg mr-3 items-center border border-gray-100">
-                  <Image
-                    source={iconMap[product.name?.toLowerCase() + '.png'] || iconMap['shop.png']}
-                    className="w-16 h-16 mb-2"
-                  />
                   <Text className="text-gray-800 font-medium text-center">{product.name}</Text>
                   <Text className="text-gray-600 text-sm">₹{product.price?.toFixed(2) || '0.00'}</Text>
                 </View>
