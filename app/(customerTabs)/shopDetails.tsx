@@ -19,6 +19,7 @@ import {
 import { db } from "../../firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { iconMap } from "@/constants/iconMap";
+import { getAuth } from "firebase/auth";
 
 interface RouteParams {
   shopId: string;
@@ -52,12 +53,15 @@ const JoinedShopDetails: React.FC = () => {
         const productList = productDoc.data().products || [];
         setProducts(productList);
       }
-
+      const user = getAuth().currentUser;
+      if (!user) return;
       // Fetch transactions for the selected shop
       const txnQuery = query(
         collection(db, "transactions"),
-        where("shopId", "==", shopId)
+        where("shopId", "==", shopId),
+        where("customerId", "==", user.uid)
       );
+      console.log(user.uid);
       const txnSnap = await getDocs(txnQuery);
       const txnList = txnSnap.docs.map((doc) => ({
         id: doc.id,
