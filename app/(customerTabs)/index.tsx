@@ -1,16 +1,7 @@
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  Dimensions,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { getAuth } from "firebase/auth";
-import { PieChart } from "react-native-chart-kit";
 import { iconMap } from "@/constants/iconMap";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { getAuth } from "firebase/auth";
 import {
   collection,
   doc,
@@ -20,8 +11,17 @@ import {
   where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { PieChart } from "react-native-chart-kit";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../../firebaseConfig";
-import { useRouter } from "expo-router";
 
 const screenWidth = Dimensions.get("window").width;
 

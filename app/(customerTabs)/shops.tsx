@@ -56,7 +56,8 @@ export default function CustomerShops() {
     if (shopIds.length === 0) return;
 
     try {
-      const shopsQuery = query(collection(db, "shops"), where("link", "in", shopIds));
+      // const shopsQuery = query(collection(db, "shops"), where("link", "in", shopIds));
+      const shopsQuery = query(collection(db, "shops"), where("__name__", "in", shopIds));
 
       const shopsSnapshot = await getDocs(shopsQuery);
       const shopsData = shopsSnapshot.docs.map((doc) => ({ ...doc.data() } as Shop));

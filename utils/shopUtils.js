@@ -1,6 +1,6 @@
-import { doc, updateDoc, arrayUnion, collection, where, getDocs, query } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { arrayUnion, collection, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { Alert } from "react-native";
+import { db } from "../firebaseConfig";
 
 /**
  * Validates if a shop link is in the correct format
@@ -51,19 +51,8 @@ export const joinShopByLink = async (shopLink, customerUid) => {
       };
     }
 
-    // Extract shop ID from link
-    const shopId = extractShopIdFromLink(shopLink);
-    if (!shopId) {
-      return {
-        success: false,
-        message: "Could not extract shop ID from the link.",
-      };
-    }
-
-    // Check if shop exists
-
+    // Find shop by link
     const q = query(collection(db, "shops"), where("link", "==", shopLink));
-
     const shopSnap = await getDocs(q);
 
     if (shopSnap.empty) {
@@ -73,7 +62,9 @@ export const joinShopByLink = async (shopLink, customerUid) => {
       };
     }
 
-    const shopData = shopSnap.docs[0];
+    const shopDoc = shopSnap.docs[0];
+    const shopId = shopDoc.id; // Use the shop document's ID (owner UID)
+    const shopData = shopDoc.data();
 
     // Check if customer is already joined
     if (shopData.customers && shopData.customers.includes(customerUid)) {
@@ -83,13 +74,13 @@ export const joinShopByLink = async (shopLink, customerUid) => {
       };
     }
 
-    const shopRef = shopData.ref;
+    const shopRef = shopDoc.ref;
     // Add customer to shop's customers array
     await updateDoc(shopRef, {
       customers: arrayUnion(customerUid),
     });
 
-    // Add shop to customer's shopsJoined array
+    // Add shop's ID (owner UID) to customer's shopsJoined array
     const customerRef = doc(db, "customers", customerUid);
     await updateDoc(customerRef, {
       shopsJoined: arrayUnion(shopId),
@@ -97,7 +88,7 @@ export const joinShopByLink = async (shopLink, customerUid) => {
 
     return {
       success: true,
-      message: `Successfully joined ${shopData.shopName || "the shop"}!`,
+      message: `Successfully joined ${shopData.shopName || shopData.name || "the shop"}!`,
       shopData,
     };
   } catch (error) {
