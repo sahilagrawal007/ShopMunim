@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import { auth } from '../../firebaseConfig';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ChangePassword() {
   const router = useRouter();
@@ -82,100 +83,88 @@ export default function ChangePassword() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <TouchableOpacity onPress={() => router.navigate('/settings')} style={styles.backButton}>
-        <Feather name="arrow-left" size={24} color="#333" />
-      </TouchableOpacity>
-      
-      <Text style={styles.title}>Change Password</Text>
-      
-      <View style={styles.form}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Current Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              value={formData.currentPassword}
-              onChangeText={(text) => setFormData({...formData, currentPassword: text})}
-              placeholder="Enter current password"
-              secureTextEntry={!showPasswords.current}
-            />
-            <TouchableOpacity 
-              style={styles.eyeButton}
-              onPress={() => togglePasswordVisibility('current')}
-            >
-              <Feather 
-                name={showPasswords.current ? "eye-off" : "eye"} 
-                size={20} 
-                color="#666" 
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>New Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              value={formData.newPassword}
-              onChangeText={(text) => setFormData({...formData, newPassword: text})}
-              placeholder="Enter new password"
-              secureTextEntry={!showPasswords.new}
-            />
-            <TouchableOpacity 
-              style={styles.eyeButton}
-              onPress={() => togglePasswordVisibility('new')}
-            >
-              <Feather 
-                name={showPasswords.new ? "eye-off" : "eye"} 
-                size={20} 
-                color="#666" 
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Confirm New Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              value={formData.confirmPassword}
-              onChangeText={(text) => setFormData({...formData, confirmPassword: text})}
-              placeholder="Confirm new password"
-              secureTextEntry={!showPasswords.confirm}
-            />
-            <TouchableOpacity 
-              style={styles.eyeButton}
-              onPress={() => togglePasswordVisibility('confirm')}
-            >
-              <Feather 
-                name={showPasswords.confirm ? "eye-off" : "eye"} 
-                size={20} 
-                color="#666" 
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.requirements}>
-          <Text style={styles.requirementsTitle}>Password Requirements:</Text>
-          <Text style={styles.requirement}>• At least 6 characters long</Text>
-          <Text style={styles.requirement}>• Different from current password</Text>
-        </View>
-
-        <TouchableOpacity 
-          style={[styles.saveButton, loading && styles.disabledButton]} 
-          onPress={handleChangePassword}
-          disabled={loading}
-        >
-          <Text style={styles.saveButtonText}>
-            {loading ? 'Updating...' : 'Update Password'}
-          </Text>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView style={styles.container}>
+        <TouchableOpacity onPress={() => router.navigate("/settings")} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+
+        <Text style={styles.title}>Change Password</Text>
+
+        <View style={styles.form}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Current Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                value={formData.currentPassword}
+                onChangeText={(text) => setFormData({ ...formData, currentPassword: text })}
+                placeholder="Enter current password"
+                secureTextEntry={!showPasswords.current}
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => togglePasswordVisibility("current")}
+              >
+                <Feather name={showPasswords.current ? "eye-off" : "eye"} size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>New Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                value={formData.newPassword}
+                onChangeText={(text) => setFormData({ ...formData, newPassword: text })}
+                placeholder="Enter new password"
+                secureTextEntry={!showPasswords.new}
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => togglePasswordVisibility("new")}
+              >
+                <Feather name={showPasswords.new ? "eye-off" : "eye"} size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Confirm New Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                value={formData.confirmPassword}
+                onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
+                placeholder="Confirm new password"
+                secureTextEntry={!showPasswords.confirm}
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => togglePasswordVisibility("confirm")}
+              >
+                <Feather name={showPasswords.confirm ? "eye-off" : "eye"} size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.requirements}>
+            <Text style={styles.requirementsTitle}>Password Requirements:</Text>
+            <Text style={styles.requirement}>• At least 6 characters long</Text>
+            <Text style={styles.requirement}>• Different from current password</Text>
+          </View>
+
+          <TouchableOpacity
+            style={[styles.saveButton, loading && styles.disabledButton]}
+            onPress={handleChangePassword}
+            disabled={loading}
+          >
+            <Text style={styles.saveButtonText}>{loading ? "Updating..." : "Update Password"}</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

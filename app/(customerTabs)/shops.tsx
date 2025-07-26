@@ -19,6 +19,7 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { iconMap } from "@/constants/iconMap";
 import { Customer, Shop } from "../../types";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
@@ -56,11 +57,11 @@ export default function CustomerShops() {
     if (shopIds.length === 0) return;
 
     try {
-      // const shopsQuery = query(collection(db, "shops"), where("link", "in", shopIds));
       const shopsQuery = query(collection(db, "shops"), where("__name__", "in", shopIds));
 
       const shopsSnapshot = await getDocs(shopsQuery);
       const shopsData = shopsSnapshot.docs.map((doc) => ({ ...doc.data() } as Shop));
+     
       setShops(shopsData);
     } catch (error) {
       console.error("Error loading shops:", error);
@@ -101,7 +102,7 @@ export default function CustomerShops() {
 
       // Update customer's shopsJoined array
       await updateDoc(doc(db, "customers", user.uid), {
-        shopsJoined: arrayUnion(shopData.id),
+        shopsJoined: arrayUnion(shopDoc.id),
         updatedAt: new Date(),
       });
 
@@ -127,6 +128,8 @@ export default function CustomerShops() {
 
   return (
     <ScrollView style={styles.container}>
+  
+
       <View style={styles.header}>
         <Text style={styles.title}>My Shops</Text>
       </View>
@@ -135,7 +138,7 @@ export default function CustomerShops() {
         <Text style={styles.sectionTitle}>Join New Shop</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter shop link or scan QR code"
+          placeholder="Enter shop link"
           value={shopLink}
           onChangeText={setShopLink}
           autoCapitalize="none"

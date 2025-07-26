@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { deleteUser, signOut } from 'firebase/auth';
 import { deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import { auth, db } from '../../firebaseConfig';
 
@@ -34,7 +34,7 @@ export default function CustomerSettings() {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      router.navigate('/(auth)/login');
+      router.replace('/(auth)/login');
     } catch (error: any) {
       Alert.alert('Error', error.message);
     }
@@ -86,58 +86,75 @@ export default function CustomerSettings() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Settings</Text>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView>
+        <View style={styles.container}>
+          <Text style={styles.header}>Settings</Text>
 
-      {/* Profile Management */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Profile</Text>
-        <TouchableOpacity style={styles.settingItem} onPress={() => router.navigate('/(customerTabs)/editProfile')}>
-          <Feather name="user" size={20} color="#555" style={styles.icon} />
-          <Text style={styles.settingText}>Edit Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem} onPress={() => router.navigate('/(customerTabs)/changePassword')}>
-          <Feather name="lock" size={20} color="#555" style={styles.icon} />
-          <Text style={styles.settingText}>Change Password</Text>
-        </TouchableOpacity>
-      </View>
+          {/* Profile Management */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Profile</Text>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => router.navigate("/(customerTabs)/editProfile")}
+            >
+              <Feather name="user" size={20} color="#555" style={styles.icon} />
+              <Text style={styles.settingText}>Edit Profile</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => router.navigate("/(customerTabs)/changePassword")}
+            >
+              <Feather name="lock" size={20} color="#555" style={styles.icon} />
+              <Text style={styles.settingText}>Change Password</Text>
+            </TouchableOpacity>
+          </View>
 
-      {/* Notifications */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Notifications</Text>
-        <View style={styles.settingItem}>
-          <Feather name="bell" size={20} color="#555" style={styles.icon} />
-          <Text style={styles.settingText}>Push Notifications</Text>
-          <Switch
-            value={pushEnabled}
-            onValueChange={handleTogglePush}
-            style={{ marginLeft: 'auto' }}
-          />
+          {/* Notifications */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Notifications</Text>
+            <View style={styles.settingItem}>
+              <Feather name="bell" size={20} color="#555" style={styles.icon} />
+              <Text style={styles.settingText}>Push Notifications</Text>
+              <Switch
+                value={pushEnabled}
+                onValueChange={handleTogglePush}
+                style={{ marginLeft: "auto" }}
+              />
+            </View>
+          </View>
+
+          {/* Order & Payment */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Order & Payment</Text>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => router.navigate("/(customerTabs)/history")}
+            >
+              <Feather name="list" size={20} color="#555" style={styles.icon} />
+              <Text style={styles.settingText}>Order History</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Account Management */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Account</Text>
+            <TouchableOpacity style={styles.settingItem} onPress={handleSignOut}>
+              <Feather name="log-out" size={20} color="#d9534f" style={styles.icon} />
+              <Text style={[styles.settingText, { color: "#d9534f" }]}>Logout</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={handleDeleteAccount}
+              disabled={deleting}
+            >
+              <Feather name="trash-2" size={20} color="#d9534f" style={styles.icon} />
+              <Text style={[styles.settingText, { color: "#d9534f" }]}>Delete Account</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-
-      {/* Order & Payment */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Order & Payment</Text>
-        <TouchableOpacity style={styles.settingItem} onPress={() => router.navigate('/(customerTabs)/history')}>
-          <Feather name="list" size={20} color="#555" style={styles.icon} />
-          <Text style={styles.settingText}>Order History</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Account Management */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Account</Text>
-        <TouchableOpacity style={styles.settingItem} onPress={handleSignOut}>
-          <Feather name="log-out" size={20} color="#d9534f" style={styles.icon} />
-          <Text style={[styles.settingText, { color: '#d9534f' }]}>Logout</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem} onPress={handleDeleteAccount} disabled={deleting}>
-          <Feather name="trash-2" size={20} color="#d9534f" style={styles.icon} />
-          <Text style={[styles.settingText, { color: '#d9534f' }]}>Delete Account</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

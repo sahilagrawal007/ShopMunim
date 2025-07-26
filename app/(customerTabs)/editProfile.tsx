@@ -1,13 +1,23 @@
-import * as ImagePicker from 'expo-image-picker';
-import { updateProfile } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { auth, db } from '../../firebaseConfig';
+import * as ImagePicker from "expo-image-picker";
+import { updateProfile } from "firebase/auth";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { auth, db } from "../../firebaseConfig";
 
 export default function EditProfile() {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -17,19 +27,19 @@ export default function EditProfile() {
       const user = auth.currentUser;
       if (!user) return;
       try {
-        const userDoc = await getDoc(doc(db, 'customers', user.uid));
+        const userDoc = await getDoc(doc(db, "customers", user.uid));
         if (userDoc.exists()) {
           const data = userDoc.data();
-          setName(data.name || user.displayName || '');
-          setPhone(data.phone || '');
+          setName(data.name || user.displayName || "");
+          setPhone(data.phone || "");
           setImage(data.photoURL || user.photoURL || null);
         } else {
-          setName(user.displayName || '');
-          setPhone('');
+          setName(user.displayName || "");
+          setPhone("");
           setImage(user.photoURL || null);
         }
       } catch (e) {
-        Alert.alert('Error', 'Failed to load profile');
+        Alert.alert("Error", "Failed to load profile");
       } finally {
         setLoading(false);
       }
@@ -55,65 +65,71 @@ export default function EditProfile() {
     setSaving(true);
     try {
       await updateProfile(user, { displayName: name, photoURL: image });
-      await updateDoc(doc(db, 'customers', user.uid), { name, phone, photoURL: image });
-      Alert.alert('Success', 'Profile updated!');
+      await updateDoc(doc(db, "customers", user.uid), { name, phone, photoURL: image });
+      Alert.alert("Success", "Profile updated!");
     } catch (e) {
-      Alert.alert('Error', 'Failed to update profile');
+      Alert.alert("Error", "Failed to update profile");
     } finally {
       setSaving(false);
     }
   };
 
   if (loading) {
-    return <View style={{flex:1,justifyContent:'center',alignItems:'center'}}><ActivityIndicator size="large" color="#007AFF" /></View>;
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Edit Profile</Text>
-      <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.profileImage} />
-        ) : (
-          <View style={styles.placeholderImage} />
-        )}
-        <Text style={styles.imageText}>Change Photo</Text>
-      </TouchableOpacity>
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Phone Number"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-      />
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={saving}>
-        <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save Changes'}</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView className="flex-1">
+      <View style={styles.container}>
+        <Text style={styles.header}>Edit Profile</Text>
+        <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.profileImage} />
+          ) : (
+            <View style={styles.placeholderImage} />
+          )}
+          <Text style={styles.imageText}>Change Photo</Text>
+        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Phone Number"
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
+        />
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={saving}>
+          <Text style={styles.saveButtonText}>{saving ? "Saving..." : "Save Changes"}</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     padding: 16,
   },
   header: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 24,
-    color: '#333',
+    color: "#333",
   },
   imagePicker: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
   },
   profileImage: {
@@ -126,32 +142,32 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#ddd',
+    backgroundColor: "#ddd",
     marginBottom: 8,
   },
   imageText: {
-    color: '#007AFF',
+    color: "#007AFF",
     fontSize: 16,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     marginBottom: 16,
   },
   saveButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     borderRadius: 8,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 10,
   },
   saveButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
-}); 
+});

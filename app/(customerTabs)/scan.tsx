@@ -12,7 +12,7 @@ import { CameraView, Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { auth } from "../../firebaseConfig"; // Import Firebase auth directly
-import { joinShopByLink, handleJoinResult } from "../../utils/shopUtils";
+import { handleJoinResult, joinShopByQR } from "../../utils/shopUtils";
 import { BarCodeScannerResult } from "expo-barcode-scanner";
 
 const { width } = Dimensions.get("window");
@@ -55,10 +55,10 @@ export default function ScanScreen() {
         return;
       }
 
-      const result = await joinShopByLink(data.trim(), currentUser.uid);
+      const result = await joinShopByQR(data.trim(), currentUser.uid);
 
       handleJoinResult(result, () => {
-        router.navigate("/(customerTabs)/shops");
+        router.navigate("/(customerTabs)/shops"); 
       });
     } catch (error) {
       console.error("Error processing QR code:", error);
@@ -95,7 +95,6 @@ export default function ScanScreen() {
           "Image Selected",
           "QR code reading from images is not yet implemented. Please use camera scanning instead."
         );
-        // TODO: Implement QR reading from image using a library like react-native-qrcode-scanner
       }
     } catch (error) {
       console.error("Error picking image:", error);
