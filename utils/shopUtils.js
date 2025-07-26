@@ -1,4 +1,5 @@
-import { doc, updateDoc, arrayUnion, collection, where, getDocs, query } from "firebase/firestore";
+import { arrayUnion, collection, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { Alert } from "react-native";
 import { db } from "../firebaseConfig";
 import { Alert } from "react-native";
 import { Customer, Shop } from "../types";
@@ -6,7 +7,6 @@ import { Customer, Shop } from "../types";
 export const joinShopByQR = async (shopLink, customerUid) => {
   try {
     const q = query(collection(db, "shops"), where("link", "==", shopLink));
-
     const shopSnap = await getDocs(q);
 
     if (shopSnap.empty) {
@@ -28,12 +28,13 @@ export const joinShopByQR = async (shopLink, customerUid) => {
     }
 
     const shopRef = shopDoc.ref;
+    const shopRef = shopDoc.ref;
     // Add customer to shop's customers array
     await updateDoc(shopRef, {
       customers: arrayUnion(customerUid),
     });
 
-    // Add shop to customer's shopsJoined array
+    // Add shop's ID (owner UID) to customer's shopsJoined array
     const customerRef = doc(db, "customers", customerUid);
     await updateDoc(customerRef, {
       shopsJoined: arrayUnion(shopDoc.id),

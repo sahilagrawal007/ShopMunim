@@ -47,6 +47,7 @@ export default function CustomerTabsLayout() {
       <Tabs.Screen name="history" options={{ href: null }} />
       <Tabs.Screen name="editProfile" options={{ href: null }} />
       <Tabs.Screen name="changePassword" options={{ href: null }} />
+      <Tabs.Screen name="shopDetails" options={{ href: null }} />
     </Tabs>
   );
 }

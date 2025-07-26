@@ -36,7 +36,7 @@ export default function DashboardScreen() {
 
       const ownerRef = doc(db, 'owners', uid);
       const analyticsRef = doc(db, 'analytics', uid);
-      const productsRef = query(collection(db, 'products'), where('ownerId', '==', uid));
+      const productsDocRef = doc(db, 'products', uid);
       const transactionsRef = query(
         collection(db, 'transactions'),
         where('ownerId', '==', uid),
