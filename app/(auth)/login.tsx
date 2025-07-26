@@ -6,8 +6,8 @@ import { auth } from "../../firebaseConfig";
 import { router } from "expo-router";
 
 export default function Login() {
-  const [email, setEmail] = useState("temp1@gmail.com");
-  const [password, setPassword] = useState("Sahil@01");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -36,6 +36,7 @@ export default function Login() {
         <TextInput
           style={styles.input}
           placeholder="Email"
+          placeholderTextColor="gray"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -45,6 +46,7 @@ export default function Login() {
         <TextInput
           style={styles.input}
           placeholder="Password"
+          placeholderTextColor="gray"
           value={password}
           onChangeText={setPassword}
           secureTextEntry

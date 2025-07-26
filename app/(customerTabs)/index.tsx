@@ -100,6 +100,17 @@ export default function CustomerHomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
+        {/* Header */}
+        <View className="flex-row justify-between items-center mb-6">
+          <View className="flex-row items-center">
+            <Image source={iconMap["shop.png"]} className="w-6 h-6 mr-2" />
+            <Text className="text-xl font-bold text-gray-900">ShopMunim</Text>
+          </View>
+          <TouchableOpacity>
+            <Image source={iconMap["bell.png"]} className="w-6 h-6" />
+          </TouchableOpacity>
+        </View>
+
         {/* Welcome */}
         <View className="flex-row items-center justify-between mb-6">
           <View>

@@ -40,7 +40,7 @@ export default function CustomerTabsLayout() {
       <Tabs.Screen
         name="scan"
         options={{
-          href: null, // Hide from tab bar
+          href: null,
           title: 'Scan QR',
         }}
       />

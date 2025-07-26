@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { iconMap } from '../../constants/iconMap';
 import { auth, db } from '../../firebaseConfig';
 
+
 export default function DashboardScreen() {
   const ownerUid = auth.currentUser?.uid; //for storing owner id in transaction collection
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function DashboardScreen() {
   ];
 
   useEffect(() => {
+  const cleanupFns: (() => void)[] = [];
   const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
     if (user) {
       const uid = user.uid;
@@ -43,19 +45,20 @@ export default function DashboardScreen() {
       );
       const customersRef = query(
         collection(db, 'customers'),
-        where('shopsJoined', 'array-contains', uid) // ✅ correct logic: using owner's UID
+        where('shopsJoined', 'array-contains', uid)
       );
 
-      const cleanupFns: (() => void)[] = [];
-
       const unsubProfile = onSnapshot(ownerRef, (docSnap) => {
+        if (!auth.currentUser) return;
         if (docSnap.exists()) {
           setUserProfile({ uid: docSnap.id, ...docSnap.data() });
         }
         setLoading(false);
       });
+      cleanupFns.push(unsubProfile);
 
       const unsubCustomers = onSnapshot(customersRef, (querySnapshot) => {
+        if (!auth.currentUser) return;
         const list: any[] = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
@@ -64,8 +67,10 @@ export default function DashboardScreen() {
         console.log('Fetched customers based on UID:', list);
         setCustomers(list);
       });
+      cleanupFns.push(unsubCustomers);
 
       const unsubAnalytics = onSnapshot(analyticsRef, (docSnap) => {
+        if (!auth.currentUser) return;
         if (docSnap.exists()) {
           const data = docSnap.data();
           console.log('Fetched analytics data:', data);
@@ -75,33 +80,36 @@ export default function DashboardScreen() {
           setAnalyticsData({ paidCustomers: 0, customersWithDue: 0, totalDue: 0, totalCreditGiven: 0 });
         }
       });
+      cleanupFns.push(unsubAnalytics);
 
       const unsubProducts = onSnapshot(productsRef, (querySnapshot) => {
+        if (!auth.currentUser) return;
         const list: any[] = [];
         querySnapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
         console.log('Fetched products:', list);
         setProducts(list);
       });
+      cleanupFns.push(unsubProducts);
 
       const unsubTransactions = onSnapshot(transactionsRef, (querySnapshot) => {
+        if (!auth.currentUser) return;
         const list: any[] = [];
         querySnapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
         console.log('Fetched transactions:', list);
         setRecentTransactions(list);
       });
+      cleanupFns.push(unsubTransactions);
 
-      cleanupFns.push(unsubProfile, unsubCustomers, unsubAnalytics, unsubProducts, unsubTransactions);
-
-      return () => {
-        cleanupFns.forEach((fn) => fn());
-        unsubscribeAuth();
-      };
     } else {
+      cleanupFns.forEach((fn) => fn());
       setLoading(false);
     }
   });
 
-  return () => unsubscribeAuth();
+  return () => {
+    cleanupFns.forEach((fn) => fn());
+    unsubscribeAuth();
+  };
 }, []);
 
 
@@ -148,11 +156,11 @@ export default function DashboardScreen() {
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center">
-            <Image source={iconMap['shop.png']} className="w-6 h-6 mr-2" />
+            <Image source={iconMap["shop.png"]} className="w-6 h-6 mr-2" />
             <Text className="text-xl font-bold text-gray-900">ShopMunim</Text>
           </View>
           <TouchableOpacity>
-            <Image source={iconMap['bell.png']} className="w-6 h-6" />
+            <Image source={iconMap["bell.png"]} className="w-6 h-6" />
           </TouchableOpacity>
         </View>
 
@@ -160,29 +168,35 @@ export default function DashboardScreen() {
         <View className="flex-row items-center justify-between mb-6">
           <View>
             <Text className="text-gray-500 text-sm">Welcome back,</Text>
-            <Text className="text-lg font-bold text-gray-900">{userProfile?.name || 'Owner'}</Text>
+            <Text className="text-lg font-bold text-gray-900">{userProfile?.name || "Owner"}</Text>
           </View>
           <Image
-            source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }}
+            source={{ uri: "https://randomuser.me/api/portraits/men/32.jpg" }}
             className="w-12 h-12 rounded-full"
           />
         </View>
 
         {/* Shop Link Card */}
         <View className="bg-white rounded-xl p-4 mb-6 flex-row items-center">
-          <View className="bg-indigo-100 p-3 rounded-full mr-3">
-            <Image source={iconMap['link.png']} className="w-5 h-5" />
-          </View>
+          <TouchableOpacity className="bg-indigo-100 p-3 rounded-full mr-3" onPress={() => router.push('/(ownerTabs)/qr')}>  
+            <Image source={iconMap["link.png"]} className="w-5 h-5" />
+          </TouchableOpacity>
           <View className="flex-1">
             <Text className="text-xs text-gray-500">Your Shop Link</Text>
             <Text className="text-sm text-gray-700 truncate w-[200px] mb-3">
-              {userProfile?.shopLink ? `${userProfile.shopLink}` : 'No shop link available'}
+              {userProfile?.shopLink ? `${userProfile.shopLink}` : "No shop link available"}
             </Text>
             <View className="flex-row space-x-2">
-              <TouchableOpacity className="bg-[#4b91f3] px-3 py-1 rounded-lg" onPress={copyToClipboard}>
+              <TouchableOpacity
+                className="bg-[#4b91f3] px-3 py-1 rounded-lg"
+                onPress={copyToClipboard}
+              >
                 <Text className="text-xs text-white">Copy</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="bg-white px-3 py-1 rounded-lg border border-gray-200" onPress={onShare}>
+              <TouchableOpacity
+                className="bg-white px-3 py-1 rounded-lg border border-gray-200"
+                onPress={onShare}
+              >
                 <Text className="text-xs text-[#4b91f3]">Share</Text>
               </TouchableOpacity>
             </View>
@@ -192,7 +206,7 @@ export default function DashboardScreen() {
         {/* Quick Actions */}
         <View className="flex-row justify-between mb-6">
           <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[49%]">
-            <Image source={iconMap['rupee-circle.png']} className="w-6 h-6 mb-1" />
+            <Image source={iconMap["rupee-circle.png"]} className="w-6 h-6 mb-1" />
             <Text className="text-xs text-center p-2 text-gray-700">New Credit</Text>
           </TouchableOpacity>
           <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[49%]">
@@ -203,45 +217,54 @@ export default function DashboardScreen() {
 
         {/* Analytics Grid */}
         <Text className="text-gray-700 font-semibold mb-2">Analytics</Text>
-        
-        
-        
+
         <View className="flex-row flex-wrap justify-between mb-6">
           <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow-lg items-center">
             <View className="bg-indigo-100 p-3 rounded-full mb-2">
-              <Image source={iconMap['user.png']} className="w-5 h-5" />
+              <Image source={iconMap["user.png"]} className="w-5 h-5" />
             </View>
             <Text className="text-lg font-bold text-indigo-500">{customers.length}</Text>
             <Text className="text-sm text-gray-500">Customers</Text>
           </View>
           <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
             <View className="bg-green-100 p-3 rounded-full mb-2">
-              <Image source={iconMap['check.png']} className="w-5 h-5" />
+              <Image source={iconMap["check.png"]} className="w-5 h-5" />
             </View>
-            <Text className="text-lg font-bold text-green-600">{analyticsData?.paidCustomers || 0}</Text>
+            <Text className="text-lg font-bold text-green-600">
+              {analyticsData?.paidCustomers || 0}
+            </Text>
             <Text className="text-sm text-gray-500">Paid</Text>
           </View>
           <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
             <View className="bg-yellow-100 p-3 rounded-full mb-2">
-              <Image source={iconMap['clock.png']} className="w-5 h-5" />
+              <Image source={iconMap["clock.png"]} className="w-5 h-5" />
             </View>
-            <Text className="text-lg font-bold text-yellow-600">{analyticsData?.customersWithDue || 0}</Text>
+            <Text className="text-lg font-bold text-yellow-600">
+              {analyticsData?.customersWithDue || 0}
+            </Text>
             <Text className="text-sm text-gray-500">With Due</Text>
           </View>
           <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
             <View className="bg-red-100 p-3 rounded-full mb-2">
-              <Image source={iconMap['rupee.png']} className="w-5 h-5" />
+              <Image source={iconMap["rupee.png"]} className="w-5 h-5" />
             </View>
-            <Text className="text-lg font-bold text-red-600">₹{analyticsData?.totalDue?.toFixed(2) || '0.00'}</Text>
+            <Text className="text-lg font-bold text-red-600">
+              ₹{analyticsData?.totalDue?.toFixed(2) || "0.00"}
+            </Text>
             <Text className="text-sm text-gray-500">Total Due</Text>
           </View>
         </View>
 
         {/* Credit Summary */}
-        <LinearGradient colors={['#6468E5', '#5FA0F9']} className="rounded-2xl p-4 mb-6 flex-row justify-between items-center">
+        <LinearGradient
+          colors={["#6468E5", "#5FA0F9"]}
+          className="rounded-2xl p-4 mb-6 flex-row justify-between items-center"
+        >
           <View>
             <Text className="text-white text-sm font-medium">Total Credit Given</Text>
-            <Text className="text-white text-2xl font-extrabold mt-3">₹{analyticsData?.totalCreditGiven?.toFixed(2) || '0.00'}</Text>
+            <Text className="text-white text-2xl font-extrabold mt-3">
+              ₹{analyticsData?.totalCreditGiven?.toFixed(2) || "0.00"}
+            </Text>
           </View>
           <TouchableOpacity className="bg-white rounded-full py-2 px-4 mt-2">
             <Text className="text-[#6468E5] font-semibold text-sm">Collect Payment</Text>
@@ -258,11 +281,11 @@ export default function DashboardScreen() {
                 className="flex-row justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
                 onPress={() => {
                   if (!ownerUid) {
-                    Alert.alert('Error', 'Unable to identify shop. Please sign in again.');
+                    Alert.alert("Error", "Unable to identify shop. Please sign in again.");
                     return;
                   }
                   router.push({
-                    pathname: '/(ownerTabs)/CustomerProfile',
+                    pathname: "/(ownerTabs)/CustomerProfile",
                     params: {
                       customerId: cust.id,
                       shopId: ownerUid,
@@ -271,21 +294,25 @@ export default function DashboardScreen() {
                 }}
               >
                 <View className="flex-row items-center">
-                  <Image source={iconMap['user.png']} className="w-10 h-10 rounded-full mr-3" />
+                  <Image source={iconMap["user.png"]} className="w-10 h-10 rounded-full mr-3" />
                   <View>
                     <Text className="text-gray-700 font-medium">{cust.name}</Text>
-                    <Text className="text-xs text-gray-500">Last: {cust.lastActivity || 'N/A'}</Text>
+                    <Text className="text-xs text-gray-500">
+                      Last: {cust.lastActivity || "N/A"}
+                    </Text>
                   </View>
                 </View>
-                <Text className={`font-bold ${cust.due === 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {cust.due === 0 ? 'Paid' : `Due ₹${cust.due?.toFixed(2)}`}
+                <Text className={`font-bold ${cust.due === 0 ? "text-green-600" : "text-red-600"}`}>
+                  {cust.due === 0 ? "Paid" : `Due ₹${cust.due?.toFixed(2)}`}
                 </Text>
               </TouchableOpacity>
             ))
           ) : (
             <Text className="text-gray-500">No customers found.</Text>
           )}
-          <Link href="./customers" className="text-blue-600 text-sm mt-3 self-end">View All</Link>
+          <Link href="./customers" className="text-blue-600 text-sm mt-3 self-end">
+            View All
+          </Link>
         </View>
 
         {/* Recent Transactions */}
@@ -293,26 +320,41 @@ export default function DashboardScreen() {
           <Text className="text-lg font-bold text-gray-800 mb-4">Recent Transactions</Text>
           {recentTransactions.length > 0 ? (
             recentTransactions.map((txn, index) => (
-              <View key={index} className="flex-row justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+              <View
+                key={index}
+                className="flex-row justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
+              >
                 <View className="flex-row items-center">
                   <Image
-                    source={iconMap[txn.productName?.toLowerCase() + '.png'] || iconMap['rupee.png']}
+                    source={
+                      iconMap[txn.productName?.toLowerCase() + ".png"] || iconMap["rupee.png"]
+                    }
                     className="w-8 h-8 mr-3"
                   />
                   <View>
-                    <Text className="text-gray-700 font-medium">{txn.description || txn.productName || 'Transaction'}</Text>
-                    <Text className="text-gray-500 text-xs">{txn.date?.toDate ? new Date(txn.date.toDate()).toLocaleDateString() : 'N/A'}</Text>
+                    <Text className="text-gray-700 font-medium">
+                      {txn.description || txn.productName || "Transaction"}
+                    </Text>
+                    <Text className="text-gray-500 text-xs">
+                      {txn.date?.toDate ? new Date(txn.date.toDate()).toLocaleDateString() : "N/A"}
+                    </Text>
                   </View>
                 </View>
-                <Text className={`font-bold ${txn.type === 'credit' || txn.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  ₹{txn.amount?.toFixed(2) || '0.00'}
+                <Text
+                  className={`font-bold ${
+                    txn.type === "credit" || txn.amount > 0 ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  ₹{txn.amount?.toFixed(2) || "0.00"}
                 </Text>
               </View>
             ))
           ) : (
             <Text className="text-gray-500">No recent transactions.</Text>
           )}
-          <Link href="/(customerTabs)/history" className="text-blue-600 text-sm mt-3 self-end">See All</Link>
+          <Link href="/(customerTabs)/history" className="text-blue-600 text-sm mt-3 self-end">
+            See All
+          </Link>
         </View>
 
         {/* Products */}
@@ -321,63 +363,69 @@ export default function DashboardScreen() {
           {products.length > 0 ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="py-2">
               {products.map((product, index) => (
-                <View key={index} className="w-32 bg-gray-50 p-3 rounded-lg mr-3 items-center border border-gray-100">
+                <View
+                  key={index}
+                  className="w-32 bg-gray-50 p-3 rounded-lg mr-3 items-center border border-gray-100"
+                >
                   <Image
-                    source={iconMap[product.name?.toLowerCase() + '.png'] || iconMap['shop.png']}
+                    source={iconMap[product.name?.toLowerCase() + ".png"] || iconMap["shop.png"]}
                     className="w-16 h-16 mb-2"
                   />
                   <Text className="text-gray-800 font-medium text-center">{product.name}</Text>
-                  <Text className="text-gray-600 text-sm">₹{product.price?.toFixed(2) || '0.00'}</Text>
+                  <Text className="text-gray-600 text-sm">
+                    ₹{product.price?.toFixed(2) || "0.00"}
+                  </Text>
                 </View>
               ))}
             </ScrollView>
           ) : (
             <Text className="text-gray-500">No products found.</Text>
           )}
-          <Link href="./products" className="text-blue-600 text-sm mt-3 self-end">Manage</Link>
+          <Link href="./products" className="text-blue-600 text-sm mt-3 self-end">
+            Manage
+          </Link>
         </View>
 
         {/* ── REMINDER BANNER ── */}
-        {Array.isArray(customers) && customers.filter(c => Number(c?.due || 0) > 0).length > 0 && (
-          <LinearGradient
-            colors={['#FDDE8E', '#FBA5A4']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            className="p-4 rounded-xl mb-8 flex-row items-center"
-          >
-            <Image
-              source={iconMap['reminder-bell.png']}
-              className="w-10 h-10 mr-4 self-start"
-              resizeMode="contain"
-            />
+        {Array.isArray(customers) &&
+          customers.filter((c) => Number(c?.due || 0) > 0).length > 0 && (
+            <LinearGradient
+              colors={["#FDDE8E", "#FBA5A4"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              className="p-4 rounded-xl mb-8 flex-row items-center"
+            >
+              <Image
+                source={iconMap["reminder-bell.png"]}
+                className="w-10 h-10 mr-4 self-start"
+                resizeMode="contain"
+              />
 
-            <View className="flex-1">
-              <Text className="text-base font-semibold text-red-600 mb-1">
-                Remind customers for due payments
-              </Text>
-              <Text className="text-sm text-gray-800 mb-3">
-                Send payment reminders to customers with pending dues.
-              </Text>
-              <TouchableOpacity
-                className="bg-white px-4 py-2 rounded-lg w-36"
-                onPress={() => {
-                  const dueCustomers = customers.filter(c => Number(c?.due || 0) > 0);
-                  if (dueCustomers.length === 0) return;
-
-                  dueCustomers.forEach((cust) => {
-                    console.log(`Reminder sent to ${cust.name} - ₹${cust.due.toFixed(2)}`);
-                  });
-
-                  Alert.alert('Reminders Sent', `${dueCustomers.length} customer(s) reminded.`);
-                }}
-              >
-                <Text className="text-center text-red-600 font-semibold">
-                  Remind Now
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-red-600 mb-1">
+                  Remind customers for due payments
                 </Text>
-              </TouchableOpacity>
-            </View>
-          </LinearGradient>
-        )}
+                <Text className="text-sm text-gray-800 mb-3">
+                  Send payment reminders to customers with pending dues.
+                </Text>
+                <TouchableOpacity
+                  className="bg-white px-4 py-2 rounded-lg w-36"
+                  onPress={() => {
+                    const dueCustomers = customers.filter((c) => Number(c?.due || 0) > 0);
+                    if (dueCustomers.length === 0) return;
+
+                    dueCustomers.forEach((cust) => {
+                      console.log(`Reminder sent to ${cust.name} - ₹${cust.due.toFixed(2)}`);
+                    });
+
+                    Alert.alert("Reminders Sent", `${dueCustomers.length} customer(s) reminded.`);
+                  }}
+                >
+                  <Text className="text-center text-red-600 font-semibold">Remind Now</Text>
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
+          )}
       </ScrollView>
     </SafeAreaView>
   );
