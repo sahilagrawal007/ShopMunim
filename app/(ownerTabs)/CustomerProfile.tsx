@@ -8,11 +8,13 @@ import {
   FlatList,
   Text,
   TouchableOpacity,
-  View
+  View,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../../firebaseConfig";
 import { Customer, Transaction } from "../../types";
+import Feather from "react-native-vector-icons/Feather";
 
 interface RouteParams {
   customerId: string;
@@ -89,17 +91,25 @@ const CustomerProfile: React.FC = () => {
   return (
     <SafeAreaView className="flex-1 bg-[#F7F7F7]">
       <View className="flex-1 p-4">
+        <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color="#333" />
+        </TouchableOpacity>
+
         {/* Header */}
         <View className="mb-4 bg-white p-4 rounded-lg shadow">
           <Text className="text-xl font-bold text-gray-800">{customer.name}</Text>
           <Text className="text-xs text-gray-500">Customer ID: {customer.uid}</Text>
-          <Text className="text-sm font-semibold text-blue-500 mt-1">Balance: ₹{calculateDue()}</Text>
+          <Text className="text-sm font-semibold text-blue-500 mt-1">
+            Balance: ₹{calculateDue()}
+          </Text>
         </View>
 
         {/* Add Transaction Button */}
         <TouchableOpacity
           className="bg-blue-500 rounded-lg py-2 px-4 mb-4 self-end"
-          onPress={() => router.push({ pathname: '/(ownerTabs)/AddTransaction', params: { customerId, shopId } })}
+          onPress={() =>
+            router.push({ pathname: "/(ownerTabs)/AddTransaction", params: { customerId, shopId } })
+          }
         >
           <Text className="text-white font-bold text-center">+ Add Transaction</Text>
         </TouchableOpacity>
@@ -113,7 +123,9 @@ const CustomerProfile: React.FC = () => {
             renderItem={({ item }) => (
               <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
                 <View>
-                  <Text className="font-medium text-gray-800">{item.description || "Transaction"}</Text>
+                  <Text className="font-medium text-gray-800">
+                    {item.description || "Transaction"}
+                  </Text>
                   <Text className="text-xs text-gray-400">
                     {new Date(item.createdAt).toLocaleDateString()}
                   </Text>
@@ -136,5 +148,12 @@ const CustomerProfile: React.FC = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  backButton: {
+    marginBottom: 20,
+    marginTop: 1,
+  },
+}); 
 
 export default CustomerProfile;

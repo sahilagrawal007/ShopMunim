@@ -1,7 +1,7 @@
 import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import { addDoc, collection, doc, getDoc, query, where, onSnapshot } from "firebase/firestore";
+import React, { useEffect, useState, useCallback } from "react";
 import { Alert, ScrollView, Text, TextInput, StyleSheet, TouchableOpacity, View } from "react-native";
 import { db } from "../../firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,23 +27,41 @@ const AddTransaction: React.FC = () => {
   const [quantities, setQuantities] = useState<{ [productId: string]: number }>({});
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  const subscribeToProducts = useCallback(() => {
+    if (!shopId) return () => {};
 
-  const fetchProducts = async () => {
-    try {
-      const ownerId = shopId; // Assuming shopId is ownerId, adjust if needed
-      const docRef = doc(db, "products", ownerId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const items = docSnap.data().products || [];
-        setProducts(items.map((item: any) => ({ ...item, price: Number(item.price) })));
+    const docRef = doc(db, "products", shopId);
+
+    const unsubscribe = onSnapshot(
+      docRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const items = docSnap.data().products || [];
+          setProducts(
+            items.map((item: any, index: number) => ({
+              ...item,
+              id: item.id ?? String(index),
+              price: Number(item.price),
+            }))
+          );
+        } else {
+          setProducts([]);
+        }
+      },
+      (error) => {
+        Alert.alert("Error", "Failed to fetch products.");
+        console.error("Firestore products subscription error:", error);
       }
-    } catch (error) {
-      Alert.alert("Error", "Failed to fetch products.");
-    }
-  };
+    );
+
+    return unsubscribe;
+  }, [shopId, setProducts]);
+
+  // Attach the real-time listener on component mount, detach on unmount
+  useEffect(() => {
+    const unsubscribe = subscribeToProducts();
+    return () => unsubscribe && unsubscribe();
+  }, [subscribeToProducts]);
 
   const handleQuantityChange = (productId: string, value: string) => {
     const qty = Math.max(0, parseInt(value) || 0);
@@ -80,8 +98,8 @@ const AddTransaction: React.FC = () => {
           onPress: () => {
             // Navigate back to CustomerProfile with refresh flag
             router.back();
-          }
-        }
+          },
+        },
       ]);
     } catch (e) {
       Alert.alert("Error", "Failed to add transaction.");

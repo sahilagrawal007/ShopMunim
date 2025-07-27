@@ -157,7 +157,7 @@ export default function DashboardScreen() {
   console.log('dueCustomers count:', dueCustomers.length, 'list:', dueCustomers);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F7F7]">
+    <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-[#F7F7F7]">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
@@ -184,7 +184,10 @@ export default function DashboardScreen() {
 
         {/* Shop Link Card */}
         <View className="bg-white rounded-xl p-4 mb-6 flex-row items-center">
-          <TouchableOpacity className="bg-indigo-100 p-3 rounded-full mr-3" onPress={() => router.push('/(ownerTabs)/qr')}>  
+          <TouchableOpacity
+            className="bg-indigo-100 p-3 rounded-full mr-3"
+            onPress={() => router.push("/(ownerTabs)/qr")}
+          >
             <Ionicons name="qr-code-outline" size={20} color="#4F46E5" />
           </TouchableOpacity>
           <View className="flex-1">
