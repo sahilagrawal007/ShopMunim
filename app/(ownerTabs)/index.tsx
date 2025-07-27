@@ -316,7 +316,7 @@ export default function DashboardScreen() {
           ) : (
             <Text className="text-gray-500">No customers found.</Text>
           )}
-          <Link href="./customers" className="text-blue-600 text-sm mt-3 self-end">
+          <Link href="./Customers" className="text-blue-600 text-sm mt-3 self-end">
             View All
           </Link>
         </View>
