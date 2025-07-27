@@ -82,12 +82,19 @@ export default function DashboardScreen() {
       });
       cleanupFns.push(unsubAnalytics);
 
-      const unsubProducts = onSnapshot(productsRef, (querySnapshot) => {
-        if (!auth.currentUser) return;
-        const list: any[] = [];
-        querySnapshot.forEach((doc) => list.push({ id: doc.id, ...doc.data() }));
-        console.log('Fetched products:', list);
-        setProducts(list);
+      const unsubProducts = onSnapshot(productsDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const productList = docSnap.data().products || [];
+          const formatted = productList.map((item: any) => ({
+            ...item,
+            price: Number(item.price),
+          }));
+          console.log("Fetched products:", formatted);
+          setProducts(formatted);
+        } else {
+          console.log("No products found for owner");
+          setProducts([]);
+        }
       });
       cleanupFns.push(unsubProducts);
 

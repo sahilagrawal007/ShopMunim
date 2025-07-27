@@ -1,7 +1,6 @@
 import { arrayUnion, collection, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { Alert } from "react-native";
 import { db } from "../firebaseConfig";
-import { Alert } from "react-native";
 import { Customer, Shop } from "../types";
 
 export const joinShopByQR = async (shopLink, customerUid) => {
@@ -27,7 +26,6 @@ export const joinShopByQR = async (shopLink, customerUid) => {
       };
     }
 
-    const shopRef = shopDoc.ref;
     const shopRef = shopDoc.ref;
     // Add customer to shop's customers array
     await updateDoc(shopRef, {
