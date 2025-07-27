@@ -74,6 +74,12 @@ export default function OwnerTabsLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="Customers"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
