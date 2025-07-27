@@ -122,13 +122,6 @@ export default function CustomersScreen() {
 
         {/* Title */}
         <View className="flex-row items-center mb-6">
-          <TouchableOpacity>
-            <Image
-              source={iconMap["arrow-right.png"]}
-              className="w-5 h-5 mr-2"
-              style={{ transform: [{ rotate: "180deg" }] }}
-            />
-          </TouchableOpacity>
           <Text className="text-xl font-bold text-gray-900">Products</Text>
         </View>
 

@@ -1,22 +1,25 @@
 // app/(ownerTabs)/qr.tsx
-import { useEffect, useState } from "react";
-import { View, Text, Alert, Button, Share } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { View, Text, Alert, Button, Share, Platform, TouchableOpacity } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import Clipboard from "expo-clipboard";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 
 export default function OwnerQRScreen() {
   const [shopLink, setShopLink] = useState("null");
   const [shopName, setShopName] = useState("null");
   const router = useRouter();
+  const qrRef = useRef<any>(null);
 
   useEffect(() => {
     fetchProducts();
   }, []);
-  ``;
+
   const fetchProducts = async () => {
     const auth = getAuth();
     const user = auth.currentUser;
@@ -34,24 +37,44 @@ export default function OwnerQRScreen() {
     }
   };
 
-  const copyLink = async () => {
-    await Clipboard.setStringAsync(shopLink);
-    Alert.alert("Copied", "Shop link copied to clipboard");
-  };
-
-  const shareLink = async () => {
-    await Share.share({
-      message: `Check out my shop "${shopName}": ${shopLink}`,
+  const shareQrImage = async () => {
+    if (!qrRef.current) return;
+    qrRef.current.toDataURL(async (dataURL: string) => {
+      try {
+        const fileUri = FileSystem.cacheDirectory + "qr-code.png";
+        await FileSystem.writeAsStringAsync(fileUri, dataURL, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        // Share the image file
+        await Sharing.shareAsync(fileUri, {
+          mimeType: "image/png",
+          dialogTitle: `QR code for shop "${shopName}"`,
+        });
+      } catch (err) {
+        Alert.alert("Error", "Could not share QR code image.");
+        console.error(err);
+      }
     });
   };
 
   return (
     <View className="flex-1 justify-center items-center bg-white p-4">
       <Text className="text-lg font-semibold mb-4">Scan to Join:</Text>
-      <QRCode value={shopLink} size={200} />
+      <QRCode
+        value={shopLink}
+        size={200}
+        quietZone={24}
+        getRef={(ref) => {
+          qrRef.current = ref;
+        }}
+      />
       <View className="flex-row space-x-4 mt-6">
-        <Button title="Copy Link" onPress={copyLink} />
-        <Button title="Share" onPress={shareLink} />
+        <TouchableOpacity
+          className="bg-[#4b91f3] px-6 py-5 rounded-lg"
+          onPress={shareQrImage}
+        >
+          <Text className="text-l text-white">Share QR Image </Text>
+        </TouchableOpacity>
       </View>
       <View className="mt-6">
         <Button title="Back" onPress={() => router.back()} />

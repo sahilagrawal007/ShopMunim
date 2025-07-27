@@ -68,6 +68,12 @@ export default function OwnerTabsLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="AddTransaction"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

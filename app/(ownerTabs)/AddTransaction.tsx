@@ -2,8 +2,10 @@ import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TextInput, StyleSheet, TouchableOpacity, View } from "react-native";
 import { db } from "../../firebaseConfig";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Feather from "react-native-vector-icons/Feather";
 
 interface RouteParams {
   customerId: string;
@@ -89,37 +91,51 @@ const AddTransaction: React.FC = () => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-[#F7F7F7] p-4">
-      <Text className="text-xl font-bold mb-4">Add Transaction</Text>
-      <Text className="text-base font-semibold mb-2">Select Products</Text>
-      {products.length === 0 ? (
-        <Text>No products found.</Text>
-      ) : (
-        products.map((product) => (
-          <View key={product.id} className="flex-row items-center mb-3">
-            <Text className="flex-1 text-gray-800">{product.name} (₹{product.price})</Text>
-            <TextInput
-              className="border border-gray-300 rounded px-2 py-1 w-16 text-center"
-              keyboardType="numeric"
-              value={quantities[product.id]?.toString() || ""}
-              onChangeText={(val) => handleQuantityChange(product.id, val)}
-              placeholder="0"
-            />
-          </View>
-        ))
-      )}
-      <Text className="text-lg font-bold mt-4">Total: ₹{totalAmount}</Text>
-      <TouchableOpacity
-        className="bg-blue-500 rounded-lg py-3 mt-6"
-        onPress={handleSubmit}
-        disabled={submitting || totalAmount <= 0}
-      >
-        <Text className="text-white text-center font-bold text-lg">
-          {submitting ? "Submitting..." : "Submit Transaction"}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView className="flex-1 p-6">
+        <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text className="text-xl font-bold mb-6">Add Transaction</Text>
+        <Text className="text-base font-semibold mb-2">Select Products</Text>
+        {products.length === 0 ? (
+          <Text>No products found.</Text>
+        ) : (
+          products.map((product) => (
+            <View key={product.id} className="flex-row items-center mb-3">
+              <Text className="flex-1 text-gray-800">
+                {product.name} (₹{product.price})
+              </Text>
+              <TextInput
+                className="border border-gray-300 rounded px-2 py-1 w-16 text-center"
+                keyboardType="numeric"
+                value={quantities[product.id]?.toString() || ""}
+                onChangeText={(val) => handleQuantityChange(product.id, val)}
+                placeholder="0"
+              />
+            </View>
+          ))
+        )}
+        <Text className="text-lg font-bold mt-4">Total: ₹{totalAmount}</Text>
+        <TouchableOpacity
+          className="bg-blue-500 rounded-lg py-3 mt-6"
+          onPress={handleSubmit}
+          disabled={submitting || totalAmount <= 0}
+        >
+          <Text className="text-white text-center font-bold text-lg">
+            {submitting ? "Submitting..." : "Submit Transaction"}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  backButton: {
+    marginBottom: 20,
+    marginTop: 1,
+  },
+}); 
 
 export default AddTransaction; 

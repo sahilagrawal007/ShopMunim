@@ -10,7 +10,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { iconMap } from '../../constants/iconMap';
 import { auth, db } from '../../firebaseConfig';
 
-
 export default function DashboardScreen() {
   const ownerUid = auth.currentUser?.uid; //for storing owner id in transaction collection
   const router = useRouter();
@@ -186,7 +185,7 @@ export default function DashboardScreen() {
         {/* Shop Link Card */}
         <View className="bg-white rounded-xl p-4 mb-6 flex-row items-center">
           <TouchableOpacity className="bg-indigo-100 p-3 rounded-full mr-3" onPress={() => router.push('/(ownerTabs)/qr')}>  
-            <Image source={iconMap["link.png"]} className="w-5 h-5" />
+            <Ionicons name="qr-code-outline" size={20} color="#4F46E5" />
           </TouchableOpacity>
           <View className="flex-1">
             <Text className="text-xs text-gray-500">Your Shop Link</Text>
@@ -211,7 +210,7 @@ export default function DashboardScreen() {
         </View>
 
         {/* Quick Actions */}
-        <View className="flex-row justify-between mb-6">
+        {/* <View className="flex-row justify-between mb-6">
           <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[49%]">
             <Image source={iconMap["rupee-circle.png"]} className="w-6 h-6 mb-1" />
             <Text className="text-xs text-center p-2 text-gray-700">New Credit</Text>
@@ -220,7 +219,7 @@ export default function DashboardScreen() {
             <Ionicons name="cube" size={24} color="#3b91f3" style={{ marginBottom: 4 }} />
             <Text className="text-xs text-center p-2 text-gray-700">Shop QR</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {/* Analytics Grid */}
         <Text className="text-gray-700 font-semibold mb-2">Analytics</Text>
