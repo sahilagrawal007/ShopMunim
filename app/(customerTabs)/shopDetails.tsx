@@ -15,11 +15,14 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import { db } from "../../firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { iconMap } from "@/constants/iconMap";
 import { getAuth } from "firebase/auth";
+import Feather from "react-native-vector-icons/Feather";
+import { useRouter } from "expo-router";
 
 interface RouteParams {
   shopId: string;
@@ -27,6 +30,7 @@ interface RouteParams {
 
 const JoinedShopDetails: React.FC = () => {
   const route = useRoute();
+  const router = useRouter();
   const { shopId } = route.params as RouteParams;
 
   const [products, setProducts] = useState<any[]>([]);
@@ -61,7 +65,7 @@ const JoinedShopDetails: React.FC = () => {
         where("shopId", "==", shopId),
         where("customerId", "==", user.uid)
       );
-      console.log(user.uid);
+      
       const txnSnap = await getDocs(txnQuery);
       const txnList = txnSnap.docs.map((doc) => ({
         id: doc.id,
@@ -97,7 +101,7 @@ const JoinedShopDetails: React.FC = () => {
         ListHeaderComponent={
           <View className="px-4 pb-4">
             {/* App Header */}
-            <View className="flex-row justify-between items-center mb-6">
+            <View className="flex-row justify-between items-center mb-6 mt-4">
               <View className="flex-row items-center">
                 <Image source={iconMap["shop.png"]} className="w-6 h-6 mr-2" />
                 <Text className="text-xl font-bold text-gray-900">ShopMunim</Text>
@@ -108,6 +112,12 @@ const JoinedShopDetails: React.FC = () => {
             </View>
 
             {/* Shop Info */}
+            <TouchableOpacity
+              onPress={() => router.navigate("/(customerTabs)")}
+              style={styles.backButton}
+            >
+              <Feather name="arrow-left" size={24} color="#333" />
+            </TouchableOpacity>
             <View className="bg-white p-4 rounded-lg mb-4 shadow">
               <Text className="text-xl font-bold text-gray-900 mb-1">
                 {shopDetails?.name || "Shop"}
@@ -146,7 +156,9 @@ const JoinedShopDetails: React.FC = () => {
           <View className="bg-white px-4 py-3 border-b border-gray-100">
             <View className="flex-row justify-between items-center">
               <View>
-                <Text className="font-medium text-gray-800">{item.description || "Transaction"}</Text>
+                <Text className="font-medium text-gray-800">
+                  {item.description || "Transaction"}
+                </Text>
                 <Text className="text-xs text-gray-400">
                   {new Date(item.createdAt).toLocaleDateString()}
                 </Text>
@@ -170,5 +182,12 @@ const JoinedShopDetails: React.FC = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  backButton: {
+    marginBottom: 20,
+    marginTop: 1,
+  },
+}); 
 
 export default JoinedShopDetails;

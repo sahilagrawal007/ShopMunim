@@ -1,13 +1,16 @@
 import { useRouter } from "expo-router";
-import { signOut } from "firebase/auth";
-import React from "react";
+import { deleteUser, signOut } from "firebase/auth";
+import React, { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
-import { auth } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 
 export default function OwnerSettings() {
   const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -18,15 +21,58 @@ export default function OwnerSettings() {
     }
   };
 
+  const handleTogglePush = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const newValue = !pushEnabled;
+    setPushEnabled(newValue);
+    try {
+      await updateDoc(doc(db, "customers", user.uid), { notificationsEnabled: newValue });
+    } catch (e) {
+      // Optionally show error
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account? This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              const user = auth.currentUser;
+              if (user) {
+                await deleteDoc(doc(db, "customers", user.uid));
+                await deleteUser(user);
+                router.replace("/(auth)/login");
+              }
+            } catch (error: any) {
+              Alert.alert("Error", error.message);
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1">
       <ScrollView>
         <View style={styles.container}>
-          <View style={styles.header}>
+          <Text style={styles.header}>
             <Text style={styles.title}>Settings</Text>
-          </View>
+          </Text>
 
+          {/* Profile Management */}
           <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Profile</Text>
             <TouchableOpacity
               style={styles.settingItem}
               onPress={() => router.navigate("/(ownerTabs)/EditProfile" as any)}
@@ -45,6 +91,24 @@ export default function OwnerSettings() {
                 <Text style={styles.settingText}>Change Password</Text>
               </View>
             </TouchableOpacity>
+          </View>
+
+          {/* <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Notifications</Text>
+            <View style={styles.settingItem}>
+              <Feather name="bell" size={20} color="#555" style={styles.icon} />
+              <Text style={styles.settingText}>Push Notifications</Text>
+              <Switch
+                value={pushEnabled}
+                onValueChange={handleTogglePush}
+                style={{ marginLeft: "auto" }}
+              />
+            </View>
+          </View> */}
+
+          {/* Shop Details */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Shop Details</Text>
             <TouchableOpacity
               style={styles.settingItem}
               onPress={() => router.navigate("/(ownerTabs)/ShopInformation" as any)}
@@ -63,11 +127,22 @@ export default function OwnerSettings() {
                 <Text style={styles.settingText}>Notifications</Text>
               </View>
             </TouchableOpacity>
+          </View>
+
+          {/* Account */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Account</Text>
+            <TouchableOpacity style={styles.settingItem} onPress={handleSignOut}>
+              <Feather name="log-out" size={20} color="#d9534f" style={styles.icon} />
+              <Text style={[styles.settingText, { color: "#d9534f" }]}>Sign Out</Text>
+            </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.settingItem, styles.signOutButton]}
-              onPress={handleSignOut}
+              style={styles.settingItem}
+              onPress={handleDeleteAccount}
+              disabled={deleting}
             >
-              <Text style={[styles.settingText, styles.signOutText]}>Sign Out</Text>
+              <Feather name="trash-2" size={20} color="#d9534f" style={styles.icon} />
+              <Text style={[styles.settingText, { color: "#d9534f" }]}>Delete Account</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -81,6 +156,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
     padding: 16,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 24,
+    color: "#333",
   },
   title: {
     fontSize: 24,
@@ -156,10 +238,6 @@ const styles = StyleSheet.create({
   formContainer: {
     marginTop: 16,
   },
-  header: {
-    marginBottom: 24,
-    paddingTop: 40,
-  },
   welcomeText: {
     fontSize: 16,
     color: "#666",
@@ -207,20 +285,20 @@ const styles = StyleSheet.create({
   },
   section: {
     backgroundColor: "white",
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 2,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "#333",
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#007AFF",
   },
   emptyText: {
     textAlign: "center",
@@ -253,14 +331,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   settingText: {
-    fontSize: 18,
-    color: "#555",
-    marginVertical: 8,
-  },
-  signOutText: {
     fontSize: 16,
-    color: "#fff",
-    fontWeight: "600",
+    color: "#333",
   },
   signOutButton: {
     backgroundColor: "#ff5252",
@@ -270,11 +342,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   settingItem: {
-    backgroundColor: "#fff",
-    padding: 16,
-    marginVertical: 6,
-    borderRadius: 8,
-    elevation: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
   },
   preferencesDisplay: {
     backgroundColor: "white",

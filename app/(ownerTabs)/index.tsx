@@ -374,12 +374,8 @@ export default function DashboardScreen() {
               {products.map((product, index) => (
                 <View
                   key={index}
-                  className="w-32 bg-gray-50 p-3 rounded-lg mr-3 items-center border border-gray-100"
+                  className="w-32 bg-sky-300 p-3 rounded-lg mr-3 items-center border border-gray-400"
                 >
-                  <Image
-                    source={iconMap[product.name?.toLowerCase() + ".png"] || iconMap["shop.png"]}
-                    className="w-16 h-16 mb-2"
-                  />
                   <Text className="text-gray-800 font-medium text-center">{product.name}</Text>
                   <Text className="text-gray-600 text-sm">
                     ₹{product.price?.toFixed(2) || "0.00"}

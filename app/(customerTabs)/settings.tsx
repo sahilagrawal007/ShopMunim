@@ -56,7 +56,7 @@ export default function CustomerSettings() {
               if (user) {
                 await deleteDoc(doc(db, 'customers', user.uid));
                 await deleteUser(user);
-                router.navigate('/(auth)/login');
+                router.replace('/(auth)/login');
               }
             } catch (error: any) {
               Alert.alert('Error', error.message);
@@ -86,7 +86,7 @@ export default function CustomerSettings() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1">
       <ScrollView>
         <View style={styles.container}>
           <Text style={styles.header}>Settings</Text>

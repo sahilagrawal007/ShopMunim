@@ -124,7 +124,7 @@ export default function CustomerHomeScreen() {
         </View>
 
         {/* Welcome */}
-        <View className="flex-row items-center justify-between mb-6">
+        {/* <View className="flex-row items-center justify-between mb-6">
           <View>
             <Text className="text-gray-500 text-sm">Welcome back,</Text>
             <Text className="text-lg font-bold text-gray-900">{customer?.name || "User"}</Text>
@@ -133,7 +133,7 @@ export default function CustomerHomeScreen() {
             source={{ uri: "https://randomuser.me/api/portraits/men/32.jpg" }}
             className="w-12 h-12 rounded-full"
           />
-        </View>
+        </View> */}
 
         {/* Profile Card */}
         <LinearGradient
@@ -141,7 +141,7 @@ export default function CustomerHomeScreen() {
           className="rounded-2xl p-4 flex-row justify-between items-center mb-6"
         >
           <View className="flex-1">
-            <Text className="text-white text-sm">Hello,</Text>
+            <Text className="text-white text-sm">Welcome back,</Text>
             <Text className="text-white text-xl font-bold mt-1">{customer?.name}</Text>
             <Text className="text-white text-xs mt-2 opacity-90">
               Track your purchases and dues from all your favourite shops.
@@ -177,37 +177,39 @@ export default function CustomerHomeScreen() {
 
         {/* Pie Chart */}
         <View className="items-center bg-white p-4 rounded-2xl shadow mb-6">
-          <PieChart
-            data={[
-              {
-                name: "Total Spent",
-                population: spent,
-                color: "#e254548e", // red-600
-                legendFontColor: "#e254548e",
-                legendFontSize: 14,
-              },
-              {
-                name: "Due",
-                population: due,
-                color: "#eac328a3", // yellow-400
-                legendFontColor: "#eac328a3",
-                legendFontSize: 14,
-              },
-            ]}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={{
-              backgroundGradientFrom: "#fff",
-              backgroundGradientTo: "#fff",
-              color: () => "#000",
-            }}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            center={[0, 0]} // keep it centered
-            hasLegend={false}
-            absolute
-          />
+          <View className="justify-center mt-4 space-x-4">
+            <PieChart
+              data={[
+                {
+                  name: "Total Spent",
+                  population: spent,
+                  color: "#e254548e", // red-600
+                  legendFontColor: "#e254548e",
+                  legendFontSize: 14,
+                },
+                {
+                  name: "Due",
+                  population: due,
+                  color: "#eac328a3", // yellow-400
+                  legendFontColor: "#eac328a3",
+                  legendFontSize: 14,
+                },
+              ]}
+              width={screenWidth}
+              height={220}
+              chartConfig={{
+                backgroundGradientFrom: "#fff",
+                backgroundGradientTo: "#fff",
+                color: () => "#000",
+              }}
+              accessor="population"
+              backgroundColor="transparent"
+              paddingLeft="25"
+              center={[70, 0]}
+              hasLegend={false}
+              absolute
+            />
+          </View>
           {/* Legend */}
           <View className="flex-row justify-center mt-4 space-x-4">
             <View className="flex-row items-center">
@@ -250,23 +252,6 @@ export default function CustomerHomeScreen() {
             <Text className="text-gray-500">No shops joined yet.</Text>
           )}
         </View>
-
-        {/* Products List */}
-        {/* <View className="mb-6">
-          <Text className="text-gray-700 font-semibold text-lg mb-2">Products</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {products.map((prod, i) => (
-              <View
-                key={i}
-                className="w-24 h-24 bg-white rounded-xl mx-1 items-center justify-center shadow-sm"
-              >
-                <Image source={iconMap[prod.icon || "tea.png"]} className="w-8 h-8 mb-1" />
-                <Text className="text-xs text-gray-900">{prod.name}</Text>
-                <Text className="text-xs text-gray-500">₹{prod.price}</Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View> */}
       </ScrollView>
     </SafeAreaView>
   );
