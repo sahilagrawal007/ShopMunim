@@ -19,6 +19,7 @@ export default function DashboardScreen() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   const pieData = [
     { key: 1, value: analyticsData?.paidCustomers || 0, svg: { fill: '#10B981' } },
@@ -50,7 +51,9 @@ export default function DashboardScreen() {
       const unsubProfile = onSnapshot(ownerRef, (docSnap) => {
         if (!auth.currentUser) return;
         if (docSnap.exists()) {
-          setUserProfile({ uid: docSnap.id, ...docSnap.data() });
+          const data = docSnap.data();
+          setUserProfile({ uid: docSnap.id, ...data });
+          setProfileImage(data.photoURL || auth.currentUser?.photoURL || null);
         }
         setLoading(false);
       });
@@ -175,10 +178,13 @@ export default function DashboardScreen() {
             <Text className="text-gray-500 text-sm">Welcome back,</Text>
             <Text className="text-lg font-bold text-gray-900">{userProfile?.name || "Owner"}</Text>
           </View>
-          <Image
-            source={{ uri: "https://randomuser.me/api/portraits/men/32.jpg" }}
-            className="w-12 h-12 rounded-full"
-          />
+          <TouchableOpacity onPress={() => router.push("/(ownerTabs)/EditProfile")}>
+            <Image
+              source={profileImage ? { uri: profileImage } : iconMap["user.png"]}
+              className="w-12 h-12 rounded-full border-2 border-gray-200"
+              style={{ resizeMode: profileImage ? 'cover' : 'contain' }}
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Shop Link Card */}
@@ -360,7 +366,7 @@ export default function DashboardScreen() {
           ) : (
             <Text className="text-gray-500">No recent transactions.</Text>
           )}
-          <Link href="/(customerTabs)/history" className="text-blue-600 text-sm mt-3 self-end">
+          <Link href="/(ownerTabs)/history" className="text-blue-600 text-sm mt-3 self-end">
             See All
           </Link>
         </View>

@@ -30,6 +30,7 @@ export default function CustomerHomeScreen() {
   const [shops, setShops] = useState<any[]>([]);
   const [due, setDue] = useState(0);
   const [spent, setSpent] = useState(0);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export default function CustomerHomeScreen() {
     if (!user) return;
 
     let unsubscribe: any;
+    let customerUnsubscribe: any;
 
     const fetchData = async () => {
       const customerDoc = await getDoc(doc(db, "customers", user.uid));
@@ -44,6 +46,16 @@ export default function CustomerHomeScreen() {
 
       const customerData = customerDoc.data();
       setCustomer(customerData);
+      setProfileImage(customerData.photoURL || null);
+
+      // Listen for customer profile changes
+      customerUnsubscribe = onSnapshot(doc(db, "customers", user.uid), (doc) => {
+        if (doc.exists()) {
+          const data = doc.data();
+          setCustomer(data);
+          setProfileImage(data.photoURL || null);
+        }
+      });
 
       const joinedShops: string[] = customerData.shopsJoined || [];
       const shopsData = [];
@@ -89,6 +101,7 @@ export default function CustomerHomeScreen() {
 
     return () => {
       if (unsubscribe) unsubscribe();
+      if (customerUnsubscribe) customerUnsubscribe();
     };
   }, []);
 
@@ -147,10 +160,16 @@ export default function CustomerHomeScreen() {
               Track your purchases and dues from all your favourite shops.
             </Text>
           </View>
-          <Image
-            source={{ uri: "https://randomuser.me/api/portraits/men/32.jpg" }}
-            className="w-12 h-12 rounded-full ml-4"
-          />
+          <TouchableOpacity 
+            onPress={() => router.push("/(customerTabs)/editProfile")}
+            className="ml-4"
+          >
+            <Image
+              source={profileImage ? { uri: profileImage } : iconMap["user.png"]}
+              className="w-20 h-20 rounded-full border-4 border-white"
+              style={{ resizeMode: profileImage ? 'cover' : 'contain' }}
+            />
+          </TouchableOpacity>
         </LinearGradient>
 
         {/* Summary Cards */}

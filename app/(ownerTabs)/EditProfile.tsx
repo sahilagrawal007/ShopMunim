@@ -1,8 +1,9 @@
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from 'expo-router';
 import { updateProfile } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import { auth, db } from '../../firebaseConfig';
 
@@ -16,6 +17,7 @@ export default function EditProfile() {
     shopName: '',
     address: ''
   });
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   useEffect(() => {
     loadUserData();
@@ -37,9 +39,22 @@ export default function EditProfile() {
           shopName: data.shopName || '',
           address: data.address || ''
         });
+        setProfileImage(data.photoURL || user.photoURL || null);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
+    }
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setProfileImage(result.assets[0].uri);
     }
   };
 
@@ -56,7 +71,8 @@ export default function EditProfile() {
 
       // Update Firebase Auth profile
       await updateProfile(user, {
-        displayName: formData.name
+        displayName: formData.name,
+        photoURL: profileImage
       });
 
       // Update Firestore data
@@ -65,6 +81,7 @@ export default function EditProfile() {
         phone: formData.phone,
         shopName: formData.shopName,
         address: formData.address,
+        photoURL: profileImage,
         updatedAt: new Date()
       });
 
@@ -87,6 +104,20 @@ export default function EditProfile() {
       <Text style={styles.title}>Edit Profile</Text>
       
       <View style={styles.form}>
+        {/* Profile Image Picker */}
+        <View style={styles.imagePickerContainer}>
+          <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+            {profileImage ? (
+              <Image source={{ uri: profileImage }} style={styles.profileImage} />
+            ) : (
+              <View style={styles.placeholderImage}>
+                <Feather name="user" size={40} color="#ccc" />
+              </View>
+            )}
+            <Text style={styles.imageText}>Change Photo</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Full Name</Text>
           <TextInput
@@ -215,5 +246,31 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  imagePickerContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  imagePicker: {
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 8,
+  },
+  placeholderImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  imageText: {
+    color: '#007AFF',
+    fontSize: 16,
   },
 }); 

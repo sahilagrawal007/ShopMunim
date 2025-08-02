@@ -1,11 +1,11 @@
 import { useRouter } from "expo-router";
 import { deleteUser, signOut } from "firebase/auth";
-import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import React, { useState } from "react";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "react-native-vector-icons/Feather";
 import { auth, db } from "../../firebaseConfig";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
 
 export default function OwnerSettings() {
   const router = useRouter();
