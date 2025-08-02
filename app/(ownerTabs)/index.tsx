@@ -154,7 +154,6 @@ export default function DashboardScreen() {
   const dueCustomers = Array.isArray(customers)
     ? customers.filter(c => Number(c?.due || 0) > 0)
     : [];
-  console.log('dueCustomers count:', dueCustomers.length, 'list:', dueCustomers);
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-[#F7F7F7]">
@@ -374,7 +373,7 @@ export default function DashboardScreen() {
               {products.map((product, index) => (
                 <View
                   key={index}
-                  className="w-32 bg-sky-300 p-3 rounded-lg mr-3 items-center border border-gray-400"
+                  className="w-32 p-3 rounded-lg mr-3 items-center border border-blue-300"
                 >
                   <Text className="text-gray-800 font-medium text-center">{product.name}</Text>
                   <Text className="text-gray-600 text-sm">

@@ -83,7 +83,7 @@ export default function ChangePassword() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1">
       <ScrollView style={styles.container}>
         <TouchableOpacity onPress={() => router.navigate("/settings")} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color="#333" />
@@ -176,7 +176,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginBottom: 20,
-    marginTop: 40,
   },
   title: {
     fontSize: 24,
