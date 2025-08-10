@@ -1,6 +1,6 @@
 // import * as FileSystem from 'expo-file-system';
 // import * as Sharing from 'expo-sharing';
-import { collection, doc, getDoc, getDocs, orderBy, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { auth, db } from "../../firebaseConfig";
@@ -16,24 +16,21 @@ export default function CustomerHistory() {
   const [filter, setFilter] = useState<"all" | "paid" | "due" | "advance">("all");
   const [shopFilter, setShopFilter] = useState<string>("");
   const [shops, setShops] = useState<{ [key: string]: string }>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadTransactions();
-  }, []);
-
-  const loadTransactions = async () => {
     const user = auth.currentUser;
     if (!user) return;
 
-    try {
-      const transactionsQuery = query(
-        collection(db, "transactions"),
-        where("customerId", "==", user.uid),
-        orderBy("createdAt", "desc")
-      );
+    // Set up real-time listener for transactions
+    const transactionsQuery = query(
+      collection(db, "transactions"),
+      where("customerId", "==", user.uid),
+      orderBy("createdAt", "desc")
+    );
 
-      const transactionsSnapshot = await getDocs(transactionsQuery);
-      const transactionsData = transactionsSnapshot.docs.map(
+    const unsubscribeTransactions = onSnapshot(transactionsQuery, async (snapshot) => {
+      const transactionsData = snapshot.docs.map(
         (doc) => ({ id: doc.id, ...doc.data() } as TransactionWithShop)
       );
 
@@ -62,10 +59,17 @@ export default function CustomerHistory() {
       }));
 
       setTransactions(transactionsWithShops);
-    } catch (error) {
-      console.error("Error loading transactions:", error);
-    }
-  };
+      setLoading(false);
+    }, (error) => {
+      console.error("Error listening to transactions:", error);
+      setLoading(false);
+    });
+
+    // Cleanup function to unsubscribe from listeners
+    return () => {
+      unsubscribeTransactions();
+    };
+  }, []);
 
   // Helper function to format date from Firestore timestamp
   const formatDate = (createdAt: any) => {
@@ -168,7 +172,9 @@ export default function CustomerHistory() {
       </View>
 
       <View style={styles.section}>
-        {filteredTransactions.length === 0 ? (
+        {loading ? (
+          <Text style={styles.emptyText}>Loading transactions...</Text>
+        ) : filteredTransactions.length === 0 ? (
           <Text style={styles.emptyText}>
             {shopFilter ? `No transactions found for "${shopFilter}"` : "No transactions found"}
           </Text>

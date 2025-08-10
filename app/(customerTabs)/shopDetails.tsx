@@ -5,10 +5,9 @@ import { getAuth } from "firebase/auth";
 import {
   collection,
   doc,
-  getDoc,
-  getDocs,
+  onSnapshot,
   query,
-  where,
+  where
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -44,7 +43,54 @@ const JoinedShopDetails: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    fetchData();
+    const user = getAuth().currentUser;
+    if (!user) return;
+
+    // Set up real-time listener for shop details
+    const shopUnsubscribe = onSnapshot(doc(db, "shops", shopId), (shopDoc) => {
+      if (shopDoc.exists()) {
+        setShopDetails({ id: shopDoc.id, ...shopDoc.data() });
+      }
+    }, (error) => {
+      console.error("Error listening to shop details:", error);
+    });
+
+    // Set up real-time listener for products
+    const productsUnsubscribe = onSnapshot(doc(db, "products", shopId), (productDoc) => {
+      if (productDoc.exists()) {
+        const productList = productDoc.data().products || [];
+        setProducts(productList);
+        setFilteredProducts(productList);
+      }
+    }, (error) => {
+      console.error("Error listening to products:", error);
+    });
+
+    // Set up real-time listener for transactions
+    const txnQuery = query(
+      collection(db, "transactions"),
+      where("shopId", "==", shopId),
+      where("customerId", "==", user.uid)
+    );
+    
+    const txnUnsubscribe = onSnapshot(txnQuery, (txnSnap) => {
+      const txnList = txnSnap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTransactions(txnList);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error listening to transactions:", error);
+      setLoading(false);
+    });
+
+    // Cleanup function to unsubscribe from all listeners
+    return () => {
+      shopUnsubscribe();
+      productsUnsubscribe();
+      txnUnsubscribe();
+    };
   }, [shopId]);
 
   useEffect(() => {
@@ -54,44 +100,6 @@ const JoinedShopDetails: React.FC = () => {
     );
     setFilteredProducts(filtered);
   }, [products, searchQuery]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // Fetch shop details
-      const shopDoc = await getDoc(doc(db, "shops", shopId));
-      if (shopDoc.exists()) {
-        setShopDetails({ id: shopDoc.id, ...shopDoc.data() });
-      }
-
-      // Fetch products
-      const productDoc = await getDoc(doc(db, "products", shopId));
-      if (productDoc.exists()) {
-        const productList = productDoc.data().products || [];
-        setProducts(productList);
-        setFilteredProducts(productList);
-      }
-      const user = getAuth().currentUser;
-      if (!user) return;
-      // Fetch transactions for the selected shop
-      const txnQuery = query(
-        collection(db, "transactions"),
-        where("shopId", "==", shopId),
-        where("customerId", "==", user.uid)
-      );
-      
-      const txnSnap = await getDocs(txnQuery);
-      const txnList = txnSnap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setTransactions(txnList);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const calculateDue = () => {
     return transactions.reduce((total, txn) => {
