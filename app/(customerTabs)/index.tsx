@@ -194,54 +194,6 @@ export default function CustomerHomeScreen() {
           </View>
         </View>
 
-        {/* Pie Chart */}
-        <View className="items-center bg-white p-4 rounded-2xl shadow mb-6">
-          <View className="justify-center mt-4 space-x-4">
-            <PieChart
-              data={[
-                {
-                  name: "Total Spent",
-                  population: spent,
-                  color: "#e254548e", // red-600
-                  legendFontColor: "#e254548e",
-                  legendFontSize: 14,
-                },
-                {
-                  name: "Due",
-                  population: due,
-                  color: "#eac328a3", // yellow-400
-                  legendFontColor: "#eac328a3",
-                  legendFontSize: 14,
-                },
-              ]}
-              width={screenWidth}
-              height={220}
-              chartConfig={{
-                backgroundGradientFrom: "#fff",
-                backgroundGradientTo: "#fff",
-                color: () => "#000",
-              }}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="25"
-              center={[70, 0]}
-              hasLegend={false}
-              absolute
-            />
-          </View>
-          {/* Legend */}
-          <View className="flex-row justify-center mt-4 space-x-4">
-            <View className="flex-row items-center">
-              <View className="w-3 h-3 rounded-full mr-2 bg-red-600" />
-              <Text className="text-sm text-red-600">Total Spent</Text>
-            </View>
-            <View className="flex-row items-center">
-              <View className="w-3 h-3 rounded-full mr-2 bg-yellow-400" />
-              <Text className="text-sm text-yellow-600">Due</Text>
-            </View>
-          </View>
-        </View>
-
         {/* Shops List */}
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
           <Text className="text-lg font-bold text-gray-800 mb-4">Your Shops</Text>
