@@ -5,7 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../../firebaseConfig";
 
@@ -170,7 +170,15 @@ export default function CustomersScreen() {
               <Text className="text-base text-gray-900 font-medium">{p.name}</Text>
             </View>
             <Text className="text-base text-gray-500 mr-4">{p.price}</Text>
-            <TouchableOpacity onPress={() => deleteProduct(p.id)} className="mx-1">
+            <TouchableOpacity
+              onPress={() =>
+                Alert.alert("Delete Product", `Are you sure you want to delete "${p.name}"?`, [
+                  { text: "Cancel", style: "cancel" },
+                  { text: "Delete", style: "destructive", onPress: () => deleteProduct(p.id) },
+                ])
+              }
+              className="mx-1"
+            >
               <Image source={iconMap["delete.png"]} className="w-5 h-5" />
             </TouchableOpacity>
           </View>
