@@ -1,15 +1,21 @@
 // import * as FileSystem from 'expo-file-system';
 // import * as Sharing from 'expo-sharing';
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { auth, db } from "../../firebaseConfig";
 import { Transaction } from "../../types";
 // import * as MailComposer from 'expo-mail-composer';
 
+interface TransactionWithShop extends Transaction {
+  shopName?: string;
+}
+
 export default function CustomerHistory() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<TransactionWithShop[]>([]);
   const [filter, setFilter] = useState<"all" | "paid" | "due" | "advance">("all");
+  const [shopFilter, setShopFilter] = useState<string>("");
+  const [shops, setShops] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     loadTransactions();
@@ -28,18 +34,80 @@ export default function CustomerHistory() {
 
       const transactionsSnapshot = await getDocs(transactionsQuery);
       const transactionsData = transactionsSnapshot.docs.map(
-        (doc) => ({ id: doc.id, ...doc.data() } as Transaction)
+        (doc) => ({ id: doc.id, ...doc.data() } as TransactionWithShop)
       );
 
-      setTransactions(transactionsData);
+      // Fetch shop names for all transactions
+      const shopIds = [...new Set(transactionsData.map(t => t.shopId))];
+      const shopsData: { [key: string]: string } = {};
+      
+      for (const shopId of shopIds) {
+        try {
+          const shopDoc = await getDoc(doc(db, "shops", shopId));
+          if (shopDoc.exists()) {
+            shopsData[shopId] = shopDoc.data().name || "Unknown Shop";
+          }
+        } catch (error) {
+          console.error(`Error fetching shop ${shopId}:`, error);
+          shopsData[shopId] = "Unknown Shop";
+        }
+      }
+
+      setShops(shopsData);
+      
+      // Add shop names to transactions
+      const transactionsWithShops = transactionsData.map(transaction => ({
+        ...transaction,
+        shopName: shopsData[transaction.shopId] || "Unknown Shop"
+      }));
+
+      setTransactions(transactionsWithShops);
     } catch (error) {
       console.error("Error loading transactions:", error);
     }
   };
 
-  const filteredTransactions = transactions.filter(
-    (transaction) => filter === "all" || transaction.type === filter
-  );
+  // Helper function to format date from Firestore timestamp
+  const formatDate = (createdAt: any) => {
+    if (!createdAt) return "Invalid Date";
+    
+    try {
+      // Handle Firestore Timestamp
+      if (createdAt && typeof createdAt.toDate === 'function') {
+        return createdAt.toDate().toLocaleString();
+      }
+      
+      // Handle Firestore-like object with seconds
+      if (createdAt && typeof createdAt.seconds === 'number') {
+        return new Date(createdAt.seconds * 1000).toLocaleString();
+      }
+      
+      // Handle ISO string
+      if (typeof createdAt === 'string') {
+        return new Date(createdAt).toLocaleString();
+      }
+      
+      // Handle number (timestamp)
+      if (typeof createdAt === 'number') {
+        return new Date(createdAt).toLocaleString();
+      }
+      
+      return "Invalid Date";
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid Date";
+    }
+  };
+
+  const filteredTransactions = transactions.filter((transaction) => {
+    const typeMatch = filter === "all" || transaction.type === filter;
+    const shopMatch = !shopFilter || 
+      transaction.shopName?.toLowerCase().includes(shopFilter.toLowerCase());
+    return typeMatch && shopMatch;
+  });
+
+  // Get unique shop names for filter suggestions
+  const uniqueShopNames = [...new Set(transactions.map(t => t.shopName).filter(Boolean))];
 
   // const handleDownloadReceipt = async (transaction: Transaction) => {
   //   const receiptText = `Receipt\n\nTransaction ID: ${transaction.id}\nDate: ${new Date(transaction.createdAt).toLocaleString()}\nType: ${transaction.type}\nAmount: ₹${transaction.amount.toFixed(2)}\nDescription: ${transaction.description || 'N/A'}`;
@@ -60,6 +128,24 @@ export default function CustomerHistory() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Transaction History</Text>
+      </View>
+
+      {/* Shop Filter */}
+      <View style={styles.shopFilterContainer}>
+        <TextInput
+          style={styles.shopFilterInput}
+          placeholder="Search by shop name..."
+          value={shopFilter}
+          onChangeText={setShopFilter}
+        />
+        {shopFilter.length > 0 && (
+          <TouchableOpacity
+            style={styles.clearFilterButton}
+            onPress={() => setShopFilter("")}
+          >
+            <Text style={styles.clearFilterText}>Clear</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.filterContainer}>
@@ -83,16 +169,21 @@ export default function CustomerHistory() {
 
       <View style={styles.section}>
         {filteredTransactions.length === 0 ? (
-          <Text style={styles.emptyText}>No transactions found</Text>
+          <Text style={styles.emptyText}>
+            {shopFilter ? `No transactions found for "${shopFilter}"` : "No transactions found"}
+          </Text>
         ) : (
           filteredTransactions.map((transaction) => (
             <View key={transaction.id} style={styles.transactionCard}>
               <View style={styles.transactionInfo}>
+                <Text style={styles.shopName}>
+                  {transaction.shopName || "Unknown Shop"}
+                </Text>
                 <Text style={styles.transactionDescription}>
                   {transaction.description || "Transaction"}
                 </Text>
                 <Text style={styles.transactionDate}>
-                  {new Date(transaction.createdAt).toLocaleDateString()}
+                  {formatDate(transaction.createdAt)}
                 </Text>
                 <Text style={styles.transactionType}>Type: {transaction.type.toUpperCase()}</Text>
               </View>
@@ -347,5 +438,36 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 14,
     fontWeight: "600",
+  },
+  shopFilterContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e0e0e0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 16,
+  },
+  shopFilterInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 0,
+  },
+  clearFilterButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "#FF3B30",
+    borderRadius: 6,
+  },
+  clearFilterText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  shopName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 4,
   },
 });

@@ -223,31 +223,72 @@ const JoinedShopDetails: React.FC = () => {
             <Text className="text-lg font-bold text-gray-800 mb-3">Transaction History</Text>
           </View>
         }
-        data={transactions.sort((a, b) => (b.createdAt as any) - (a.createdAt as any))}
+        data={transactions.sort((a, b) => {
+          const getTime = (createdAt: any) => {
+            if (!createdAt) return 0;
+            if (createdAt && typeof createdAt.toDate === 'function') {
+              return createdAt.toDate().getTime();
+            }
+            if (createdAt && typeof createdAt.seconds === 'number') {
+              return createdAt.seconds * 1000;
+            }
+            if (typeof createdAt === 'string') {
+              return new Date(createdAt).getTime();
+            }
+            if (typeof createdAt === 'number') {
+              return createdAt;
+            }
+            return 0;
+          };
+          return getTime(b.createdAt) - getTime(a.createdAt);
+        })}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View className="bg-white px-4 py-3 border-b border-gray-100">
-            <View className="flex-row justify-between items-center">
-              <View>
-                <Text className="font-medium text-gray-800">
-                  {item.description || "Transaction"}
-                </Text>
-                <Text className="text-xs text-gray-400">
-                  {new Date(item.createdAt).toLocaleDateString()}
+        renderItem={({ item }) => {
+          const formatDate = (createdAt: any) => {
+            if (!createdAt) return "Invalid Date";
+            try {
+              if (createdAt && typeof createdAt.toDate === 'function') {
+                return createdAt.toDate().toLocaleString();
+              }
+              if (createdAt && typeof createdAt.seconds === 'number') {
+                return new Date(createdAt.seconds * 1000).toLocaleString();
+              }
+              if (typeof createdAt === 'string') {
+                return new Date(createdAt).toLocaleString();
+              }
+              if (typeof createdAt === 'number') {
+                return new Date(createdAt).toLocaleString();
+              }
+              return "Invalid Date";
+            } catch (error) {
+              return "Invalid Date";
+            }
+          };
+
+          return (
+            <View className="bg-white px-4 py-3 border-b border-gray-100">
+              <View className="flex-row justify-between items-center">
+                <View>
+                  <Text className="font-medium text-gray-800">
+                    {item.description || "Transaction"}
+                  </Text>
+                  <Text className="text-xs text-gray-400">
+                    {formatDate(item.createdAt)}
+                  </Text>
+                </View>
+                <Text
+                  className={`font-semibold ${
+                    item.type === "paid" || item.type === "advance"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {item.type === "paid" || item.type === "advance" ? "+" : "-"}₹{item.amount}
                 </Text>
               </View>
-              <Text
-                className={`font-semibold ${
-                  item.type === "paid" || item.type === "advance"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {item.type === "paid" || item.type === "advance" ? "+" : "-"}₹{item.amount}
-              </Text>
             </View>
-          </View>
-        )}
+          );
+        }}
         ListEmptyComponent={
           <Text className="text-center text-gray-400 mt-4">No transactions found.</Text>
         }
