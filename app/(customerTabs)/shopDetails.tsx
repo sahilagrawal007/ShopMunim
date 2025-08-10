@@ -185,8 +185,8 @@ const JoinedShopDetails: React.FC = () => {
 
 const styles = StyleSheet.create({
   backButton: {
-    marginBottom: 20,
-    marginTop: 1,
+    width: 40,
+    height: 40,
   },
 }); 
 

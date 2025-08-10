@@ -58,7 +58,6 @@ export default function CustomersScreen() {
         <Text className="text-2xl font-bold text-gray-900 mb-6">All Customers</Text>
         <TextInput
           className="mb-3 px-4 py-4 bg-white rounded-xl border border-gray-200 text-gray-900 text-base"
-          multiline={true}
           style={{ paddingTop: 10, paddingBottom: 15 }}
           placeholder="Search by customer name..."
           placeholderTextColor="gray"
@@ -111,7 +110,7 @@ export default function CustomersScreen() {
 
 const styles = StyleSheet.create({
   backButton: {
-    marginBottom: 20,
-    marginTop: 1,
+    width: 40,
+    height: 40,
   },
 }); 
