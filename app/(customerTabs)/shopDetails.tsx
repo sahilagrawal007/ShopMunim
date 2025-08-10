@@ -49,7 +49,9 @@ const JoinedShopDetails: React.FC = () => {
     // Set up real-time listener for shop details
     const shopUnsubscribe = onSnapshot(doc(db, "shops", shopId), (shopDoc) => {
       if (shopDoc.exists()) {
-        setShopDetails({ id: shopDoc.id, ...shopDoc.data() });
+        const shopData = { id: shopDoc.id, ...shopDoc.data() } as any;
+        console.log("Shop details updated:", shopData.name);
+        setShopDetails(shopData);
       }
     }, (error) => {
       console.error("Error listening to shop details:", error);
@@ -78,6 +80,7 @@ const JoinedShopDetails: React.FC = () => {
         id: doc.id,
         ...doc.data(),
       }));
+      console.log("Transactions loaded:", txnList.length, "transactions");
       setTransactions(txnList);
       setLoading(false);
     }, (error) => {
@@ -100,6 +103,11 @@ const JoinedShopDetails: React.FC = () => {
     );
     setFilteredProducts(filtered);
   }, [products, searchQuery]);
+
+  // Debug effect to track shop name changes
+  useEffect(() => {
+    console.log("Current shop name for View All button:", shopDetails?.name);
+  }, [shopDetails?.name]);
 
   const calculateDue = () => {
     return transactions.reduce((total, txn) => {
@@ -227,79 +235,135 @@ const JoinedShopDetails: React.FC = () => {
               )}
             </View>
 
-            {/* Transactions Title */}
-            <Text className="text-lg font-bold text-gray-800 mb-3">Transaction History</Text>
+            {/* Transaction History Section */}
+            <View className="bg-white p-4 rounded-lg mb-4 shadow">
+              <View className="flex-row justify-between items-center mb-3">
+                <Text className="text-lg font-bold text-gray-800">Transaction History</Text>
+                {transactions.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      const currentShopName = shopDetails?.name || "";
+                      console.log("Navigating to history with shop filter:", currentShopName);
+                      router.push({
+                        pathname: "/(customerTabs)/history",
+                        params: { 
+                          shopFilter: currentShopName,
+                          timestamp: Date.now() // Add timestamp to force fresh navigation
+                        }
+                      });
+                    }}
+                    className="bg-blue-500 px-3 py-1 rounded-lg"
+                  >
+                    <Text className="text-white text-sm font-semibold">
+                      View All {transactions.length > 3 ? `(${transactions.length - 3} more)` : ''}
+                    </Text>
+                    <Text className="text-white text-xs opacity-75">
+                      {shopDetails?.name || "Shop"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              
+              {transactions.length > 0 ? (
+                <View>
+                  {transactions
+                    .sort((a, b) => {
+                      const getTime = (createdAt: any) => {
+                        if (!createdAt) return 0;
+                        if (createdAt && typeof createdAt.toDate === 'function') {
+                          return createdAt.toDate().getTime();
+                        }
+                        if (createdAt && typeof createdAt.seconds === 'number') {
+                          return createdAt.seconds * 1000;
+                        }
+                        if (typeof createdAt === 'string') {
+                          return new Date(createdAt).getTime();
+                        }
+                        if (typeof createdAt === 'number') {
+                          return createdAt;
+                        }
+                        return 0;
+                      };
+                      return getTime(b.createdAt) - getTime(a.createdAt);
+                    })
+                    .slice(0, 3)
+                    .map((item) => {
+                      const formatDate = (createdAt: any) => {
+                        if (!createdAt) return "Invalid Date";
+                        try {
+                          if (createdAt && typeof createdAt.toDate === 'function') {
+                            return createdAt.toDate().toLocaleString();
+                          }
+                          if (createdAt && typeof createdAt.seconds === 'number') {
+                            return new Date(createdAt.seconds * 1000).toLocaleString();
+                          }
+                          if (typeof createdAt === 'string') {
+                            return new Date(createdAt).toLocaleString();
+                          }
+                          if (typeof createdAt === 'number') {
+                            return new Date(createdAt).toLocaleString();
+                          }
+                          return "Invalid Date";
+                        } catch (error) {
+                          return "Invalid Date";
+                        }
+                      };
+
+                      return (
+                        <View key={item.id} className="flex-row justify-between items-center py-3 border-b border-gray-100">
+                          <View className="flex-1">
+                            <Text className="font-medium text-gray-800 mb-1">
+                              {item.description || "Transaction"}
+                            </Text>
+                            <Text className="text-xs text-gray-500">
+                              {formatDate(item.createdAt)}
+                            </Text>
+                            <Text className="text-xs text-gray-400 mt-1">
+                              Type: {item.type.toUpperCase()}
+                            </Text>
+                          </View>
+                          <Text
+                            className={`font-semibold text-lg ${
+                              item.type === "paid" || item.type === "advance"
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {item.type === "paid" || item.type === "advance" ? "+" : "-"}₹{item.amount}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  
+                  {transactions.length > 3 && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        const currentShopName = shopDetails?.name || "";
+                        console.log("Navigating to history with shop filter (bottom button):", currentShopName);
+                        router.push({
+                          pathname: "/(customerTabs)/history",
+                          params: { 
+                            shopFilter: currentShopName,
+                            timestamp: Date.now() // Add timestamp to force fresh navigation
+                          }
+                        });
+                      }}
+                      className="mt-3 py-2 bg-blue-500 rounded-lg"
+                    >
+                      <Text className="text-white text-center font-semibold">
+                        View All Transactions ({transactions.length - 3} more)
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ) : (
+                <Text className="text-gray-400 text-center py-4">No transactions found.</Text>
+              )}
+            </View>
           </View>
         }
-        data={transactions.sort((a, b) => {
-          const getTime = (createdAt: any) => {
-            if (!createdAt) return 0;
-            if (createdAt && typeof createdAt.toDate === 'function') {
-              return createdAt.toDate().getTime();
-            }
-            if (createdAt && typeof createdAt.seconds === 'number') {
-              return createdAt.seconds * 1000;
-            }
-            if (typeof createdAt === 'string') {
-              return new Date(createdAt).getTime();
-            }
-            if (typeof createdAt === 'number') {
-              return createdAt;
-            }
-            return 0;
-          };
-          return getTime(b.createdAt) - getTime(a.createdAt);
-        })}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
-          const formatDate = (createdAt: any) => {
-            if (!createdAt) return "Invalid Date";
-            try {
-              if (createdAt && typeof createdAt.toDate === 'function') {
-                return createdAt.toDate().toLocaleString();
-              }
-              if (createdAt && typeof createdAt.seconds === 'number') {
-                return new Date(createdAt.seconds * 1000).toLocaleString();
-              }
-              if (typeof createdAt === 'string') {
-                return new Date(createdAt).toLocaleString();
-              }
-              if (typeof createdAt === 'number') {
-                return new Date(createdAt).toLocaleString();
-              }
-              return "Invalid Date";
-            } catch (error) {
-              return "Invalid Date";
-            }
-          };
-
-          return (
-            <View className="bg-white px-4 py-3 border-b border-gray-100">
-              <View className="flex-row justify-between items-center">
-                <View>
-                  <Text className="font-medium text-gray-800">
-                    {item.description || "Transaction"}
-                  </Text>
-                  <Text className="text-xs text-gray-400">
-                    {formatDate(item.createdAt)}
-                  </Text>
-                </View>
-                <Text
-                  className={`font-semibold ${
-                    item.type === "paid" || item.type === "advance"
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {item.type === "paid" || item.type === "advance" ? "+" : "-"}₹{item.amount}
-                </Text>
-              </View>
-            </View>
-          );
-        }}
-        ListEmptyComponent={
-          <Text className="text-center text-gray-400 mt-4">No transactions found.</Text>
-        }
+        data={[]}
+        renderItem={() => null}
       />
     </SafeAreaView>
   );
