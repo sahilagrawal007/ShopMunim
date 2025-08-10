@@ -1,28 +1,30 @@
+import { iconMap } from "@/constants/iconMap";
 import { useRoute } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { getAuth } from "firebase/auth";
 import {
+  collection,
   doc,
   getDoc,
   getDocs,
-  collection,
   query,
   where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
   ActivityIndicator,
-  Image,
   FlatList,
-  TouchableOpacity,
+  Image,
+  ScrollView,
   StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { db } from "../../firebaseConfig";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { iconMap } from "@/constants/iconMap";
-import { getAuth } from "firebase/auth";
 import Feather from "react-native-vector-icons/Feather";
-import { useRouter } from "expo-router";
+import { db } from "../../firebaseConfig";
 
 interface RouteParams {
   shopId: string;
@@ -34,13 +36,24 @@ const JoinedShopDetails: React.FC = () => {
   const { shopId } = route.params as RouteParams;
 
   const [products, setProducts] = useState<any[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [shopDetails, setShopDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showAllProducts, setShowAllProducts] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchData();
   }, [shopId]);
+
+  useEffect(() => {
+    // Filter products based on search query
+    const filtered = products.filter(product =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredProducts(filtered);
+  }, [products, searchQuery]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -56,6 +69,7 @@ const JoinedShopDetails: React.FC = () => {
       if (productDoc.exists()) {
         const productList = productDoc.data().products || [];
         setProducts(productList);
+        setFilteredProducts(productList);
       }
       const user = getAuth().currentUser;
       if (!user) return;
@@ -85,6 +99,13 @@ const JoinedShopDetails: React.FC = () => {
       if (txn.type === "due") return total - txn.amount;
       return total;
     }, 0);
+  };
+
+  const getDisplayProducts = () => {
+    if (showAllProducts) {
+      return filteredProducts;
+    }
+    return filteredProducts.slice(0, 3);
   };
 
   if (loading) {
@@ -131,18 +152,70 @@ const JoinedShopDetails: React.FC = () => {
             {/* Product List */}
             <View className="bg-white p-4 rounded-lg mb-4 shadow">
               <Text className="text-lg font-bold text-gray-800 mb-3">Products</Text>
-              {products.length > 0 ? (
-                products.map((product) => (
-                  <View
-                    key={product.id}
-                    className="flex-row justify-between items-center py-2 border-b border-gray-100"
-                  >
-                    <Text className="text-gray-700">{product.name}</Text>
-                    <Text className="text-gray-600 font-semibold">₹{product.price}</Text>
-                  </View>
-                ))
+              
+              {/* Search Bar */}
+              <View className="mb-3">
+                <View className="flex-row items-center bg-gray-100 rounded-lg px-3 py-2">
+                  <Feather name="search" size={20} color="#666" />
+                  <TextInput
+                    className="flex-1 ml-2 text-gray-700"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholderTextColor="#999"
+                  />
+                  {searchQuery.length > 0 && (
+                    <TouchableOpacity onPress={() => setSearchQuery("")}>
+                      <Feather name="x" size={20} color="#666" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+
+              {filteredProducts.length > 0 ? (
+                <ScrollView 
+                  className="max-h-64"
+                  showsVerticalScrollIndicator={false}
+                  nestedScrollEnabled={true}
+                >
+                  {getDisplayProducts().map((product) => (
+                    <View
+                      key={product.id}
+                      className="flex-row justify-between items-center py-2 border-b border-gray-100"
+                    >
+                      <Text className="text-gray-700">{product.name}</Text>
+                      <Text className="text-gray-600 font-semibold">₹{product.price}</Text>
+                    </View>
+                  ))}
+                  
+                  {/* View More Button */}
+                  {!showAllProducts && filteredProducts.length > 3 && (
+                    <TouchableOpacity
+                      onPress={() => setShowAllProducts(true)}
+                      className="mt-3 py-2 bg-blue-500 rounded-lg"
+                    >
+                      <Text className="text-white text-center font-semibold">
+                        View More ({filteredProducts.length - 3} more)
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  
+                  {/* Show Less Button */}
+                  {showAllProducts && filteredProducts.length > 3 && (
+                    <TouchableOpacity
+                      onPress={() => setShowAllProducts(false)}
+                      className="mt-3 py-2 bg-gray-500 rounded-lg"
+                    >
+                      <Text className="text-white text-center font-semibold">
+                        Show Less
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </ScrollView>
               ) : (
-                <Text className="text-gray-400 text-sm">No products found.</Text>
+                <Text className="text-gray-400 text-sm">
+                  {searchQuery ? "No products found matching your search." : "No products found."}
+                </Text>
               )}
             </View>
 
