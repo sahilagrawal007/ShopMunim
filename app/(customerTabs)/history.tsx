@@ -1,6 +1,5 @@
 // import * as FileSystem from 'expo-file-system';
 // import * as Sharing from 'expo-sharing';
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { collection, doc, getDoc, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -13,20 +12,11 @@ interface TransactionWithShop extends Transaction {
 }
 
 export default function CustomerHistory() {
-  const params = useLocalSearchParams();
-  const router = useRouter();
   const [transactions, setTransactions] = useState<TransactionWithShop[]>([]);
   const [filter, setFilter] = useState<"all" | "paid" | "due" | "advance">("all");
-  const [shopFilter, setShopFilter] = useState<string>(params.shopFilter as string || "");
+  const [shopFilter, setShopFilter] = useState<string>("");
   const [shops, setShops] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(true);
-
-  // Update shop filter when params change
-  useEffect(() => {
-    const newShopFilter = params.shopFilter as string || "";
-    console.log("History page received new shop filter:", newShopFilter);
-    setShopFilter(newShopFilter);
-  }, [params.shopFilter, params.timestamp]);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -141,37 +131,26 @@ export default function CustomerHistory() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Text style={styles.backButtonText}>← Back</Text>
-        </TouchableOpacity>
         <Text style={styles.title}>Transaction History</Text>
-        {shopFilter && (
-          <Text style={styles.subtitle}>Filtered by: {shopFilter}</Text>
-        )}
       </View>
 
-      {/* Shop Filter - Only show if not pre-filtered */}
-      {!params.shopFilter && (
-        <View style={styles.shopFilterContainer}>
-          <TextInput
-            style={styles.shopFilterInput}
-            placeholder="Search by shop name..."
-            value={shopFilter}
-            onChangeText={setShopFilter}
-          />
-          {shopFilter.length > 0 && (
-            <TouchableOpacity
-              style={styles.clearFilterButton}
-              onPress={() => setShopFilter("")}
-            >
-              <Text style={styles.clearFilterText}>Clear</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
+      {/* Shop Filter */}
+      <View style={styles.shopFilterContainer}>
+        <TextInput
+          style={styles.shopFilterInput}
+          placeholder="Search by shop name..."
+          value={shopFilter}
+          onChangeText={setShopFilter}
+        />
+        {shopFilter.length > 0 && (
+          <TouchableOpacity
+            style={styles.clearFilterButton}
+            onPress={() => setShopFilter("")}
+          >
+            <Text style={styles.clearFilterText}>Clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       <View style={styles.filterContainer}>
         {["all", "paid", "due", "advance"].map((filterType) => (
@@ -203,11 +182,9 @@ export default function CustomerHistory() {
           filteredTransactions.map((transaction) => (
             <View key={transaction.id} style={styles.transactionCard}>
               <View style={styles.transactionInfo}>
-                {!shopFilter && (
-                  <Text style={styles.shopName}>
-                    {transaction.shopName || "Unknown Shop"}
-                  </Text>
-                )}
+                <Text style={styles.shopName}>
+                  {transaction.shopName || "Unknown Shop"}
+                </Text>
                 <Text style={styles.transactionDescription}>
                   {transaction.description || "Transaction"}
                 </Text>
@@ -227,7 +204,7 @@ export default function CustomerHistory() {
                       : styles.paidAmount,
                   ]}
                 >
-                  {transaction.type === "paid" || transaction.type === "advance" ? "+" : "-"}₹{transaction.amount.toFixed(2)}
+                  ₹{transaction.amount.toFixed(2)}
                 </Text>
                 {/* <TouchableOpacity
                 <TouchableOpacity
@@ -498,14 +475,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
     marginBottom: 4,
-  },
-  backButton: {
-    alignSelf: "flex-start",
-    marginBottom: 8,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: "#007AFF",
-    fontWeight: "600",
   },
 });
