@@ -1,5 +1,6 @@
 // import * as FileSystem from 'expo-file-system';
 // import * as Sharing from 'expo-sharing';
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { collection, doc, getDoc, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -12,11 +13,20 @@ interface TransactionWithShop extends Transaction {
 }
 
 export default function CustomerHistory() {
+  const params = useLocalSearchParams();
+  const router = useRouter();
   const [transactions, setTransactions] = useState<TransactionWithShop[]>([]);
   const [filter, setFilter] = useState<"all" | "paid" | "due" | "advance">("all");
-  const [shopFilter, setShopFilter] = useState<string>("");
+  const [shopFilter, setShopFilter] = useState<string>(params.shopFilter as string || "");
   const [shops, setShops] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(true);
+
+// Update shop filter when params change
+useEffect(() => {
+  const newShopFilter = params.shopFilter as string || "";
+  console.log("History page received new shop filter:", newShopFilter);
+  setShopFilter(newShopFilter);
+}, [params.shopFilter, params.timestamp]);
 
   useEffect(() => {
     const user = auth.currentUser;
