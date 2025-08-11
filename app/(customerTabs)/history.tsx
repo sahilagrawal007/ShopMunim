@@ -21,12 +21,12 @@ export default function CustomerHistory() {
   const [shops, setShops] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(true);
 
-// Update shop filter when params change
-useEffect(() => {
-  const newShopFilter = params.shopFilter as string || "";
-  console.log("History page received new shop filter:", newShopFilter);
-  setShopFilter(newShopFilter);
-}, [params.shopFilter, params.timestamp]);
+  // Update shop filter when params change
+  useEffect(() => {
+    const newShopFilter = params.shopFilter as string || "";
+    console.log("History page received new shop filter:", newShopFilter);
+    setShopFilter(newShopFilter);
+  }, [params.shopFilter, params.timestamp]);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -141,26 +141,37 @@ useEffect(() => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>Transaction History</Text>
-      </View>
-
-      {/* Shop Filter */}
-      <View style={styles.shopFilterContainer}>
-        <TextInput
-          style={styles.shopFilterInput}
-          placeholder="Search by shop name..."
-          value={shopFilter}
-          onChangeText={setShopFilter}
-        />
-        {shopFilter.length > 0 && (
-          <TouchableOpacity
-            style={styles.clearFilterButton}
-            onPress={() => setShopFilter("")}
-          >
-            <Text style={styles.clearFilterText}>Clear</Text>
-          </TouchableOpacity>
+        {shopFilter && (
+          <Text style={styles.subtitle}>Filtered by: {shopFilter}</Text>
         )}
       </View>
+
+      {/* Shop Filter - Only show if not pre-filtered */}
+      {!params.shopFilter && (
+        <View style={styles.shopFilterContainer}>
+          <TextInput
+            style={styles.shopFilterInput}
+            placeholder="Search by shop name..."
+            value={shopFilter}
+            onChangeText={setShopFilter}
+          />
+          {shopFilter.length > 0 && (
+            <TouchableOpacity
+              style={styles.clearFilterButton}
+              onPress={() => setShopFilter("")}
+            >
+              <Text style={styles.clearFilterText}>Clear</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       <View style={styles.filterContainer}>
         {["all", "paid", "due", "advance"].map((filterType) => (
@@ -192,9 +203,11 @@ useEffect(() => {
           filteredTransactions.map((transaction) => (
             <View key={transaction.id} style={styles.transactionCard}>
               <View style={styles.transactionInfo}>
-                <Text style={styles.shopName}>
-                  {transaction.shopName || "Unknown Shop"}
-                </Text>
+                {!shopFilter && (
+                  <Text style={styles.shopName}>
+                    {transaction.shopName || "Unknown Shop"}
+                  </Text>
+                )}
                 <Text style={styles.transactionDescription}>
                   {transaction.description || "Transaction"}
                 </Text>
@@ -214,7 +227,7 @@ useEffect(() => {
                       : styles.paidAmount,
                   ]}
                 >
-                  ₹{transaction.amount.toFixed(2)}
+                  {transaction.type === "paid" || transaction.type === "advance" ? "+" : "-"}₹{transaction.amount.toFixed(2)}
                 </Text>
                 {/* <TouchableOpacity
                 <TouchableOpacity
@@ -485,5 +498,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
     marginBottom: 4,
+  },
+  backButton: {
+    alignSelf: "flex-start",
+    marginBottom: 8,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: "#007AFF",
+    fontWeight: "600",
   },
 });
