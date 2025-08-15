@@ -301,7 +301,7 @@ export default function DashboardScreen() {
           console.error('❌ Error fetching all transactions:', error);
         });
         cleanupFns.push(unsubAllTransactions);
-
+        
       } catch (error) {
         console.error('❌ Error in data fetching:', error);
         setLoading(false);
