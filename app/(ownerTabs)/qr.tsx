@@ -68,7 +68,7 @@ export default function OwnerQRScreen() {
           qrRef.current = ref;
         }}
       />
-      <View className="flex-row space-x-4 mt-6">
+      <View className="mt-6">
         <TouchableOpacity
           className="bg-[#4b91f3] px-6 py-5 rounded-lg"
           onPress={shareQrImage}
@@ -76,8 +76,13 @@ export default function OwnerQRScreen() {
           <Text className="text-l text-white">Share QR Image </Text>
         </TouchableOpacity>
       </View>
-      <View className="mt-6">
-        <Button title="Back" onPress={() => router.back()} />
+      <View className="mt-3">
+        <TouchableOpacity
+          className="bg-[#4b91f3] px-6 py-5 rounded-lg"
+          onPress={() => router.back()}
+        >
+          <Text className="text-l text-white">Back</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

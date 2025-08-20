@@ -25,7 +25,9 @@ export default function DashboardScreen() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [allTransactions, setAllTransactions] = useState<any[]>([]);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [allTransactionsCount, setAllTransactionsCount] = useState<number>(0);
 
   // Function to calculate analytics from customer data (fallback)
   const calculateAnalyticsFromCustomers = (customerList: any[]) => {
@@ -67,7 +69,6 @@ export default function DashboardScreen() {
   // Function to calculate analytics from transactions (primary method)
   const calculateAnalyticsFromTransactions = (transactionList: any[]) => {
     const customerMap: Record<string, { paid: number; due: number; credit: number }> = {};
-    let totalCreditGiven = 0;
 
     console.log('🔍 Processing transactions for analytics:', transactionList.length, 'transactions');
 
@@ -85,11 +86,12 @@ export default function DashboardScreen() {
       } else if (tx.type === 'due') {
         customerMap[cid].due += amount;
         customerMap[cid].credit += amount;
-        totalCreditGiven += amount;
       }
     });
 
-    const totalCustomers = Object.keys(customerMap).length;
+    const totalCustomers = Array.isArray(customers) && customers.length > 0
+      ? customers.length
+      : Object.keys(customerMap).length;
     let paidCustomers = 0;
     let customersWithDue = 0;
     let totalDue = 0;
@@ -107,6 +109,9 @@ export default function DashboardScreen() {
         paidCustomers++;
       }
     });
+
+    // Reflect net outstanding credit in the summary
+    const totalCreditGiven = totalDue;
 
     const analytics = {
       paidCustomers,
@@ -216,10 +221,6 @@ export default function DashboardScreen() {
           collection(db, 'customers'),
           where('shopsJoined', 'array-contains', uid)
         );
-        const customersRef2 = query(
-          collection(db, 'customers'),
-          where('shopId', '==', uid)
-        );
 
         const unsubCustomers1 = onSnapshot(customersRef1, (querySnapshot) => {
           if (!auth.currentUser) return;
@@ -231,27 +232,17 @@ export default function DashboardScreen() {
           console.log('👥 Fetched customers (method 1):', list);
           if (list.length > 0) {
             setCustomers(list);
+            // If there are no transactions yet, keep analytics in sync from customers
+            if (allTransactionsCount === 0) {
+              calculateAnalyticsFromCustomers(list);
+            }
           }
         }, (error) => {
           console.error('❌ Error fetching customers (method 1):', error);
         });
         cleanupFns.push(unsubCustomers1);
 
-        const unsubCustomers2 = onSnapshot(customersRef2, (querySnapshot) => {
-          if (!auth.currentUser) return;
-          const list: any[] = [];
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            list.push({ id: doc.id, ...data, due: Number(data.due) || 0 });
-          });
-          console.log('👥 Fetched customers (method 2):', list);
-          if (list.length > 0) {
-            setCustomers(list);
-          }
-        }, (error) => {
-          console.error('❌ Error fetching customers (method 2):', error);
-        });
-        cleanupFns.push(unsubCustomers2);
+        
 
         // Transactions - This will be used to calculate real balances
         const transactionsRef = query(
@@ -287,13 +278,15 @@ export default function DashboardScreen() {
             list.push({ id: doc.id, ...data });
           });
           console.log('💰 Fetched ALL transactions for analytics:', list);
+          setAllTransactions(list);
+          setAllTransactionsCount(list.length);
           
           // Calculate analytics from transactions
           if (list.length > 0) {
             calculateAnalyticsFromTransactions(list);
           } else {
             // If no transactions, use customer data as fallback
-            if (customers.length > 0) {
+            if (Array.isArray(customers) && customers.length > 0) {
               calculateAnalyticsFromCustomers(customers);
             }
           }
@@ -319,6 +312,14 @@ export default function DashboardScreen() {
   };
 }, []);
 
+
+  // Keep total customer count in sync with the actual customers list
+  useEffect(() => {
+    setAnalyticsData((prev) => ({
+      ...prev,
+      totalCustomers: Array.isArray(customers) ? customers.length : 0,
+    }));
+  }, [customers]);
 
   const copyToClipboard = useCallback(async () => {
     if (userProfile?.shopLink) {
@@ -489,14 +490,14 @@ export default function DashboardScreen() {
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
           <Text className="text-lg font-bold text-gray-800 mb-4">Customers</Text>
           {customers.length > 0 ? (
-            customers.slice(0, 3).map((cust, index) => {
-              // Calculate customer balance from transactions
-              const customerTransactions = recentTransactions.filter(tx => tx.customerId === cust.id);
-              const calculatedBalance = customerTransactions.reduce((sum, tx) => {
-                if (tx.type === "due") return sum + tx.amount;
-                if (tx.type === "paid" || tx.type === "advance") return sum - tx.amount;
-                return sum;
-              }, 0);
+                         customers.slice(0, 3).map((cust, index) => {
+               // Calculate customer balance from ALL transactions (not just recent ones)
+               const customerTransactions = allTransactions.filter(tx => tx.customerId === cust.id);
+               const calculatedBalance = customerTransactions.reduce((sum, tx) => {
+                 if (tx.type === "due") return sum + tx.amount;
+                 if (tx.type === "paid" || tx.type === "advance") return sum - tx.amount;
+                 return sum;
+               }, 0);
               
               return (
                 <TouchableOpacity
@@ -525,8 +526,8 @@ export default function DashboardScreen() {
                       </Text>
                     </View>
                   </View>
-                  <Text className={`font-bold ${calculatedBalance === 0 ? "text-green-600" : "text-red-600"}`}>
-                    {calculatedBalance === 0 ? "Paid" : `Due ₹${calculatedBalance?.toFixed(2)}`}
+                  <Text className={`font-bold ${calculatedBalance <= 0 ? "text-green-600" : "text-red-600"}`}>
+                    {calculatedBalance <= 0 ? "Paid" : "Due"}
                   </Text>
                 </TouchableOpacity>
               );
@@ -566,17 +567,17 @@ export default function DashboardScreen() {
                 </View>
                 <Text
                   className={`font-bold ${
-                    txn.type === "credit" || txn.amount > 0 ? "text-green-600" : "text-red-600"
+                    txn.type === "paid" || txn.type === "advance" ? "text-green-600" : "text-red-600"
                   }`}
                 >
-                  ₹{txn.amount?.toFixed(2) || "0.00"}
+                  ₹{Number(txn.amount || 0).toFixed(2)}
                 </Text>
               </View>
             ))
           ) : (
             <Text className="text-gray-500">No recent transactions.</Text>
           )}
-          <Link href="/(ownerTabs)/history" className="text-blue-600 text-sm mt-3 self-end">
+          <Link href="/(ownerTabs)/Customers" className="text-blue-600 text-sm mt-3 self-end">
             See All
           </Link>
         </View>
