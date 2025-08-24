@@ -11,29 +11,90 @@ import Feather from "react-native-vector-icons/Feather";
 export default function CustomersScreen() {
   const router = useRouter();
   const [customers, setCustomers] = useState<any[]>([]);
+  const [allTransactions, setAllTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const ownerUid = auth.currentUser?.uid;
 
+  // Calculate customer balance based on transactions
+  const calculateCustomerBalance = (customerId: string) => {
+    if (!allTransactions.length) {
+      console.log('No transactions available for calculation');
+      return 0;
+    }
+    
+    const customerTransactions = allTransactions.filter(txn => txn.customerId === customerId);
+    console.log(`Customer ${customerId} has ${customerTransactions.length} transactions:`, customerTransactions);
+    
+    let totalDue = 0;
+    let totalPaid = 0;
+    let totalAdvance = 0;
+    
+    customerTransactions.forEach(txn => {
+      console.log(`Transaction: type=${txn.type}, amount=${txn.amount}, customerId=${txn.customerId}`);
+      if (txn.type === 'credit' || txn.type === 'due') {
+        totalDue += Number(txn.amount) || 0;
+      } else if (txn.type === 'payment' || txn.type === 'paid') {
+        totalPaid += Number(txn.amount) || 0;
+      } else if (txn.type === 'advance') {
+        totalAdvance += Number(txn.amount) || 0;
+      }
+    });
+    
+    console.log(`Customer ${customerId} totals: due=${totalDue}, paid=${totalPaid}, advance=${totalAdvance}`);
+    
+    // Net due = total credit - (payments + advances)
+    const netDue = Math.max(totalDue - (totalPaid + totalAdvance), 0);
+    console.log(`Customer ${customerId} net due: ${netDue}`);
+    
+    return netDue;
+  };
+
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
+        console.log('Fetching data for user:', user.uid);
+        
+        // Fetch customers
         const customersRef = query(
           collection(db, 'customers'),
           where('shopsJoined', 'array-contains', user.uid)
         );
+        
+        // Fetch all transactions for this shop
+        const transactionsRef = query(
+          collection(db, 'transactions'),
+          where('shopId', '==', user.uid)
+        );
+        
         const unsubCustomers = onSnapshot(customersRef, (querySnapshot) => {
           const list: any[] = [];
           querySnapshot.forEach((doc) => {
             const data = doc.data();
-            list.push({ id: doc.id, ...data, due: data.due || 0 });
+            list.push({ id: doc.id, ...data });
           });
+          console.log('Loaded customers:', list.length);
           setCustomers(list);
+        });
+        
+        const unsubTransactions = onSnapshot(transactionsRef, (querySnapshot) => {
+          const list: any[] = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            list.push({ id: doc.id, ...data });
+          });
+          console.log('Loaded transactions:', list.length, 'Sample:', list.slice(0, 2));
+          setAllTransactions(list);
           setLoading(false);
         });
-        return unsubCustomers;
+        
+        return () => {
+          unsubCustomers();
+          unsubTransactions();
+        };
       } else {
         setCustomers([]);
+        setAllTransactions([]);
         setLoading(false);
       }
     });
@@ -56,6 +117,7 @@ export default function CustomersScreen() {
         </TouchableOpacity>
 
         <Text className="text-2xl font-bold text-gray-900 mb-6">All Customers</Text>
+        
         <TextInput
           className="mb-3 px-4 py-4 bg-white rounded-xl border border-gray-200 text-gray-900 text-base"
           style={{ paddingTop: 10, paddingBottom: 15 }}
@@ -68,45 +130,50 @@ export default function CustomersScreen() {
           .length > 0 ? (
           customers
             .filter((cust) => cust.name?.toLowerCase().includes(searchQuery.toLowerCase()))
-            .map((cust, index) => (
-              <TouchableOpacity
-                key={index}
-                className="flex-row justify-between items-center py-3 px-2 mb-2 bg-white rounded-lg shadow-sm border border-gray-100"
-                onPress={() => {
-                  if (!ownerUid) {
-                    Alert.alert("Error", "Unable to identify shop. Please sign in again.");
-                    return;
-                  }
-                  router.push({
-                    pathname: "/(ownerTabs)/CustomerProfile",
-                    params: {
-                      customerId: cust.id,
-                      shopId: ownerUid,
-                    },
-                  });
-                }}
-              >
-                <View className="flex-row items-center">
-                  <Image source={iconMap["user.png"]} className="w-10 h-10 rounded-full mr-3" />
-                  <View>
-                    <Text className="text-gray-700 font-medium">{cust.name}</Text>
-                    <Text className="text-xs text-gray-500">
-                      Last: {cust.lastActivity || "N/A"}
+            .map((cust, index) => {
+              const calculatedDue = calculateCustomerBalance(cust.id);
+              return (
+                <TouchableOpacity
+                  key={index}
+                  className="flex-row justify-between items-center py-3 px-2 mb-2 bg-white rounded-lg shadow-sm border border-gray-100"
+                  onPress={() => {
+                    if (!ownerUid) {
+                      Alert.alert("Error", "Unable to identify shop. Please sign in again.");
+                      return;
+                    }
+                    router.push({
+                      pathname: "/(ownerTabs)/CustomerProfile",
+                      params: {
+                        customerId: cust.id,
+                        shopId: ownerUid,
+                      },
+                    });
+                  }}
+                >
+                  <View className="flex-row items-center">
+                    <Image source={iconMap["user.png"]} className="w-10 h-10 rounded-full mr-3" />
+                    <View>
+                      <Text className="text-gray-700 font-medium">{cust.name}</Text>
+                      <Text className="text-xs text-gray-500">
+                        Last: {cust.lastActivity || "N/A"}
+                      </Text>
+                    </View>
+                  </View>
+                  <View className="items-end">
+                    <Text className={`font-bold ${calculatedDue === 0 ? "text-green-600" : "text-red-600"}`}>
+                      {calculatedDue === 0 ? "Paid" : "Due"}
                     </Text>
                   </View>
-                </View>
-                <Text className={`font-bold ${cust.due === 0 ? "text-green-600" : "text-red-600"}`}>
-                  {cust.due === 0 ? "Paid" : `Due ₹${cust.due?.toFixed(2)}`}
-                </Text>
-              </TouchableOpacity>
-            ))
+                </TouchableOpacity>
+              );
+            })
         ) : (
           <Text className="text-gray-500">No customers found.</Text>
         )}
       </ScrollView>
     </SafeAreaView>
   );
-} 
+}
 
 const styles = StyleSheet.create({
   backButton: {

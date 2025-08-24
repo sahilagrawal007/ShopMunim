@@ -350,142 +350,156 @@ export default function DashboardScreen() {
   };
 
   useEffect(() => {
-  const cleanupFns: (() => void)[] = [];
-  const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      const uid = user.uid;
+    const cleanupFns: (() => void)[] = [];
+    
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const uid = user.uid;
 
-      try {
-        // Owner Profile
-        const ownerRef = doc(db, 'owners', uid);
-        const unsubProfile = onSnapshot(ownerRef, (docSnap) => {
-          if (!auth.currentUser) return;
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            setUserProfile({ uid: docSnap.id, ...data });
-            setProfileImage(data.photoURL || auth.currentUser?.photoURL || null);
-            
-            // Load last notification sent time
-            if (data.lastPaymentRemindersSent) {
-              setLastNotificationSent(data.lastPaymentRemindersSent);
-            }
-          } else {
-          }
-          setLoading(false);
-        }, (error) => {
-          setLoading(false);
-        });
-        cleanupFns.push(unsubProfile);
-
-        // Products
-        const productsDocRef = doc(db, 'products', uid);
-        const unsubProducts = onSnapshot(productsDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            const productList = docSnap.data().products || [];
-            const formatted = productList.map((item: any) => ({
-              ...item,
-              price: Number(item.price),
-            }));
-            setProducts(formatted);
-          } else {
-            setProducts([]);
-          }
-        }, (error) => {
-          setProducts([]);
-        });
-        cleanupFns.push(unsubProducts);
-
-        // Customers - try both queries
-        const customersRef1 = query(
-          collection(db, 'customers'),
-          where('shopsJoined', 'array-contains', uid)
-        );
-
-        const unsubCustomers1 = onSnapshot(customersRef1, (querySnapshot) => {
-          if (!auth.currentUser) return;
-          const list: any[] = [];
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            list.push({ id: doc.id, ...data, due: Number(data.due) || 0 });
-          });
-          if (list.length > 0) {
-            setCustomers(list);
-          }
-        }, (error) => {
-        });
-        cleanupFns.push(unsubCustomers1);
-
-        
-
-        // Transactions - This will be used to calculate real balances
-        const transactionsRef = query(
-          collection(db, 'transactions'),
-          where('shopId', '==', uid),
-          limit(5)
-        );
-        const unsubTransactions = onSnapshot(transactionsRef, (querySnapshot) => {
-          if (!auth.currentUser) return;
-          const list: any[] = [];
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            list.push({ id: doc.id, ...data });
-          });
-          setRecentTransactions(list);
-        }, (error) => {
-          setRecentTransactions([]);
-        });
-        cleanupFns.push(unsubTransactions);
-
-        // All Transactions for Analytics Calculation
-        const allTransactionsRef = query(
-          collection(db, 'transactions'),
-          where('shopId', '==', uid)
-        );
-        const unsubAllTransactions = onSnapshot(allTransactionsRef, (querySnapshot) => {
-          if (!auth.currentUser) return;
-          const list: any[] = [];
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            list.push({ id: doc.id, ...data });
-          });
-          
-          // Only update and recalculate if the transaction data has actually changed
-          const hasChanged = list.length !== allTransactions.length || 
-            JSON.stringify(list.map(t => ({ id: t.id, amount: t.amount, type: t.type }))) !== 
-            JSON.stringify(allTransactions.map(t => ({ id: t.id, amount: t.amount, type: t.type })));
-          
-          if (hasChanged) {
-            setAllTransactions(list);
-            setAllTransactionsCount(list.length);
-            
-            // Calculate analytics from transactions if customers are also loaded
-            if (list.length > 0 && Array.isArray(customers) && customers.length > 0) {
-              calculateAnalyticsFromTransactions(list, customers);
-            } else if (list.length === 0 && Array.isArray(customers) && customers.length > 0) {
-              calculateAnalyticsFromCustomers(customers);
+        try {
+          // Owner Profile
+          const ownerRef = doc(db, 'owners', uid);
+          const unsubProfile = onSnapshot(ownerRef, (docSnap) => {
+            if (!auth.currentUser) return;
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              setUserProfile({ uid: docSnap.id, ...data });
+              setProfileImage(data.photoURL || auth.currentUser?.photoURL || null);
+              
+              // Load last notification sent time
+              if (data.lastPaymentRemindersSent) {
+                setLastNotificationSent(data.lastPaymentRemindersSent);
+              }
             } else {
             }
-          } else {
-            setAllTransactionsCount(list.length);
-          }
-        }, (error) => {
-        });
-        cleanupFns.push(unsubAllTransactions);
-        
-      } catch (error) {
+            setLoading(false);
+          }, (error) => {
+            setLoading(false);
+          });
+          cleanupFns.push(unsubProfile);
+
+          // Products
+          const productsDocRef = doc(db, 'products', uid);
+          const unsubProducts = onSnapshot(productsDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+              const productList = docSnap.data().products || [];
+              const formatted = productList.map((item: any) => ({
+                ...item,
+                price: Number(item.price),
+              }));
+              setProducts(formatted);
+            } else {
+              setProducts([]);
+            }
+          }, (error) => {
+            setProducts([]);
+          });
+          cleanupFns.push(unsubProducts);
+
+          // Customers - try both queries
+          const customersRef1 = query(
+            collection(db, 'customers'),
+            where('shopsJoined', 'array-contains', uid)
+          );
+
+          const unsubCustomers1 = onSnapshot(customersRef1, (querySnapshot) => {
+            if (!auth.currentUser) return;
+            const list: any[] = [];
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              list.push({ id: doc.id, ...data, due: Number(data.due) || 0 });
+            });
+            if (list.length > 0) {
+              setCustomers(list);
+            }
+          }, (error) => {
+          });
+          cleanupFns.push(unsubCustomers1);
+
+          // Transactions - This will be used to calculate real balances
+          const transactionsRef = query(
+            collection(db, 'transactions'),
+            where('shopId', '==', uid),
+            limit(5)
+          );
+          const unsubTransactions = onSnapshot(transactionsRef, (querySnapshot) => {
+            if (!auth.currentUser) return;
+            const list: any[] = [];
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              list.push({ id: doc.id, ...data });
+            });
+            setRecentTransactions(list);
+          }, (error) => {
+            setRecentTransactions([]);
+          });
+          cleanupFns.push(unsubTransactions);
+
+          // All Transactions for Analytics Calculation
+          const allTransactionsRef = query(
+            collection(db, 'transactions'),
+            where('shopId', '==', uid)
+          );
+          const unsubAllTransactions = onSnapshot(allTransactionsRef, (querySnapshot) => {
+            if (!auth.currentUser) return;
+            const list: any[] = [];
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              list.push({ id: doc.id, ...data });
+            });
+            
+            // Only update and recalculate if the transaction data has actually changed
+            const hasChanged = list.length !== allTransactions.length || 
+              JSON.stringify(list.map(t => ({ id: t.id, amount: t.amount, type: t.type }))) !== 
+              JSON.stringify(allTransactions.map(t => ({ id: t.id, amount: t.amount, type: t.type })));
+            
+            if (hasChanged) {
+              setAllTransactions(list);
+              setAllTransactionsCount(list.length);
+              
+              // Calculate analytics from transactions if customers are also loaded
+              if (list.length > 0 && Array.isArray(customers) && customers.length > 0) {
+                calculateAnalyticsFromTransactions(list, customers);
+              } else if (list.length === 0 && Array.isArray(customers) && customers.length > 0) {
+                calculateAnalyticsFromCustomers(customers);
+              } else {
+              }
+            } else {
+              setAllTransactionsCount(list.length);
+            }
+          }, (error) => {
+          });
+          cleanupFns.push(unsubAllTransactions);
+          
+        } catch (error) {
+          setLoading(false);
+        }
+      } else {
+        // Clear all data when user is not authenticated
+        setUserProfile(null);
+        setCustomers([]);
+        setProducts([]);
+        setRecentTransactions([]);
+        setAllTransactions([]);
+        setAllTransactionsCount(0);
+        setProfileImage(null);
+        setLastNotificationSent(null);
         setLoading(false);
       }
-    } else {
-      cleanupFns.forEach((fn) => fn());
-      setLoading(false);
-    }
-  });
+    });
 
-  return () => {
-    cleanupFns.forEach((fn) => fn());
-    unsubscribeAuth();
-  };
-}, []);
+    // Return cleanup function that handles both auth unsubscribe and all snapshot listeners
+    return () => {
+      unsubscribeAuth();
+      cleanupFns.forEach((cleanupFn) => {
+        try {
+          cleanupFn();
+        } catch (error) {
+          // Silently handle cleanup errors
+        }
+      });
+    };
+  }, []);
 
 
   // Keep total customer count in sync with the actual customers list
