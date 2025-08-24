@@ -659,7 +659,7 @@ export default function DashboardScreen() {
             <Text className="text-sm text-gray-500">With Due</Text>
           </View>
           <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
-            <View className="bg-red-100 p-3 rounded-full mb-2">\
+            <View className="bg-red-100 p-3 rounded-full mb-2">
               <Icon name="currency-rupee" size={20} color="#EF4444" />
             </View>
             <Text className="text-lg font-bold text-red-600">₹{analyticsData.totalDue}</Text>
