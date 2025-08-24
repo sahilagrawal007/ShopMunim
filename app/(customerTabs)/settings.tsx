@@ -141,7 +141,7 @@ export default function CustomerSettings() {
             <Text style={styles.sectionTitle}>Account</Text>
             <TouchableOpacity style={styles.settingItem} onPress={handleSignOut}>
               <Feather name="log-out" size={20} color="#d9534f" style={styles.icon} />
-              <Text style={[styles.settingText, { color: "#d9534f" }]}>Signout</Text>
+              <Text style={[styles.settingText, { color: "#d9534f" }]}>Sign Out</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.settingItem}

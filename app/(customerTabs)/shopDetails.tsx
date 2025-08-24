@@ -149,7 +149,6 @@ const JoinedShopDetails: React.FC = () => {
 
   // Debug effect to track shop name changes
   useEffect(() => {
-    console.log("Current shop name for View All button:", shopDetails?.name);
   }, [shopDetails?.name]);
 
   const calculateDue = () => {

@@ -380,18 +380,6 @@ export default function CustomerHomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Welcome */}
-        {/* <View className="flex-row items-center justify-between mb-6">
-          <View>
-            <Text className="text-gray-500 text-sm">Welcome back,</Text>
-            <Text className="text-lg font-bold text-gray-900">{customer?.name || "User"}</Text>
-          </View>
-          <Image
-            source={{ uri: "https://randomuser.me/api/portraits/men/32.jpg" }}
-            className="w-12 h-12 rounded-full"
-          />
-        </View> */}
-
         {/* Profile Card */}
         <LinearGradient
           colors={["#3B82F6", "#60A5FA"]}
@@ -438,31 +426,6 @@ export default function CustomerHomeScreen() {
           </View>
         </View>
 
-        {/* Detailed Analytics */}
-        {/* <View className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <Text className="text-blue-800 font-semibold mb-3">📊 Transaction Analytics</Text>
-          <View className="space-y-2">
-            <View className="flex-row justify-between">
-              <Text className="text-blue-700 text-sm">Total Credit Used:</Text>
-              <Text className="text-blue-800 font-medium">₹{spent + due}</Text>
-            </View>
-            <View className="flex-row justify-between">
-              <Text className="text-blue-700 text-sm">Payments Made:</Text>
-              <Text className="text-blue-800 font-medium">₹{spent}</Text>
-            </View>
-            <View className="flex-row justify-between">
-              <Text className="text-blue-700 text-sm">Outstanding Due:</Text>
-              <Text className="text-blue-800 font-medium">₹{due}</Text>
-            </View>
-            <View className="flex-row justify-between">
-              <Text className="text-blue-700 text-sm">Payment Progress:</Text>
-              <Text className="text-blue-800 font-medium">
-                {spent + due > 0 ? Math.round((spent / (spent + due)) * 100) : 0}%
-              </Text>
-            </View>
-          </View>
-        </View> */}
-
         {/* Shops List */}
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
           <Text className="text-lg font-bold text-gray-800 mb-4">Your Shops</Text>
@@ -482,7 +445,6 @@ export default function CustomerHomeScreen() {
                   <Image source={iconMap["shop.png"]} className="w-10 h-10 rounded-full mr-3" />
                   <View>
                     <Text className="text-gray-700 font-medium">{shop.name}</Text>
-                    <Text className="text-xs text-gray-500">{shop.location || "No location"}</Text>
                   </View>
                 </View>
                 <Image source={iconMap["arrow-right.png"]} className="w-4 h-4" />
@@ -492,50 +454,6 @@ export default function CustomerHomeScreen() {
             <Text className="text-gray-500">No shops joined yet.</Text>
           )}
         </View>
-
-        {/* Debug Section - Remove in production */}
-        {/* <View className="mb-6 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-          <Text className="text-yellow-800 font-semibold mb-2">Debug Info</Text>
-          <Text className="text-yellow-700 text-sm mb-2">📱 Total Notifications: {notifications.length}</Text>
-          <Text className="text-yellow-700 text-sm mb-2">🔴 Unread: {unreadCount}</Text>
-          <Text className="text-yellow-700 text-sm mb-2">🏪 Joined Shops: {shops.length}</Text>
-          <Text className="text-yellow-700 text-sm mb-2">👤 Customer ID: {getAuth().currentUser?.uid?.substring(0, 8)}...</Text>
-          <Text className="text-yellow-700 text-sm mb-2">💰 Total Spent: ₹{spent}</Text>
-          <Text className="text-yellow-700 text-sm mb-2">⏰ Current Due: ₹{due}</Text>
-          <Text className="text-yellow-700 text-sm mb-2">💳 Total Credit Used: ₹{spent + due}</Text>
-          <TouchableOpacity 
-            className="bg-yellow-500 px-4 py-2 rounded-lg mt-2"
-            onPress={testNotifications}
-          >
-            <Text className="text-white font-semibold text-center">Test Notifications</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            className="bg-blue-500 px-4 py-2 rounded-lg mt-2"
-            onPress={() => setShowNotifications(true)}
-          >
-            <Text className="text-white font-semibold text-center">View All Notifications</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            className="bg-green-500 px-4 py-2 rounded-lg mt-2"
-            onPress={recalculateAnalytics}
-          >
-            <Text className="text-white font-semibold text-center">Recalculate Analytics</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            className="bg-purple-500 px-4 py-2 rounded-lg mt-2"
-            onPress={() => {
-              console.log('🔍 Current State:', {
-                spent,
-                due,
-                shops: shops.map(s => ({ id: s.id, name: s.name })),
-                customerId: getAuth().currentUser?.uid
-              });
-              Alert.alert('State Logged', 'Current state logged to console. Check console for details.');
-            }}
-          >
-            <Text className="text-white font-semibold text-center">Log Current State</Text>
-          </TouchableOpacity>
-        </View> */}
       </ScrollView>
 
       {/* Toast Notification */}
