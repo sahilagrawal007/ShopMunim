@@ -4,7 +4,6 @@ import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { iconMap } from '../../constants/iconMap';
 import { auth, db } from '../../firebaseConfig';
 import Feather from "react-native-vector-icons/Feather";
 
@@ -142,16 +141,18 @@ export default function CustomersScreen() {
                   }}
                 >
                   <View className="flex-row items-center">
-                    <Image source={iconMap["user.png"]} className="w-10 h-10 rounded-full mr-3" />
+                    <Feather name="user" size={30} color="#3B82F6" />
                     <View>
-                      <Text className="text-gray-700 font-medium">{cust.name}</Text>
-                      <Text className="text-xs text-gray-500">
-                        Last: {cust.lastActivity || "N/A"}
-                      </Text>
+                      <Text className="text-gray-700 font-medium ml-2">{cust.name}</Text>
+                      
                     </View>
                   </View>
                   <View className="items-end">
-                    <Text className={`font-bold ${calculatedDue === 0 ? "text-green-600" : "text-red-600"}`}>
+                    <Text
+                      className={`font-bold ${
+                        calculatedDue === 0 ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
                       {calculatedDue === 0 ? "Paid" : "Due"}
                     </Text>
                   </View>

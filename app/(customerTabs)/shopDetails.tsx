@@ -1,4 +1,3 @@
-import { iconMap } from "@/constants/iconMap";
 import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { getAuth } from "firebase/auth";
@@ -31,6 +30,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "react-native-vector-icons/Feather";
 import { db } from "../../firebaseConfig";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 interface RouteParams {
   shopId: string;
@@ -477,11 +477,11 @@ const JoinedShopDetails: React.FC = () => {
             {/* App Header */}
             <View className="flex-row justify-between items-center mb-6 mt-4">
               <View className="flex-row items-center">
-                <Image source={iconMap["shop.png"]} className="w-6 h-6 mr-2" />
-                <Text className="text-xl font-bold text-gray-900">ShopMunim</Text>
+                <Icon name="storefront" size={30} color="#3B82F6" />
+                <Text className="text-xl font-bold text-gray-900 ml-2">ShopMunim</Text>
               </View>
               <TouchableOpacity>
-                <Image source={iconMap["bell.png"]} className="w-6 h-6" />
+                <Icon name="notifications-active" size={30} color="#3B82F6" />
               </TouchableOpacity>
             </View>
 
@@ -505,7 +505,7 @@ const JoinedShopDetails: React.FC = () => {
             {/* Product List */}
             <View className="bg-white p-4 rounded-lg mb-4 shadow">
               <Text className="text-lg font-bold text-gray-800 mb-3">Products</Text>
-              
+
               {/* Search Bar */}
               <View className="mb-3">
                 <View className="flex-row items-center bg-gray-100 rounded-lg px-3 py-2">
@@ -526,7 +526,7 @@ const JoinedShopDetails: React.FC = () => {
               </View>
 
               {filteredProducts.length > 0 ? (
-                <ScrollView 
+                <ScrollView
                   className="max-h-64"
                   showsVerticalScrollIndicator={false}
                   nestedScrollEnabled={true}
@@ -540,7 +540,7 @@ const JoinedShopDetails: React.FC = () => {
                       <Text className="text-gray-600 font-semibold">₹{product.price}</Text>
                     </View>
                   ))}
-                  
+
                   {/* View More Button */}
                   {!showAllProducts && filteredProducts.length > 3 && (
                     <TouchableOpacity
@@ -552,16 +552,14 @@ const JoinedShopDetails: React.FC = () => {
                       </Text>
                     </TouchableOpacity>
                   )}
-                  
+
                   {/* Show Less Button */}
                   {showAllProducts && filteredProducts.length > 3 && (
                     <TouchableOpacity
                       onPress={() => setShowAllProducts(false)}
                       className="mt-3 py-2 bg-gray-500 rounded-lg"
                     >
-                      <Text className="text-white text-center font-semibold">
-                        Show Less
-                      </Text>
+                      <Text className="text-white text-center font-semibold">Show Less</Text>
                     </TouchableOpacity>
                   )}
                 </ScrollView>
@@ -572,57 +570,57 @@ const JoinedShopDetails: React.FC = () => {
               )}
             </View>
 
-                         {/* Transaction History Section */}
-             <View className="bg-white p-4 rounded-lg mb-4 shadow">
-               <Text className="text-lg font-bold text-gray-800 mb-3">Transaction History</Text>
-               
-                               {/* Action Buttons - Below heading */}
-                {transactions.length > 0 && (
-                  <View className="flex-row justify-center gap-2 mb-3">
-                    <TouchableOpacity
-                      onPress={() => setShowStatementModal(true)}
-                      className="bg-blue-500 px-3 py-2 rounded-lg"
-                      style={{ minWidth: 140, alignItems: "center" }}
-                    >
-                      <Text className="text-white text-sm font-semibold">Download Statement</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        const currentShopName = shopDetails?.name || "";
-                        router.push({
-                          pathname: "/(customerTabs)/history",
-                          params: { 
-                            shopFilter: currentShopName,
-                            timestamp: Date.now() // Add timestamp to force fresh navigation
-                          }
-                        });
-                      }}
-                      className="bg-blue-500 px-3 py-2 rounded-lg"
-                      style={{ minWidth: 140, alignItems: "center" }}
-                    >
-                      <Text className="text-white text-sm font-semibold">
-                        View All {transactions.length > 3 ? `(${transactions.length - 3})` : ''}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              
+            {/* Transaction History Section */}
+            <View className="bg-white p-4 rounded-lg mb-4 shadow">
+              <Text className="text-lg font-bold text-gray-800 mb-3">Transaction History</Text>
+
+              {/* Action Buttons - Below heading */}
+              {transactions.length > 0 && (
+                <View className="flex-row justify-center gap-2 mb-3">
+                  <TouchableOpacity
+                    onPress={() => setShowStatementModal(true)}
+                    className="bg-blue-500 px-3 py-2 rounded-lg"
+                    style={{ minWidth: 140, alignItems: "center" }}
+                  >
+                    <Text className="text-white text-sm font-semibold">Download Statement</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      const currentShopName = shopDetails?.name || "";
+                      router.push({
+                        pathname: "/(customerTabs)/history",
+                        params: {
+                          shopFilter: currentShopName,
+                          timestamp: Date.now(), // Add timestamp to force fresh navigation
+                        },
+                      });
+                    }}
+                    className="bg-blue-500 px-3 py-2 rounded-lg"
+                    style={{ minWidth: 140, alignItems: "center" }}
+                  >
+                    <Text className="text-white text-sm font-semibold">
+                      View All {transactions.length > 3 ? `(${transactions.length - 3})` : ""}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
               {transactions.length > 0 ? (
                 <View>
                   {transactions
                     .sort((a, b) => {
                       const getTime = (createdAt: any) => {
                         if (!createdAt) return 0;
-                        if (createdAt && typeof createdAt.toDate === 'function') {
+                        if (createdAt && typeof createdAt.toDate === "function") {
                           return createdAt.toDate().getTime();
                         }
-                        if (createdAt && typeof createdAt.seconds === 'number') {
+                        if (createdAt && typeof createdAt.seconds === "number") {
                           return createdAt.seconds * 1000;
                         }
-                        if (typeof createdAt === 'string') {
+                        if (typeof createdAt === "string") {
                           return new Date(createdAt).getTime();
                         }
-                        if (typeof createdAt === 'number') {
+                        if (typeof createdAt === "number") {
                           return createdAt;
                         }
                         return 0;
@@ -634,16 +632,16 @@ const JoinedShopDetails: React.FC = () => {
                       const formatDate = (createdAt: any) => {
                         if (!createdAt) return "Invalid Date";
                         try {
-                          if (createdAt && typeof createdAt.toDate === 'function') {
+                          if (createdAt && typeof createdAt.toDate === "function") {
                             return createdAt.toDate().toLocaleString();
                           }
-                          if (createdAt && typeof createdAt.seconds === 'number') {
+                          if (createdAt && typeof createdAt.seconds === "number") {
                             return new Date(createdAt.seconds * 1000).toLocaleString();
                           }
-                          if (typeof createdAt === 'string') {
+                          if (typeof createdAt === "string") {
                             return new Date(createdAt).toLocaleString();
                           }
-                          if (typeof createdAt === 'number') {
+                          if (typeof createdAt === "number") {
                             return new Date(createdAt).toLocaleString();
                           }
                           return "Invalid Date";
@@ -653,7 +651,10 @@ const JoinedShopDetails: React.FC = () => {
                       };
 
                       return (
-                        <View key={item.id} className="flex-row justify-between items-center py-3 border-b border-gray-100">
+                        <View
+                          key={item.id}
+                          className="flex-row justify-between items-center py-3 border-b border-gray-100"
+                        >
                           <View className="flex-1">
                             <Text className="font-medium text-gray-800 mb-1">
                               {item.description || "Transaction"}
@@ -673,16 +674,17 @@ const JoinedShopDetails: React.FC = () => {
                                   : "text-red-600"
                               }`}
                             >
-                              {item.type === "paid" || item.type === "advance" ? "+" : "-"}₹{item.amount}
+                              {item.type === "paid" || item.type === "advance" ? "+" : "-"}₹
+                              {item.amount}
                             </Text>
                             <TouchableOpacity
                               onPress={() => handleDownloadInvoice(item)}
                               accessibilityLabel={`download-invoice-${item.id}`}
-                              style={{ 
+                              style={{
                                 marginTop: 4,
                                 padding: 4,
                                 backgroundColor: "#F3F4F6",
-                                borderRadius: 6
+                                borderRadius: 6,
                               }}
                             >
                               <Feather name="download" size={16} color="#2563EB" />
@@ -691,17 +693,17 @@ const JoinedShopDetails: React.FC = () => {
                         </View>
                       );
                     })}
-                  
+
                   {transactions.length > 3 && (
                     <TouchableOpacity
                       onPress={() => {
                         const currentShopName = shopDetails?.name || "";
                         router.push({
                           pathname: "/(customerTabs)/history",
-                          params: { 
+                          params: {
                             shopFilter: currentShopName,
-                            timestamp: Date.now() // Add timestamp to force fresh navigation
-                          }
+                            timestamp: Date.now(), // Add timestamp to force fresh navigation
+                          },
                         });
                       }}
                       className="mt-3 py-2 bg-blue-500 rounded-lg"
@@ -744,7 +746,10 @@ const JoinedShopDetails: React.FC = () => {
             </TouchableOpacity>
 
             <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 12 }}>
-              <Pressable onPress={() => setShowStatementModal(false)} style={modalStyles.buttonOutline}>
+              <Pressable
+                onPress={() => setShowStatementModal(false)}
+                style={modalStyles.buttonOutline}
+              >
                 <Text style={modalStyles.buttonOutlineText}>Cancel</Text>
               </Pressable>
 

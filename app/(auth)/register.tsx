@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { LinearGradient } from 'expo-linear-gradient';
 import { auth } from '../../firebaseConfig';
 import { useRouter } from 'expo-router';
-import { iconMap } from '../../constants/iconMap';
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -43,7 +43,7 @@ export default function Register() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <LinearGradient
-        colors={['#E0E7FF', '#F3F4F6', '#FFFFFF']}
+        colors={["#E0E7FF", "#F3F4F6", "#FFFFFF"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="flex-1"
@@ -53,11 +53,7 @@ export default function Register() {
           {/* App Logo and Name */}
           <View className="items-center mb-8">
             <View className="bg-indigo-100 rounded-3xl p-6 mb-4">
-              <Image 
-                source={iconMap["shop.png"]} 
-                className="w-16 h-16"
-                style={{ tintColor: '#4F46E5' }}
-              />
+              <Icon name="storefront" size={60} color="#4B82F6" />
             </View>
             <Text className="text-3xl font-bold text-indigo-900 mb-2">ShopMunim</Text>
             <Text className="text-indigo-700 text-base text-center">
@@ -71,7 +67,7 @@ export default function Register() {
               <Text className="text-2xl font-bold text-indigo-900 text-center mb-4">
                 Create Account
               </Text>
-              
+
               <Text className="text-indigo-700 text-center mb-6">
                 Start your journey with ShopMunim today
               </Text>
@@ -109,7 +105,9 @@ export default function Register() {
 
               {/* Confirm Password Input */}
               <View className="mb-6">
-                <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Confirm Password</Text>
+                <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">
+                  Confirm Password
+                </Text>
                 <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
                   <TextInput
                     style={styles.input}
@@ -129,7 +127,7 @@ export default function Register() {
                 disabled={loading}
               >
                 <LinearGradient
-                  colors={loading ? ['#9CA3AF', '#6B7280'] : ['#4F46E5', '#6366F1']}
+                  colors={loading ? ["#9CA3AF", "#6B7280"] : ["#4F46E5", "#6366F1"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   className="w-full rounded-xl py-4 items-center"
@@ -141,15 +139,13 @@ export default function Register() {
               </TouchableOpacity>
 
               {/* Login Link */}
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="mt-6 items-center"
                 onPress={() => router.replace("/(auth)/login")}
               >
                 <Text className="text-indigo-700 text-center">
                   Already have an account?{" "}
-                  <Text className="text-indigo-600 font-semibold underline">
-                    Sign in here
-                  </Text>
+                  <Text className="text-indigo-600 font-semibold underline">Sign in here</Text>
                 </Text>
               </TouchableOpacity>
             </View>
@@ -157,9 +153,7 @@ export default function Register() {
 
           {/* Footer */}
           <View className="mt-6 items-center">
-            <Text className="text-indigo-600 text-sm text-center">
-              Secure • Fast • Reliable
-            </Text>
+            <Text className="text-indigo-600 text-sm text-center">Secure • Fast • Reliable</Text>
           </View>
         </View>
       </LinearGradient>

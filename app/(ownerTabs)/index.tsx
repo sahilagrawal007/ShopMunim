@@ -7,8 +7,9 @@ import { addDoc, collection, doc, limit, onSnapshot, query, where, updateDoc, ge
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { iconMap } from '../../constants/iconMap';
 import { auth, db } from '../../firebaseConfig';
+import Icon from "react-native-vector-icons/MaterialIcons";
+import Feather from "react-native-vector-icons/Feather";
 
 export default function DashboardScreen() {
   const ownerUid = auth.currentUser?.uid; //for storing owner id in transaction collection
@@ -565,11 +566,11 @@ export default function DashboardScreen() {
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center">
-            <Image source={iconMap["shop.png"]} className="w-6 h-6 mr-2" />
-            <Text className="text-xl font-bold text-gray-900">ShopMunim</Text>
+            <Icon name="storefront" size={30} color="#4B82F6" />
+            <Text className="text-xl font-bold text-gray-900 ml-2">ShopMunim</Text>
           </View>
           <TouchableOpacity>
-            <Image source={iconMap["bell.png"]} className="w-6 h-6" />
+            <Icon name="notifications-active" size={30} color="#3B82F6" />
           </TouchableOpacity>
         </View>
 
@@ -579,12 +580,22 @@ export default function DashboardScreen() {
             <Text className="text-gray-500 text-sm">Welcome back,</Text>
             <Text className="text-lg font-bold text-gray-900">{userProfile?.name || "Owner"}</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push("/(ownerTabs)/EditProfile")}>
-            <Image
-              source={profileImage ? { uri: profileImage } : iconMap["user.png"]}
-              className="w-12 h-12 rounded-full border-2 border-gray-200"
-              style={{ resizeMode: profileImage ? 'cover' : 'contain' }}
-            />
+
+          <TouchableOpacity
+            onPress={() => router.push("/(ownerTabs)/EditProfile")}
+            className="ml-4"
+          >
+            {profileImage ? (
+              <Image
+                source={{ uri: profileImage }}
+                className="w-12 h-12 rounded-full border-2 border-white"
+                style={{ resizeMode: "cover" }}
+              />
+            ) : (
+              <View className="w-20 h-20 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center">
+                <Feather name="user" size={40} color="#9CA3AF" />
+              </View>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -624,23 +635,23 @@ export default function DashboardScreen() {
         <View className="flex-row flex-wrap justify-between mb-6">
           <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow-lg items-center">
             <View className="bg-indigo-100 p-3 rounded-full mb-2">
-              <Image source={iconMap["user.png"]} className="w-5 h-5" />
+              <Feather name="user" size={20} color="#3B82F6" />
             </View>
-            <Text className="text-lg font-bold text-indigo-500">{analyticsData.totalCustomers}</Text>
+            <Text className="text-lg font-bold text-indigo-500">
+              {analyticsData.totalCustomers}
+            </Text>
             <Text className="text-sm text-gray-500">Customers</Text>
           </View>
           <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
             <View className="bg-green-100 p-3 rounded-full mb-2">
-              <Image source={iconMap["check.png"]} className="w-5 h-5" />
+              <Feather name="check-circle" size={20} color="#22C55E" />
             </View>
-            <Text className="text-lg font-bold text-green-600">
-              {analyticsData.paidCustomers}
-            </Text>
+            <Text className="text-lg font-bold text-green-600">{analyticsData.paidCustomers}</Text>
             <Text className="text-sm text-gray-500">Paid</Text>
           </View>
           <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
             <View className="bg-yellow-100 p-3 rounded-full mb-2">
-              <Image source={iconMap["clock.png"]} className="w-5 h-5" />
+              <Feather name="clock" size={20} color="#F59E0B" />
             </View>
             <Text className="text-lg font-bold text-yellow-600">
               {analyticsData.customersWithDue}
@@ -648,12 +659,10 @@ export default function DashboardScreen() {
             <Text className="text-sm text-gray-500">With Due</Text>
           </View>
           <View className="w-[48%] bg-white p-4 rounded-xl mb-4 shadow items-center">
-            <View className="bg-red-100 p-3 rounded-full mb-2">
-              <Image source={iconMap["rupee.png"]} className="w-5 h-5" />
+            <View className="bg-red-100 p-3 rounded-full mb-2">\
+              <Icon name="currency-rupee" size={20} color="#EF4444" />
             </View>
-            <Text className="text-lg font-bold text-red-600">
-              ₹{analyticsData.totalDue}
-            </Text>
+            <Text className="text-lg font-bold text-red-600">₹{analyticsData.totalDue}</Text>
             <Text className="text-sm text-gray-500">Total Due</Text>
           </View>
         </View>
@@ -675,23 +684,30 @@ export default function DashboardScreen() {
             )}
           </View>
           <View className="flex-col space-y-2">
-            <TouchableOpacity 
+            <TouchableOpacity
               className={`rounded-full py-2 px-4 mt-2 ${
-                sendingNotifications || !canSendNotifications() ? 'bg-gray-300' : 'bg-white'
+                sendingNotifications || !canSendNotifications() ? "bg-gray-300" : "bg-white"
               }`}
               onPress={sendPaymentCollectionNotifications}
               disabled={sendingNotifications || !canSendNotifications()}
             >
-              <Text className={`font-semibold text-sm ${
-                sendingNotifications || !canSendNotifications() ? 'text-gray-500' : 'text-[#6468E5]'
-              }`}>
-                {sendingNotifications ? 'Sending...' : 
-                 !canSendNotifications() ? 'Recently Sent' : 'Collect Payment'}
+              <Text
+                className={`font-semibold text-sm ${
+                  sendingNotifications || !canSendNotifications()
+                    ? "text-gray-500"
+                    : "text-[#6468E5]"
+                }`}
+              >
+                {sendingNotifications
+                  ? "Sending..."
+                  : !canSendNotifications()
+                  ? "Recently Sent"
+                  : "Collect Payment"}
               </Text>
             </TouchableOpacity>
             {analyticsData.customersWithDue > 0 && (
               <Text className="text-white text-xs text-center opacity-75">
-                {!canSendNotifications() ? 'Reminders sent recently' : 'Tap to send reminders'}
+                {!canSendNotifications() ? "Reminders sent recently" : "Tap to send reminders"}
               </Text>
             )}
           </View>
@@ -704,10 +720,9 @@ export default function DashboardScreen() {
               <Ionicons name="information-circle" size={20} color="#3B82F6" />
               <View className="ml-2 flex-1">
                 <Text className="text-blue-800 text-sm">
-                  {sendingNotifications 
-                    ? 'Sending payment reminders to customers...' 
-                    : `Ready to send payment reminders to ${analyticsData.customersWithDue} customer(s) with pending dues.`
-                  }
+                  {sendingNotifications
+                    ? "Sending payment reminders to customers..."
+                    : `Ready to send payment reminders to ${analyticsData.customersWithDue} customer(s) with pending dues.`}
                 </Text>
                 {lastNotificationSent && !sendingNotifications && (
                   <View>
@@ -716,7 +731,14 @@ export default function DashboardScreen() {
                     </Text>
                     {!canSendNotifications() && (
                       <Text className="text-orange-600 text-xs mt-1">
-                        Next reminder available in {Math.ceil((new Date(lastNotificationSent).getTime() + (6 * 60 * 60 * 1000) - new Date().getTime()) / (1000 * 60 * 60))} hour(s)
+                        Next reminder available in{" "}
+                        {Math.ceil(
+                          (new Date(lastNotificationSent).getTime() +
+                            6 * 60 * 60 * 1000 -
+                            new Date().getTime()) /
+                            (1000 * 60 * 60)
+                        )}{" "}
+                        hour(s)
                       </Text>
                     )}
                   </View>
@@ -730,15 +752,17 @@ export default function DashboardScreen() {
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
           <Text className="text-lg font-bold text-gray-800 mb-4">Customers</Text>
           {customers.length > 0 ? (
-                         customers.slice(0, 3).map((cust, index) => {
-               // Calculate customer balance from ALL transactions (not just recent ones)
-               const customerTransactions = allTransactions.filter(tx => tx.customerId === cust.id);
-               const calculatedBalance = customerTransactions.reduce((sum, tx) => {
-                 if (tx.type === "due") return sum + tx.amount;
-                 if (tx.type === "paid" || tx.type === "advance") return sum - tx.amount;
-                 return sum;
-               }, 0);
-              
+            customers.slice(0, 3).map((cust, index) => {
+              // Calculate customer balance from ALL transactions (not just recent ones)
+              const customerTransactions = allTransactions.filter(
+                (tx) => tx.customerId === cust.id
+              );
+              const calculatedBalance = customerTransactions.reduce((sum, tx) => {
+                if (tx.type === "due") return sum + tx.amount;
+                if (tx.type === "paid" || tx.type === "advance") return sum - tx.amount;
+                return sum;
+              }, 0);
+
               return (
                 <TouchableOpacity
                   key={index}
@@ -758,12 +782,16 @@ export default function DashboardScreen() {
                   }}
                 >
                   <View className="flex-row items-center">
-                    <Image source={iconMap["user.png"]} className="w-10 h-10 rounded-full mr-3" />
-                    <View>
+                    <Feather name="user" size={30} color="#3B82F6" />
+                    <View className="ml-2">
                       <Text className="text-gray-700 font-medium">{cust.name}</Text>
                     </View>
                   </View>
-                  <Text className={`font-bold ${calculatedBalance <= 0 ? "text-green-600" : "text-red-600"}`}>
+                  <Text
+                    className={`font-bold ${
+                      calculatedBalance <= 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
                     {calculatedBalance <= 0 ? "Paid" : "Due"}
                   </Text>
                 </TouchableOpacity>

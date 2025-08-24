@@ -1,4 +1,3 @@
-import { iconMap } from "@/constants/iconMap";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { getAuth } from "firebase/auth";
@@ -26,6 +25,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../../firebaseConfig";
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Feather from "react-native-vector-icons/Feather";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -356,10 +356,10 @@ export default function CustomerHomeScreen() {
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center">
-          <Icon name="storefront" size={30} color="#4B82F6" />
-            <Text className="text-xl font-bold text-gray-900">ShopMunim</Text>
+            <Icon name="storefront" size={30} color="#4B82F6" />
+            <Text className="text-xl font-bold text-gray-900 ml-2">ShopMunim</Text>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => {
               if (notifications.length > 0) {
                 showNotificationsModal();
@@ -369,11 +369,11 @@ export default function CustomerHomeScreen() {
             }}
             className="relative"
           >
-            <Image source={iconMap["bell.png"]} className="w-6 h-6" />
+            <Icon name="notifications-active" size={30} color="#3B82F6" />
             {unreadCount > 0 && (
               <View className="absolute -top-1 -right-1 bg-red-500 rounded-full w-5 h-5 items-center justify-center">
                 <Text className="text-white text-xs font-bold">
-                  {unreadCount > 9 ? '9+' : unreadCount}
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </Text>
               </View>
             )}
@@ -392,15 +392,21 @@ export default function CustomerHomeScreen() {
               Track your purchases and dues from all your favourite shops.
             </Text>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => router.push("/(customerTabs)/editProfile")}
             className="ml-4"
           >
-            <Image
-              source={profileImage ? { uri: profileImage } : iconMap["user.png"]}
-              className="w-20 h-20 rounded-full border-4 border-white"
-              style={{ resizeMode: profileImage ? 'cover' : 'contain' }}
-            />
+            {profileImage ? (
+              <Image
+                source={{ uri: profileImage }}
+                className="w-20 h-20 rounded-full border-4 border-white"
+                style={{ resizeMode: "cover" }}
+              />
+            ) : (
+              <View className="w-20 h-20 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center">
+                <Feather name="user" size={40} color="#9CA3AF" />
+              </View>
+            )}
           </TouchableOpacity>
         </LinearGradient>
 
@@ -410,7 +416,7 @@ export default function CustomerHomeScreen() {
           {/* Total Spent Card (Updated to Red Theme) */}
           <View className="w-[48%] bg-white p-4 rounded-xl shadow items-center">
             <View className="bg-red-100 p-3 rounded-full mb-2">
-              <Image source={iconMap["rupee.png"]} className="w-5 h-5" />
+              <Icon name="currency-rupee" size={28} color="#EF4444" />
             </View>
             <Text className="text-lg font-bold text-red-600">₹{spent}</Text>
             <Text className="text-sm text-gray-500 text-center">Total Spent</Text>
@@ -419,7 +425,7 @@ export default function CustomerHomeScreen() {
           {/* Due Card (Yellow Theme) */}
           <View className="w-[48%] bg-white p-4 rounded-xl shadow items-center">
             <View className="bg-yellow-100 p-3 rounded-full mb-2">
-              <Image source={iconMap["clock.png"]} className="w-5 h-5" />
+              <Feather name="clock" size={20} color="#F59E0B" />
             </View>
             <Text className="text-lg font-bold text-yellow-600">₹{due}</Text>
             <Text className="text-sm text-gray-500 text-center">Due</Text>
@@ -442,12 +448,12 @@ export default function CustomerHomeScreen() {
                 }
               >
                 <View className="flex-row items-center">
-                  <Image source={iconMap["shop.png"]} className="w-10 h-10 rounded-full mr-3" />
+                  <Icon name="storefront" size={30} color="#4B82F6" />
                   <View>
-                    <Text className="text-gray-700 font-medium">{shop.name}</Text>
+                    <Text className="text-gray-700 text-base font-medium ml-2">{shop.name}</Text>
                   </View>
                 </View>
-                <Image source={iconMap["arrow-right.png"]} className="w-4 h-4" />
+                <Icon name="arrow-right" size={30} color="#3B82F6" />
               </TouchableOpacity>
             ))
           ) : (
@@ -460,7 +466,7 @@ export default function CustomerHomeScreen() {
       {showToast && (
         <View className="absolute top-20 left-4 right-4 bg-blue-500 rounded-lg p-4 shadow-lg z-50">
           <View className="flex-row items-center">
-            <Image source={iconMap["bell.png"]} className="w-5 h-5 mr-3" style={{ tintColor: 'white' }} />
+            <Icon name="notifications-active" size={30} color="#3B82F6" />
             <Text className="text-white font-medium flex-1">{toastMessage}</Text>
             <TouchableOpacity onPress={() => setShowToast(false)}>
               <Text className="text-white text-lg">✕</Text>
@@ -479,7 +485,7 @@ export default function CustomerHomeScreen() {
                 <Text className="text-gray-500 text-lg">✕</Text>
               </TouchableOpacity>
             </View>
-            
+
             {/* Summary Header */}
             <View className="bg-blue-50 p-3 rounded-lg mb-4">
               <Text className="text-blue-800 text-sm font-medium">
@@ -489,18 +495,20 @@ export default function CustomerHomeScreen() {
                 Shows all payment reminders and updates from all shops
               </Text>
             </View>
-            
+
             <ScrollView showsVerticalScrollIndicator={false}>
               {notifications.length > 0 ? (
                 notifications.map((notification, index) => {
                   const isNew = !(notification as any).read;
-                  const isRecent = new Date((notification as any).createdAt).getTime() > Date.now() - (24 * 60 * 60 * 1000); // Last 24 hours
-                  
+                  const isRecent =
+                    new Date((notification as any).createdAt).getTime() >
+                    Date.now() - 24 * 60 * 60 * 1000; // Last 24 hours
+
                   return (
                     <TouchableOpacity
                       key={notification.id}
                       className={`p-4 border-l-4 mb-3 rounded-lg ${
-                        isNew ? 'bg-blue-50 border-blue-500' : 'bg-gray-50 border-gray-300'
+                        isNew ? "bg-blue-50 border-blue-500" : "bg-gray-50 border-gray-300"
                       }`}
                       onPress={() => markNotificationAsRead(notification.id)}
                     >
@@ -508,7 +516,7 @@ export default function CustomerHomeScreen() {
                       <View className="flex-row justify-between items-start mb-2">
                         <View className="flex-row items-center">
                           <Text className="font-semibold text-gray-900 text-base">
-                            {notification.title || 'Payment Reminder'}
+                            {notification.title || "Payment Reminder"}
                           </Text>
                           {isNew && (
                             <View className="ml-2 bg-blue-500 px-2 py-1 rounded-full">
@@ -525,15 +533,13 @@ export default function CustomerHomeScreen() {
                           {new Date((notification as any).createdAt).toLocaleDateString()}
                         </Text>
                       </View>
-                      
-                      <Text className="text-gray-700 text-sm mb-2">
-                        {notification.message}
-                      </Text>
-                      
+
+                      <Text className="text-gray-700 text-sm mb-2">{notification.message}</Text>
+
                       <View className="flex-row justify-between items-center">
                         <View>
                           <Text className="text-xs text-gray-500">
-                            From: {(notification as any).shopName || 'Shop'}
+                            From: {(notification as any).shopName || "Shop"}
                           </Text>
                           <Text className="text-xs text-gray-400">
                             {new Date((notification as any).createdAt).toLocaleString()}
@@ -545,12 +551,10 @@ export default function CustomerHomeScreen() {
                           </Text>
                         )}
                       </View>
-                      
+
                       {isNew && (
                         <View className="mt-2">
-                          <Text className="text-xs text-blue-600">
-                            👆 Tap to mark as read
-                          </Text>
+                          <Text className="text-xs text-blue-600">👆 Tap to mark as read</Text>
                         </View>
                       )}
                     </TouchableOpacity>
@@ -558,7 +562,6 @@ export default function CustomerHomeScreen() {
                 })
               ) : (
                 <View className="py-8 items-center">
-                  <Image source={iconMap["bell.png"]} className="w-16 h-16 opacity-30 mb-4" />
                   <Text className="text-gray-500 text-center">No notifications yet</Text>
                   <Text className="text-gray-400 text-sm text-center mt-1">
                     You'll see payment reminders and updates here

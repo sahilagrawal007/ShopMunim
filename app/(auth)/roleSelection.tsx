@@ -14,7 +14,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { auth, db } from "../../firebaseConfig";
 import { useRouter } from "expo-router";
 import { Owner, Customer } from "../../types";
-import { iconMap } from "../../constants/iconMap";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import Feather from "react-native-vector-icons/Feather";
 
 export default function RoleSelection() {
   const [role, setRole] = useState<"owner" | "customer" | null>(null);
@@ -147,7 +148,7 @@ export default function RoleSelection() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <LinearGradient
-        colors={['#E0E7FF', '#F3F4F6', '#FFFFFF']}
+        colors={["#E0E7FF", "#F3F4F6", "#FFFFFF"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="flex-1"
@@ -157,11 +158,7 @@ export default function RoleSelection() {
           {/* App Logo and Name */}
           <View className="items-center mb-8">
             <View className="bg-indigo-100 rounded-3xl p-6 mb-4">
-              <Image 
-                source={iconMap["shop.png"]} 
-                className="w-16 h-16"
-                style={{ tintColor: '#4F46E5' }}
-              />
+              <Icon name="storefront" size={60} color="#4B82F6" />
             </View>
             <Text className="text-3xl font-bold text-indigo-900 mb-2">ShopMunim</Text>
             <Text className="text-indigo-700 text-base text-center">
@@ -178,44 +175,36 @@ export default function RoleSelection() {
 
               {/* Role Selection */}
               <View className="mb-6">
-                <Text className="text-indigo-800 text-sm font-medium mb-3 ml-1">Choose Your Role</Text>
+                <Text className="text-indigo-800 text-sm font-medium mb-3 ml-1">
+                  Choose Your Role
+                </Text>
                 <View className="flex-row space-x-3">
                   <TouchableOpacity
-                    style={[
-                      styles.roleButton,
-                      role === "owner" && styles.roleButtonSelected
-                    ]}
+                    style={[styles.roleButton, role === "owner" && styles.roleButtonSelected]}
                     onPress={() => setRole("owner")}
                   >
-                    <Image 
-                      source={iconMap["shop.png"]} 
-                      className="w-8 h-8 mb-2"
-                      style={{ tintColor: role === "owner" ? 'white' : '#4F46E5' }}
-                    />
-                    <Text style={[
-                      styles.roleButtonText,
-                      role === "owner" && styles.roleButtonTextSelected
-                    ]}>
+                    <Icon name="storefront" size={60} color="#4B82F6" />
+                    <Text
+                      style={[
+                        styles.roleButtonText,
+                        role === "owner" && styles.roleButtonTextSelected,
+                      ]}
+                    >
                       Shop Owner
                     </Text>
                   </TouchableOpacity>
-                  
+
                   <TouchableOpacity
-                    style={[
-                      styles.roleButton,
-                      role === "customer" && styles.roleButtonSelected
-                    ]}
+                    style={[styles.roleButton, role === "customer" && styles.roleButtonSelected]}
                     onPress={() => setRole("customer")}
                   >
-                    <Image 
-                      source={iconMap["user.png"]} 
-                      className="w-8 h-8 mb-2"
-                      style={{ tintColor: role === "customer" ? 'white' : '#4F46E5' }}
-                    />
-                    <Text style={[
-                      styles.roleButtonText,
-                      role === "customer" && styles.roleButtonTextSelected
-                    ]}>
+                    <Feather name="user" size={60} color="#4B82F6" />
+                    <Text
+                      style={[
+                        styles.roleButtonText,
+                        role === "customer" && styles.roleButtonTextSelected,
+                      ]}
+                    >
                       Customer
                     </Text>
                   </TouchableOpacity>
@@ -247,7 +236,7 @@ export default function RoleSelection() {
                     value={phone}
                     onChangeText={(text) => {
                       // Only allow numbers and limit to 10 characters
-                      const numericText = text.replace(/[^0-9]/g, '');
+                      const numericText = text.replace(/[^0-9]/g, "");
                       if (numericText.length <= 10) {
                         setPhone(numericText);
                       }
@@ -291,7 +280,7 @@ export default function RoleSelection() {
                         value={pincode}
                         onChangeText={(text) => {
                           // Only allow numbers and limit to 6 characters
-                          const numericText = text.replace(/[^0-9]/g, '');
+                          const numericText = text.replace(/[^0-9]/g, "");
                           if (numericText.length <= 6) {
                             setPincode(numericText);
                             if (numericText.length === 6) {
@@ -316,7 +305,7 @@ export default function RoleSelection() {
                       <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">City</Text>
                       <View className="bg-gray-100 rounded-xl border border-gray-300 shadow-sm">
                         <TextInput
-                          style={[styles.input, { color: '#6B7280' }]}
+                          style={[styles.input, { color: "#6B7280" }]}
                           value={city}
                           editable={false}
                         />
@@ -329,7 +318,7 @@ export default function RoleSelection() {
                     <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Address</Text>
                     <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
                       <TextInput
-                        style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
+                        style={[styles.input, { height: 80, textAlignVertical: "top" }]}
                         placeholder="Enter your complete address"
                         placeholderTextColor="#9CA3AF"
                         value={address}
@@ -345,20 +334,29 @@ export default function RoleSelection() {
               {/* Continue Button */}
               <TouchableOpacity
                 style={[
-                  styles.continueButton, 
-                  (!role || !name || !phone || phone.length !== 10 || 
-                   (role === "owner" && (!shopName || !pincode || pincode.length !== 6 || !address.trim())) || 
-                   loading) && styles.buttonDisabled
+                  styles.continueButton,
+                  (!role ||
+                    !name ||
+                    !phone ||
+                    phone.length !== 10 ||
+                    (role === "owner" &&
+                      (!shopName || !pincode || pincode.length !== 6 || !address.trim())) ||
+                    loading) &&
+                    styles.buttonDisabled,
                 ]}
                 onPress={handleRoleSelection}
                 disabled={
-                  !role || !name || !phone || phone.length !== 10 || 
-                  (role === "owner" && (!shopName || !pincode || pincode.length !== 6 || !address.trim())) || 
+                  !role ||
+                  !name ||
+                  !phone ||
+                  phone.length !== 10 ||
+                  (role === "owner" &&
+                    (!shopName || !pincode || pincode.length !== 6 || !address.trim())) ||
                   loading
                 }
               >
                 <LinearGradient
-                  colors={loading ? ['#9CA3AF', '#6B7280'] : ['#4F46E5', '#6366F1']}
+                  colors={loading ? ["#9CA3AF", "#6B7280"] : ["#4F46E5", "#6366F1"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   className="w-full rounded-xl py-4 items-center"
@@ -373,9 +371,7 @@ export default function RoleSelection() {
 
           {/* Footer */}
           <View className="mt-6 items-center">
-            <Text className="text-indigo-600 text-sm text-center">
-              Secure • Fast • Reliable
-            </Text>
+            <Text className="text-indigo-600 text-sm text-center">Secure • Fast • Reliable</Text>
           </View>
         </View>
       </LinearGradient>

@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { auth } from "../../firebaseConfig";
 import { router } from "expo-router";
-import { iconMap } from "../../constants/iconMap";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 const { width } = Dimensions.get('window');
 
@@ -32,9 +32,9 @@ export default function Login() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
       <LinearGradient
-        colors={['#E0E7FF', '#F3F4F6', '#FFFFFF']}
+        colors={["#E0E7FF", "#F3F4F6", "#FFFFFF"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="flex-1"
@@ -44,11 +44,7 @@ export default function Login() {
           {/* App Logo and Name */}
           <View className="items-center mb-12">
             <View className="bg-indigo-100 rounded-3xl p-6 mb-6">
-              <Image 
-                source={iconMap["shop.png"]} 
-                className="w-20 h-20"
-                style={{ tintColor: '#4F46E5' }}
-              />
+              <Icon name="storefront" size={60} color="#4B82F6" />
             </View>
             <Text className="text-4xl font-bold text-indigo-900 mb-2">ShopMunim</Text>
             <Text className="text-indigo-700 text-lg text-center">
@@ -62,7 +58,7 @@ export default function Login() {
               <Text className="text-2xl font-bold text-indigo-900 text-center mb-6">
                 Welcome Back
               </Text>
-              
+
               <Text className="text-indigo-700 text-center mb-6">
                 Sign in to manage your shop or track your purchases
               </Text>
@@ -105,7 +101,7 @@ export default function Login() {
                 disabled={loading}
               >
                 <LinearGradient
-                  colors={loading ? ['#9CA3AF', '#6B7280'] : ['#4F46E5', '#6366F1']}
+                  colors={loading ? ["#9CA3AF", "#6B7280"] : ["#4F46E5", "#6366F1"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   className="w-full rounded-xl py-4 items-center"
@@ -117,15 +113,13 @@ export default function Login() {
               </TouchableOpacity>
 
               {/* Register Link */}
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="mt-6 items-center"
                 onPress={() => router.push("/(auth)/register")}
               >
                 <Text className="text-indigo-700 text-center">
                   Don't have an account?{" "}
-                  <Text className="text-indigo-600 font-semibold underline">
-                    Create one here
-                  </Text>
+                  <Text className="text-indigo-600 font-semibold underline">Create one here</Text>
                 </Text>
               </TouchableOpacity>
             </View>
@@ -133,9 +127,7 @@ export default function Login() {
 
           {/* Footer */}
           <View className="mt-8 items-center">
-            <Text className="text-indigo-600 text-sm text-center">
-              Secure • Fast • Reliable
-            </Text>
+            <Text className="text-indigo-600 text-sm text-center">Secure • Fast • Reliable</Text>
             <Text className="text-indigo-500 text-xs text-center mt-2">
               © 2024 ShopMunim. All rights reserved.
             </Text>

@@ -19,7 +19,6 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import { iconMap } from "@/constants/iconMap";
 import { Customer, Shop } from "../../types";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";

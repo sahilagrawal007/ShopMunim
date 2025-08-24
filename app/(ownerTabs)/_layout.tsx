@@ -51,12 +51,6 @@ export default function OwnerTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="Notifications"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="CustomerProfile"
         options={{
           href: null,

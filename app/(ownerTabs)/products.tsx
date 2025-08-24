@@ -1,6 +1,3 @@
-// app/(tabs)/two.tsx
-
-import { iconMap } from "@/constants/iconMap";
 import { LinearGradient } from "expo-linear-gradient";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -8,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../../firebaseConfig";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function CustomersScreen() {
   const [productName, setProductName] = useState("");
@@ -112,11 +110,11 @@ export default function CustomersScreen() {
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center">
-            <Image source={iconMap["shop.png"]} className="w-6 h-6 mr-2" />
-            <Text className="text-xl font-bold text-gray-900">ShopMunim</Text>
+            <Icon name="storefront" size={30} color="#4B82F6" />
+            <Text className="text-xl font-bold text-gray-900 ml-2">ShopMunim</Text>
           </View>
           <TouchableOpacity>
-            <Image source={iconMap["bell.png"]} className="w-6 h-6" />
+            <Icon name="notifications-active" size={30} color="#3B82F6" />
           </TouchableOpacity>
         </View>
 
@@ -179,7 +177,7 @@ export default function CustomersScreen() {
               }
               className="mx-1"
             >
-              <Image source={iconMap["delete.png"]} className="w-5 h-5" />
+              <Icon name="delete-forever" size={30} color="#EF4444" />
             </TouchableOpacity>
           </View>
         ))}
