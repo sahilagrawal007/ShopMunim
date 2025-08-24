@@ -7,11 +7,14 @@ import {
   StyleSheet,
   Alert,
   SafeAreaView,
+  Image,
 } from "react-native";
 import { doc, setDoc } from "firebase/firestore";
+import { LinearGradient } from "expo-linear-gradient";
 import { auth, db } from "../../firebaseConfig";
 import { useRouter } from "expo-router";
 import { Owner, Customer } from "../../types";
+import { iconMap } from "../../constants/iconMap";
 
 export default function RoleSelection() {
   const [role, setRole] = useState<"owner" | "customer" | null>(null);
@@ -96,251 +99,198 @@ export default function RoleSelection() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View style={styles.container}>
-        <Text style={styles.title}>Choose Your Role</Text>
-
-        <View style={styles.roleContainer}>
-          <TouchableOpacity
-            style={[styles.roleButton, role === "owner" && styles.roleButtonSelected]}
-            onPress={() => setRole("owner")}
-          >
-            <Text
-              style={[styles.roleButtonText, role === "owner" && styles.roleButtonTextSelected]}
-            >
-              Shop Owner
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.roleButton, role === "customer" && styles.roleButtonSelected]}
-            onPress={() => setRole("customer")}
-          >
-            <Text
-              style={[styles.roleButtonText, role === "customer" && styles.roleButtonTextSelected]}
-            >
-              Customer
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {role && (
-          <View style={styles.formContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Full Name"
-              placeholderTextColor="gray"
-              value={name}
-              onChangeText={setName}
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Phone Number"
-              placeholderTextColor="gray"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-            />
-
-            {role === "owner" && (
-              <TextInput
-                style={styles.input}
-                placeholder="Shop Name"
-                placeholderTextColor="gray"
-                value={shopName}
-                onChangeText={setShopName}
+      <LinearGradient
+        colors={['#E0E7FF', '#F3F4F6', '#FFFFFF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="flex-1"
+      >
+        {/* Header Section */}
+        <View className="flex-1 justify-center items-center px-8">
+          {/* App Logo and Name */}
+          <View className="items-center mb-8">
+            <View className="bg-indigo-100 rounded-3xl p-6 mb-4">
+              <Image 
+                source={iconMap["shop.png"]} 
+                className="w-16 h-16"
+                style={{ tintColor: '#4F46E5' }}
               />
-            )}
-
-            <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleRoleSelection}
-              disabled={loading}
-            >
-              <Text style={styles.buttonText}>{loading ? "Setting up..." : "Continue"}</Text>
-            </TouchableOpacity>
+            </View>
+            <Text className="text-3xl font-bold text-indigo-900 mb-2">ShopMunim</Text>
+            <Text className="text-indigo-700 text-base text-center">
+              Choose your role to get started
+            </Text>
           </View>
-        )}
-      </View>
+
+          {/* Role Selection Form */}
+          <View className="w-full max-w-sm">
+            <View className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-indigo-200 shadow-lg">
+              <Text className="text-2xl font-bold text-indigo-900 text-center mb-6">
+                Complete Your Profile
+              </Text>
+
+              {/* Role Selection */}
+              <View className="mb-6">
+                <Text className="text-indigo-800 text-sm font-medium mb-3 ml-1">Choose Your Role</Text>
+                <View className="flex-row space-x-3">
+                  <TouchableOpacity
+                    style={[
+                      styles.roleButton,
+                      role === "owner" && styles.roleButtonSelected
+                    ]}
+                    onPress={() => setRole("owner")}
+                  >
+                    <Image 
+                      source={iconMap["shop.png"]} 
+                      className="w-8 h-8 mb-2"
+                      style={{ tintColor: role === "owner" ? 'white' : '#4F46E5' }}
+                    />
+                    <Text style={[
+                      styles.roleButtonText,
+                      role === "owner" && styles.roleButtonTextSelected
+                    ]}>
+                      Shop Owner
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={[
+                      styles.roleButton,
+                      role === "customer" && styles.roleButtonSelected
+                    ]}
+                    onPress={() => setRole("customer")}
+                  >
+                    <Image 
+                      source={iconMap["user.png"]} 
+                      className="w-8 h-8 mb-2"
+                      style={{ tintColor: role === "customer" ? 'white' : '#4F46E5' }}
+                    />
+                    <Text style={[
+                      styles.roleButtonText,
+                      role === "customer" && styles.roleButtonTextSelected
+                    ]}>
+                      Customer
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Name Input */}
+              <View className="mb-4">
+                <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Full Name</Text>
+                <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your full name"
+                    placeholderTextColor="#9CA3AF"
+                    value={name}
+                    onChangeText={setName}
+                  />
+                </View>
+              </View>
+
+              {/* Phone Input */}
+              <View className="mb-4">
+                <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Phone Number</Text>
+                <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Enter your phone number"
+                    placeholderTextColor="#9CA3AF"
+                    value={phone}
+                    onChangeText={setPhone}
+                    keyboardType="phone-pad"
+                  />
+                </View>
+              </View>
+
+              {/* Shop Name Input (only for owners) */}
+              {role === "owner" && (
+                <View className="mb-6">
+                  <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Shop Name</Text>
+                  <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter your shop name"
+                      placeholderTextColor="#9CA3AF"
+                      value={shopName}
+                      onChangeText={setShopName}
+                    />
+                  </View>
+                </View>
+              )}
+
+              {/* Continue Button */}
+              <TouchableOpacity
+                style={[styles.continueButton, (!role || !name || !phone || (role === "owner" && !shopName) || loading) && styles.buttonDisabled]}
+                onPress={handleRoleSelection}
+                disabled={!role || !name || !phone || (role === "owner" && !shopName) || loading}
+              >
+                <LinearGradient
+                  colors={loading ? ['#9CA3AF', '#6B7280'] : ['#4F46E5', '#6366F1']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  className="w-full rounded-xl py-4 items-center"
+                >
+                  <Text className="text-white font-bold text-lg">
+                    {loading ? "Setting Up..." : "Continue"}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Footer */}
+          <View className="mt-6 items-center">
+            <Text className="text-indigo-600 text-sm text-center">
+              Secure • Fast • Reliable
+            </Text>
+          </View>
+        </View>
+      </LinearGradient>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 8,
-    color: "#333",
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 32,
-    color: "#666",
-  },
   input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
-    backgroundColor: "white",
-    color: "black",
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
     padding: 16,
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  buttonDisabled: {
-    backgroundColor: "#ccc",
-  },
-  buttonText: {
-    color: "white",
     fontSize: 16,
-    fontWeight: "600",
-  },
-  linkButton: {
-    alignItems: "center",
-  },
-  linkText: {
-    color: "#007AFF",
-    fontSize: 16,
-  },
-  roleContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 32,
+    color: '#1F2937',
+    fontWeight: '500',
   },
   roleButton: {
     flex: 1,
-    marginHorizontal: 8,
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
     borderWidth: 2,
-    borderColor: "#ddd",
-    alignItems: "center",
-    backgroundColor: "white",
+    borderColor: 'rgba(79, 70, 229, 0.3)',
   },
   roleButtonSelected: {
-    borderColor: "#007AFF",
-    backgroundColor: "#007AFF",
+    backgroundColor: '#4F46E5',
+    borderColor: '#4F46E5',
   },
   roleButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4F46E5',
+    textAlign: 'center',
   },
   roleButtonTextSelected: {
-    color: "white",
+    color: 'white',
   },
-  formContainer: {
-    marginTop: 16,
+  continueButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  header: {
-    marginBottom: 24,
-    paddingTop: 40,
-  },
-  welcomeText: {
-    fontSize: 16,
-    color: "#666",
-  },
-  nameText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  summaryContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 24,
-  },
-  summaryCard: {
-    flex: 1,
-    backgroundColor: "white",
-    padding: 16,
-    borderRadius: 8,
-    marginHorizontal: 4,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  summaryLabel: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 8,
-  },
-  summaryAmount: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  dueAmount: {
-    color: "#FF3B30",
-  },
-  advanceAmount: {
-    color: "#34C759",
-  },
-  paidAmount: {
-    color: "#007AFF",
-  },
-  section: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: "#333",
-  },
-  emptyText: {
-    textAlign: "center",
-    color: "#666",
-    fontStyle: "italic",
-  },
-  transactionCard: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  transactionInfo: {
-    flex: 1,
-  },
-  transactionDescription: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333",
-  },
-  transactionDate: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 4,
-  },
-  transactionAmount: {
-    fontSize: 16,
-    fontWeight: "bold",
+  buttonDisabled: {
+    opacity: 0.5,
   },
 });
