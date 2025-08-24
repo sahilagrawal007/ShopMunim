@@ -16,7 +16,7 @@ export default function CustomerHistory() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const [transactions, setTransactions] = useState<TransactionWithShop[]>([]);
-  const [filter, setFilter] = useState<"all" | "paid" | "due" | "advance">("all");
+  const [filter, setFilter] = useState<"all" | "paid" | "due">("all");
   const [shopFilter, setShopFilter] = useState<string>(params.shopFilter as string || "");
   const [shops, setShops] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,6 @@ export default function CustomerHistory() {
   // Update shop filter when params change
   useEffect(() => {
     const newShopFilter = params.shopFilter as string || "";
-    console.log("History page received new shop filter:", newShopFilter);
     setShopFilter(newShopFilter);
   }, [params.shopFilter, params.timestamp]);
 
@@ -174,7 +173,7 @@ export default function CustomerHistory() {
       )}
 
       <View style={styles.filterContainer}>
-        {["all", "paid", "due", "advance"].map((filterType) => (
+        {["all", "paid", "due"].map((filterType) => (
           <TouchableOpacity
             key={filterType}
             style={[styles.filterButton, filter === filterType && styles.filterButtonActive]}
@@ -222,8 +221,6 @@ export default function CustomerHistory() {
                     styles.transactionAmount,
                     transaction.type === "due"
                       ? styles.dueAmount
-                      : transaction.type === "advance"
-                      ? styles.advanceAmount
                       : styles.paidAmount,
                   ]}
                 >

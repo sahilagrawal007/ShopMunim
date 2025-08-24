@@ -146,7 +146,25 @@ const CustomerProfile: React.FC = () => {
               id: d.id,
               ...(d.data() as any),
             }));
-            setTransactions(txns);
+            
+            // Client-side sorting as backup to ensure proper order
+            const sortedTxns = txns.sort((a, b) => {
+              const timeA = getTimeFromCreatedAt(a.createdAt);
+              const timeB = getTimeFromCreatedAt(b.createdAt);
+              // Sort by newest first (descending order)
+              return timeB - timeA;
+            });
+            
+            console.log('Raw transactions:', txns.length);
+            console.log('Sorted transactions:', sortedTxns.length);
+            console.log('Sample transaction dates:', sortedTxns.slice(0, 3).map(t => ({
+              id: t.id,
+              createdAt: t.createdAt,
+              time: getTimeFromCreatedAt(t.createdAt),
+              date: new Date(getTimeFromCreatedAt(t.createdAt)).toLocaleString()
+            })));
+            
+            setTransactions(sortedTxns);
             setLoading(false);
           },
           (err) => {
@@ -569,7 +587,12 @@ const CustomerProfile: React.FC = () => {
 
         {/* Transaction History */}
         <View className="bg-white rounded-lg p-4 shadow">
-          <Text className="text-base font-bold text-gray-800 mb-3">Transaction History</Text>
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-base font-bold text-gray-800">Transaction History</Text>
+            <Text className="text-xs text-gray-500">({transactions.length} transactions)</Text>
+          </View>
+          
+          
           <FlatList
             data={transactions} // already returned sorted server-side
             keyExtractor={(item) => item.id}
@@ -607,7 +630,7 @@ const CustomerProfile: React.FC = () => {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={modalStyles.container}
           >
-            <View style={modalStyles.inner}>
+            <View style={[modalStyles.inner, { marginBottom: Platform.OS === 'ios' ? 34 : 0 }]}>
               <Text style={modalStyles.title}>Record Offline Payment</Text>
 
               <Text style={modalStyles.label}>Amount (₹)</Text>
@@ -652,7 +675,7 @@ const CustomerProfile: React.FC = () => {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={modalStyles.container}
           >
-            <View style={modalStyles.inner}>
+            <View style={[modalStyles.inner, { marginBottom: Platform.OS === 'ios' ? 34 : 0 }]}>
               <Text style={modalStyles.title}>Download Statement</Text>
               <Text style={modalStyles.label}>From</Text>
               <TouchableOpacity
@@ -739,13 +762,14 @@ const modalStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "rgba(0,0,0,0.4)",
-    marginBottom: 35,
+    marginBottom: 0, // Remove the small margin
   },
   inner: {
     backgroundColor: "#fff",
     padding: 16,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
+    paddingBottom: 32, // Add extra padding at bottom for safe area
   },
   title: {
     fontSize: 18,
