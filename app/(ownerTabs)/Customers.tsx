@@ -19,19 +19,16 @@ export default function CustomersScreen() {
   // Calculate customer balance based on transactions
   const calculateCustomerBalance = (customerId: string) => {
     if (!allTransactions.length) {
-      console.log('No transactions available for calculation');
       return 0;
     }
     
     const customerTransactions = allTransactions.filter(txn => txn.customerId === customerId);
-    console.log(`Customer ${customerId} has ${customerTransactions.length} transactions:`, customerTransactions);
     
     let totalDue = 0;
     let totalPaid = 0;
     let totalAdvance = 0;
     
     customerTransactions.forEach(txn => {
-      console.log(`Transaction: type=${txn.type}, amount=${txn.amount}, customerId=${txn.customerId}`);
       if (txn.type === 'credit' || txn.type === 'due') {
         totalDue += Number(txn.amount) || 0;
       } else if (txn.type === 'payment' || txn.type === 'paid') {
@@ -41,11 +38,8 @@ export default function CustomersScreen() {
       }
     });
     
-    console.log(`Customer ${customerId} totals: due=${totalDue}, paid=${totalPaid}, advance=${totalAdvance}`);
-    
     // Net due = total credit - (payments + advances)
     const netDue = Math.max(totalDue - (totalPaid + totalAdvance), 0);
-    console.log(`Customer ${customerId} net due: ${netDue}`);
     
     return netDue;
   };
@@ -53,7 +47,6 @@ export default function CustomersScreen() {
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log('Fetching data for user:', user.uid);
         
         // Fetch customers
         const customersRef = query(
@@ -73,7 +66,6 @@ export default function CustomersScreen() {
             const data = doc.data();
             list.push({ id: doc.id, ...data });
           });
-          console.log('Loaded customers:', list.length);
           setCustomers(list);
         });
         
@@ -83,7 +75,6 @@ export default function CustomersScreen() {
             const data = doc.data();
             list.push({ id: doc.id, ...data });
           });
-          console.log('Loaded transactions:', list.length, 'Sample:', list.slice(0, 2));
           setAllTransactions(list);
           setLoading(false);
         });
