@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { auth } from "../../firebaseConfig";
+import { router } from "expo-router";
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -49,6 +50,12 @@ export default function ChangePassword() {
   return (
     <SafeAreaView className="flex-1">
       <View style={styles.container}>
+        <TouchableOpacity
+          onPress={() => router.navigate("/(customerTabs)/settings")}
+          style={styles.backButton}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
         <Text style={styles.header}>Change Password</Text>
         <TextInput
           style={styles.input}
@@ -119,6 +126,15 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: "white",
     fontSize: 16,
+    fontWeight: "600",
+  },
+  backButton: {
+    alignSelf: "flex-start",
+    marginBottom: 8,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: "#007AFF",
     fontWeight: "600",
   },
 });

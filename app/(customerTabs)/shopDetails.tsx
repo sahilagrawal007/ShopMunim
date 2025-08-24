@@ -70,7 +70,6 @@ const JoinedShopDetails: React.FC = () => {
     const shopUnsubscribe = onSnapshot(doc(db, "shops", shopId), (shopDoc) => {
       if (shopDoc.exists()) {
         const shopData = { id: shopDoc.id, ...shopDoc.data() } as any;
-        console.log("Shop details updated:", shopData.name);
         setShopDetails(shopData);
       }
     }, (error) => {
@@ -100,7 +99,6 @@ const JoinedShopDetails: React.FC = () => {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log("Transactions loaded:", txnList.length, "transactions");
       setTransactions(txnList);
       setLoading(false);
     }, (error) => {
@@ -130,7 +128,6 @@ const JoinedShopDetails: React.FC = () => {
         // store the component constructor
         setDateTimePickerComponent(() => (dtp as any).default || dtp);
       } catch (e) {
-        console.log("DateTimePicker not available; falling back to text inputs.");
       }
     })();
 
@@ -593,7 +590,6 @@ const JoinedShopDetails: React.FC = () => {
                     <TouchableOpacity
                       onPress={() => {
                         const currentShopName = shopDetails?.name || "";
-                        console.log("Navigating to history with shop filter:", currentShopName);
                         router.push({
                           pathname: "/(customerTabs)/history",
                           params: { 
@@ -701,7 +697,6 @@ const JoinedShopDetails: React.FC = () => {
                     <TouchableOpacity
                       onPress={() => {
                         const currentShopName = shopDetails?.name || "";
-                        console.log("Navigating to history with shop filter (bottom button):", currentShopName);
                         router.push({
                           pathname: "/(customerTabs)/history",
                           params: { 

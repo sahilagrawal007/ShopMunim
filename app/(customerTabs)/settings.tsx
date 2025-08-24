@@ -111,7 +111,7 @@ export default function CustomerSettings() {
           </View>
 
           {/* Notifications */}
-          <View style={styles.section}>
+          {/* <View style={styles.section}>
             <Text style={styles.sectionTitle}>Notifications</Text>
             <View style={styles.settingItem}>
               <Feather name="bell" size={20} color="#555" style={styles.icon} />
@@ -122,7 +122,7 @@ export default function CustomerSettings() {
                 style={{ marginLeft: "auto" }}
               />
             </View>
-          </View>
+          </View> */}
 
           {/* Order & Payment */}
           <View style={styles.section}>

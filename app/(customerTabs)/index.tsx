@@ -61,7 +61,6 @@ export default function CustomerHomeScreen() {
       ));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Error marking notification as read:', error);
     }
   };
 
@@ -75,22 +74,16 @@ export default function CustomerHomeScreen() {
   // Fallback function to fetch notifications without real-time updates
   const fetchNotificationsFallback = async (joinedShops: string[], customerId: string) => {
     try {
-      console.log('🔄 Using fallback method to fetch notifications');
-      console.log('🔍 Customer ID:', customerId);
-      console.log('🏪 Joined shops:', joinedShops);
       
       const notificationsRef = collection(db, 'notifications');
       const q = query(notificationsRef, where("customerId", "==", customerId));
       const snapshot = await getDocs(q);
-      
-      console.log('📱 Total notifications found for customer:', snapshot.size);
       
       const notificationsList: any[] = [];
       let unread = 0;
 
       snapshot.forEach((doc) => {
         const notification = { id: doc.id, ...doc.data() };
-        console.log('📋 Notification:', notification);
         // Include ALL notifications for this customer (not just from joined shops)
         // This shows complete history including past notifications
         notificationsList.push(notification);
@@ -109,9 +102,7 @@ export default function CustomerHomeScreen() {
       setNotifications(notificationsList);
       setUnreadCount(unread);
       setPreviousNotificationCount(notificationsList.length);
-      console.log(`📱 Fallback: Fetched ${notificationsList.length} notifications, ${unread} unread`);
     } catch (error) {
-      console.error('❌ Error in fallback notifications fetch:', error);
       setNotifications([]);
       setUnreadCount(0);
     }
@@ -126,25 +117,17 @@ export default function CustomerHomeScreen() {
     }
     
     try {
-      console.log('🧪 Testing notifications...');
-      console.log('👤 Current user:', user.uid);
-      console.log('🏪 Current shops:', shops);
-      console.log('📱 Current notifications:', notifications);
-      console.log('🔴 Unread count:', unreadCount);
       
       // Test direct Firestore query
       const notificationsRef = collection(db, 'notifications');
       const snapshot = await getDocs(notificationsRef);
-      console.log('📊 Total notifications in collection:', snapshot.size);
       
       snapshot.forEach((doc) => {
         const data = doc.data();
-        console.log('📋 Notification data:', { id: doc.id, ...data });
       });
       
       Alert.alert('Test Complete', `Found ${snapshot.size} total notifications. Check console for details.`);
     } catch (error) {
-      console.error('❌ Test failed:', error);
       Alert.alert('Test Failed', 'Check console for error details.');
     }
   };
@@ -158,7 +141,6 @@ export default function CustomerHomeScreen() {
     }
 
     try {
-      console.log('🧮 Manually recalculating analytics...');
       
       // Get current joined shops
       const customerDoc = await getDoc(doc(db, "customers", user.uid));
@@ -186,14 +168,10 @@ export default function CustomerHomeScreen() {
       let totalPaid = 0;
       let totalAdvance = 0;
       let totalDue = 0;
-
-      console.log('💰 Manual transaction fetch:', snapshot.size, 'transactions');
       
       snapshot.forEach((doc) => {
         const txn = doc.data();
         const amount = Number(txn.amount) || 0;
-        
-        console.log(`📊 Transaction: ${txn.type} - ₹${amount} at shop ${txn.shopId}`);
         
         if (txn.type === "paid") {
           totalPaid += amount;
@@ -207,14 +185,6 @@ export default function CustomerHomeScreen() {
       const netDue = Math.max(totalDue - (totalPaid + totalAdvance), 0);
       const totalSpent = totalPaid + totalAdvance;
 
-      console.log('📊 Manual calculation results:', {
-        totalPaid,
-        totalDue,
-        totalAdvance,
-        netDue,
-        totalSpent
-      });
-
       // Update state
       setDue(netDue);
       setSpent(totalSpent);
@@ -224,7 +194,6 @@ export default function CustomerHomeScreen() {
       );
       
     } catch (error) {
-      console.error('❌ Manual recalculation failed:', error);
       Alert.alert('Recalculation Failed', 'Check console for error details.');
     }
   };
@@ -276,21 +245,17 @@ export default function CustomerHomeScreen() {
           );
 
           notificationsUnsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
-            console.log('📱 Notifications snapshot received:', snapshot.size, 'documents');
             const notificationsList: any[] = [];
             let unread = 0;
 
             snapshot.forEach((doc) => {
               const notification = { id: doc.id, ...doc.data() };
-              console.log('📋 Processing notification:', { id: doc.id, shopId: (notification as any).shopId, customerId: (notification as any).customerId });
-              
               // Include ALL notifications for this customer (not just from joined shops)
               // This shows complete history including past notifications from shops they may have left
               notificationsList.push(notification);
               if (!(notification as any).read) {
                 unread++;
               }
-              console.log('✅ Notification added (all notifications included)');
             });
 
             // Sort by creation date (newest first)
@@ -309,14 +274,11 @@ export default function CustomerHomeScreen() {
             setNotifications(notificationsList);
             setUnreadCount(unread);
             setPreviousNotificationCount(notificationsList.length);
-            console.log(`📱 Final result: ${notificationsList.length} notifications, ${unread} unread`);
           }, (error) => {
-            console.error('❌ Error fetching notifications:', error);
             // Fallback: try to fetch without real-time updates
             fetchNotificationsFallback(joinedShops, user.uid);
           });
         } catch (error) {
-          console.error('❌ Error setting up notifications listener:', error);
           // Fallback: try to fetch without real-time updates
           fetchNotificationsFallback(joinedShops, user.uid);
         }
@@ -334,15 +296,9 @@ export default function CustomerHomeScreen() {
         let totalAdvance = 0;
         let totalDue = 0;
 
-        console.log('💰 Processing transactions for customer:', user.uid);
-        console.log('🏪 From shops:', joinedShops);
-        console.log('📊 Total transactions found:', snapshot.size);
-
         snapshot.forEach((doc) => {
           const txn = doc.data();
           const amount = Number(txn.amount) || 0;
-          
-          console.log(`📊 Transaction: ${txn.type} - ₹${amount} at shop ${txn.shopId}`);
           
           if (txn.type === "paid") {
             totalPaid += amount;
@@ -350,16 +306,7 @@ export default function CustomerHomeScreen() {
             totalDue += amount;
           } else if (txn.type === "advance") {
             totalAdvance += amount;
-          } else {
-            console.log(`⚠️ Unknown transaction type: ${txn.type}`);
           }
-        });
-
-        console.log('📊 Transaction Summary:', {
-          totalPaid,
-          totalDue,
-          totalAdvance,
-          totalTransactions: snapshot.size
         });
 
         // Calculate net outstanding due (what customer actually owes)
@@ -371,13 +318,6 @@ export default function CustomerHomeScreen() {
         
         // Total credit used = Total due amount (what was purchased on credit)
         const totalCreditUsed = totalDue;
-
-        console.log('📊 Final Calculations:', {
-          netDue,
-          totalSpent,
-          totalCreditUsed,
-          calculation: `Due: ${totalDue} - (Paid: ${totalPaid} + Advance: ${totalAdvance}) = ${netDue}`
-        });
 
         setDue(netDue);
         setSpent(totalSpent);
@@ -499,7 +439,7 @@ export default function CustomerHomeScreen() {
         </View>
 
         {/* Detailed Analytics */}
-        <View className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+        {/* <View className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
           <Text className="text-blue-800 font-semibold mb-3">📊 Transaction Analytics</Text>
           <View className="space-y-2">
             <View className="flex-row justify-between">
@@ -521,7 +461,7 @@ export default function CustomerHomeScreen() {
               </Text>
             </View>
           </View>
-        </View>
+        </View> */}
 
         {/* Shops List */}
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
@@ -554,7 +494,7 @@ export default function CustomerHomeScreen() {
         </View>
 
         {/* Debug Section - Remove in production */}
-        <View className="mb-6 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+        {/* <View className="mb-6 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
           <Text className="text-yellow-800 font-semibold mb-2">Debug Info</Text>
           <Text className="text-yellow-700 text-sm mb-2">📱 Total Notifications: {notifications.length}</Text>
           <Text className="text-yellow-700 text-sm mb-2">🔴 Unread: {unreadCount}</Text>
@@ -595,7 +535,7 @@ export default function CustomerHomeScreen() {
           >
             <Text className="text-white font-semibold text-center">Log Current State</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* Toast Notification */}

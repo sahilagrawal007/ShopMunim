@@ -20,12 +20,10 @@ export default function RootLayout() {
           const ownerDoc = await getDoc(doc(db, "owners", user.uid));
           if (ownerDoc.exists()) {
             setUserRole("owner");
-            console.log("Owner details correct");
           } else {
             const customerDoc = await getDoc(doc(db, "customers", user.uid));
             if (customerDoc.exists()) {
               setUserRole("customer");
-              console.log("Customer details correct");
             } else setUserRole(null);
           }
         } catch (error) {

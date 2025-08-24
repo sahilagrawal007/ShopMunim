@@ -35,15 +35,6 @@ export default function DashboardScreen() {
   const calculateAnalyticsFromTransactions = (transactionList: any[], customerList: any[]) => {
     const customerMap: Record<string, { paid: number; due: number; credit: number }> = {};
 
-    console.log('🔍 Processing transactions for analytics:', transactionList.length, 'transactions');
-    console.log('📋 Raw transaction data:', transactionList.map(tx => ({
-      id: tx.id,
-      customerId: tx.customerId,
-      type: tx.type,
-      amount: tx.amount,
-      description: tx.description
-    })));
-
     transactionList.forEach((tx) => {
       const cid = tx.customerId;
       if (!customerMap[cid]) {
@@ -51,17 +42,12 @@ export default function DashboardScreen() {
       }
 
       const amount = Number(tx.amount) || 0;
-      console.log(`💰 Transaction: ${tx.type} - ₹${amount} for customer ${cid}`);
 
       if (tx.type === 'paid' || tx.type === 'advance') {
         customerMap[cid].paid += amount;
-        console.log(`✅ Added to paid: ${customerMap[cid].paid}`);
       } else if (tx.type === 'due') {
         customerMap[cid].due += amount;
         customerMap[cid].credit += amount;
-        console.log(`❌ Added to due: ${customerMap[cid].due}`);
-      } else {
-        console.log(`⚠️ Unknown transaction type: ${tx.type}, amount: ${amount}`);
       }
     });
 
@@ -71,11 +57,9 @@ export default function DashboardScreen() {
     let customersWithDue = 0;
     let totalDue = 0;
 
-    console.log('📊 Customer balances from transactions:');
     Object.entries(customerMap).forEach(([cid, { paid, due }]) => {
       // Calculate net balance (due - paid)
       const netBalance = due - paid;
-      console.log(`👤 Customer ${cid}: Due ₹${due}, Paid ₹${paid}, Net Balance ₹${netBalance}`);
       
       if (netBalance > 0) {
         customersWithDue++;
@@ -95,8 +79,6 @@ export default function DashboardScreen() {
       totalCreditGiven,
       totalCustomers,
     };
-    console.log('📊 Computed Analytics from Transactions:', analytics);
-    console.log('💰 Transaction Details:', customerMap);
     setAnalyticsData(analytics);
   };
 
@@ -128,12 +110,6 @@ export default function DashboardScreen() {
       totalCreditGiven: totalDue, // Total due amount is the credit given
       totalCustomers,
     };
-    console.log('📊 Computed Analytics from Customers (fallback):', analytics);
-    console.log('📋 Customer Details:', customerList.map(c => ({
-      name: c.name,
-      due: c.due,
-      balance: c.due > 0 ? `Owes ₹${c.due}` : `Paid/Advance ₹${Math.abs(c.due)}`
-    })));
     setAnalyticsData(analytics);
   };
 
@@ -143,9 +119,6 @@ export default function DashboardScreen() {
       Alert.alert('Error', 'Shop information not available. Please try again.');
       return;
     }
-
-    // Debug: Log current analytics before sending notifications
-    console.log('📊 Analytics before sending notifications:', analyticsData);
 
     // Check if notifications were recently sent (spam prevention)
     if (!canSendNotifications()) {
@@ -221,15 +194,13 @@ export default function DashboardScreen() {
                 lastReminderAmount: calculatedBalance
               });
             } catch (updateError) {
-              console.log('Could not update customer reminder info:', updateError);
             }
           }
 
           notificationsSent++;
-          console.log(`📱 Notification sent to ${customer.name} for ₹${calculatedBalance.toFixed(2)}`);
-
+         
         } catch (error) {
-          console.error(`Failed to send notification to ${customer.name}:`, error);
+          
           failedNotifications++;
         }
       }
@@ -280,17 +251,12 @@ export default function DashboardScreen() {
           lastPaymentRemindersSent: new Date().toISOString()
         });
       } catch (updateError) {
-        console.log('Could not update owner notification info:', updateError);
       }
 
     } catch (error) {
-      console.error('Error sending payment collection notifications:', error);
       Alert.alert('Error', 'Failed to send notifications. Please try again.');
     } finally {
       setSendingNotifications(false);
-      
-      // Debug: Log analytics after sending notifications to ensure they haven't changed
-      console.log('📊 Analytics after sending notifications:', analyticsData);
     }
   };
 
@@ -345,7 +311,6 @@ export default function DashboardScreen() {
       
       Alert.alert("Success", "Test transactions added!");
     } catch (error) {
-      console.error("Error adding test transactions:", error);
       Alert.alert("Error", "Failed to add test transactions");
     }
   };
@@ -380,7 +345,6 @@ export default function DashboardScreen() {
       
       Alert.alert("Success", "Test payment transactions added!");
     } catch (error) {
-      console.error("Error adding test payment transactions:", error);
       Alert.alert("Error", "Failed to add test payment transactions");
     }
   };
@@ -390,7 +354,6 @@ export default function DashboardScreen() {
   const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
     if (user) {
       const uid = user.uid;
-      console.log('🔐 Authenticated UID:', uid);
 
       try {
         // Owner Profile
@@ -399,7 +362,6 @@ export default function DashboardScreen() {
           if (!auth.currentUser) return;
           if (docSnap.exists()) {
             const data = docSnap.data();
-            console.log('👤 Owner profile data:', data);
             setUserProfile({ uid: docSnap.id, ...data });
             setProfileImage(data.photoURL || auth.currentUser?.photoURL || null);
             
@@ -408,11 +370,9 @@ export default function DashboardScreen() {
               setLastNotificationSent(data.lastPaymentRemindersSent);
             }
           } else {
-            console.log('❌ No owner profile found for UID:', uid);
           }
           setLoading(false);
         }, (error) => {
-          console.error('❌ Error fetching owner profile:', error);
           setLoading(false);
         });
         cleanupFns.push(unsubProfile);
@@ -426,14 +386,11 @@ export default function DashboardScreen() {
               ...item,
               price: Number(item.price),
             }));
-            console.log("📦 Fetched products:", formatted);
             setProducts(formatted);
           } else {
-            console.log("📦 No products found for owner");
             setProducts([]);
           }
         }, (error) => {
-          console.error('❌ Error fetching products:', error);
           setProducts([]);
         });
         cleanupFns.push(unsubProducts);
@@ -451,14 +408,10 @@ export default function DashboardScreen() {
             const data = doc.data();
             list.push({ id: doc.id, ...data, due: Number(data.due) || 0 });
           });
-          console.log('👥 Fetched customers (method 1):', list);
           if (list.length > 0) {
             setCustomers(list);
-            // Don't calculate analytics here - wait for transactions to be loaded
-            console.log('📊 Customers loaded, waiting for transactions to calculate analytics');
           }
         }, (error) => {
-          console.error('❌ Error fetching customers (method 1):', error);
         });
         cleanupFns.push(unsubCustomers1);
 
@@ -477,10 +430,8 @@ export default function DashboardScreen() {
             const data = doc.data();
             list.push({ id: doc.id, ...data });
           });
-          console.log('💰 Fetched transactions:', list);
           setRecentTransactions(list);
         }, (error) => {
-          console.error('❌ Error fetching transactions:', error);
           setRecentTransactions([]);
         });
         cleanupFns.push(unsubTransactions);
@@ -497,7 +448,6 @@ export default function DashboardScreen() {
             const data = doc.data();
             list.push({ id: doc.id, ...data });
           });
-          console.log('💰 Fetched ALL transactions for analytics:', list);
           
           // Only update and recalculate if the transaction data has actually changed
           const hasChanged = list.length !== allTransactions.length || 
@@ -505,35 +455,27 @@ export default function DashboardScreen() {
             JSON.stringify(allTransactions.map(t => ({ id: t.id, amount: t.amount, type: t.type })));
           
           if (hasChanged) {
-            console.log('🔄 Transaction data changed, updating analytics');
             setAllTransactions(list);
             setAllTransactionsCount(list.length);
             
             // Calculate analytics from transactions if customers are also loaded
             if (list.length > 0 && Array.isArray(customers) && customers.length > 0) {
-              console.log('📊 Both customers and transactions loaded, calculating analytics from transactions');
               calculateAnalyticsFromTransactions(list, customers);
             } else if (list.length === 0 && Array.isArray(customers) && customers.length > 0) {
-              console.log('📊 No transactions found, using customer data for analytics');
               calculateAnalyticsFromCustomers(customers);
             } else {
-              console.log('📊 Waiting for both customers and transactions to be loaded');
             }
           } else {
-            console.log('🔄 Transaction data unchanged, skipping analytics recalculation');
             setAllTransactionsCount(list.length);
           }
         }, (error) => {
-          console.error('❌ Error fetching all transactions:', error);
         });
         cleanupFns.push(unsubAllTransactions);
         
       } catch (error) {
-        console.error('❌ Error in data fetching:', error);
         setLoading(false);
       }
     } else {
-      console.log('❌ No authenticated user');
       cleanupFns.forEach((fn) => fn());
       setLoading(false);
     }
@@ -556,23 +498,14 @@ export default function DashboardScreen() {
 
   // Recalculate analytics when both customers and transactions are available
   useEffect(() => {
-    console.log('📊 useEffect triggered:', {
-      customersLength: Array.isArray(customers) ? customers.length : 'not array',
-      transactionsLength: Array.isArray(allTransactions) ? allTransactions.length : 'not array',
-      customersLoaded: Array.isArray(customers) && customers.length > 0,
-      transactionsLoaded: Array.isArray(allTransactions)
-    });
 
     if (Array.isArray(customers) && customers.length > 0 && Array.isArray(allTransactions)) {
       if (allTransactions.length > 0) {
-        console.log('📊 useEffect: Both customers and transactions available, calculating analytics from transactions');
         calculateAnalyticsFromTransactions(allTransactions, customers);
       } else {
-        console.log('📊 useEffect: Only customers available, calculating analytics from customers');
         calculateAnalyticsFromCustomers(customers);
       }
     } else {
-      console.log('📊 useEffect: Waiting for data to be fully loaded');
     }
   }, [customers, allTransactions]);
 
@@ -724,7 +657,7 @@ export default function DashboardScreen() {
         </View>
 
         {/* Debug Section */}
-        <View className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+        {/* <View className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
           <Text className="text-yellow-800 text-sm font-semibold mb-2">🔍 Debug Info</Text>
           <Text className="text-yellow-700 text-xs">
             Customers: {Array.isArray(customers) ? customers.length : 'Loading...'} | 
@@ -739,10 +672,8 @@ export default function DashboardScreen() {
               className="bg-yellow-600 px-3 py-1 rounded"
               onPress={() => {
                 if (Array.isArray(allTransactions) && allTransactions.length > 0 && Array.isArray(customers) && customers.length > 0) {
-                  console.log('🧪 Manual analytics recalculation triggered');
                   calculateAnalyticsFromTransactions(allTransactions, customers);
                 } else if (Array.isArray(customers) && customers.length > 0) {
-                  console.log('🧪 Manual analytics recalculation from customers triggered');
                   calculateAnalyticsFromCustomers(customers);
                 } else {
                   Alert.alert('No Data', 'Customers or transactions not loaded yet');
@@ -754,12 +685,6 @@ export default function DashboardScreen() {
             <TouchableOpacity 
               className="bg-blue-600 px-3 py-1 rounded"
               onPress={() => {
-                console.log('🧪 Current State:', {
-                  customers,
-                  allTransactions,
-                  analyticsData,
-                  allTransactionsCount
-                });
                 Alert.alert('State Logged', 'Check console for current state');
               }}
             >
@@ -782,7 +707,7 @@ export default function DashboardScreen() {
               <Text className="text-white text-xs">Add Test Payments</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
 
         {/* Credit Summary */}
         <LinearGradient
@@ -887,9 +812,6 @@ export default function DashboardScreen() {
                     <Image source={iconMap["user.png"]} className="w-10 h-10 rounded-full mr-3" />
                     <View>
                       <Text className="text-gray-700 font-medium">{cust.name}</Text>
-                      <Text className="text-xs text-gray-500">
-                        Last: {cust.lastActivity || "N/A"}
-                      </Text>
                     </View>
                   </View>
                   <Text className={`font-bold ${calculatedBalance <= 0 ? "text-green-600" : "text-red-600"}`}>
@@ -905,8 +827,6 @@ export default function DashboardScreen() {
             View All
           </Link>
         </View>
-
-
 
         {/* Products */}
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
@@ -932,47 +852,6 @@ export default function DashboardScreen() {
             Manage
           </Link>
         </View>
-
-        {/* ── REMINDER BANNER ── */}
-        {Array.isArray(customers) &&
-          customers.filter((c) => Number(c?.due || 0) > 0).length > 0 && (
-            <LinearGradient
-              colors={["#FDDE8E", "#FBA5A4"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              className="p-4 rounded-xl mb-8 flex-row items-center"
-            >
-              <Image
-                source={iconMap["reminder-bell.png"]}
-                className="w-10 h-10 mr-4 self-start"
-                resizeMode="contain"
-              />
-
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-red-600 mb-1">
-                  Remind customers for due payments
-                </Text>
-                <Text className="text-sm text-gray-800 mb-3">
-                  Send payment reminders to customers with pending dues.
-                </Text>
-                <TouchableOpacity
-                  className="bg-white px-4 py-2 rounded-lg w-36"
-                  onPress={() => {
-                    const dueCustomers = customers.filter((c) => Number(c?.due || 0) > 0);
-                    if (dueCustomers.length === 0) return;
-
-                    dueCustomers.forEach((cust) => {
-                      console.log(`Reminder sent to ${cust.name} - ₹${cust.due.toFixed(2)}`);
-                    });
-
-                    Alert.alert("Reminders Sent", `${dueCustomers.length} customer(s) reminded.`);
-                  }}
-                >
-                  <Text className="text-center text-red-600 font-semibold">Remind Now</Text>
-                </TouchableOpacity>
-              </View>
-            </LinearGradient>
-          )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig";
+import { router } from "expo-router";
 
 export default function EditProfile() {
   const [name, setName] = useState("");
@@ -85,6 +86,9 @@ export default function EditProfile() {
   return (
     <SafeAreaView className="flex-1">
       <View style={styles.container}>
+        <TouchableOpacity onPress={() => router.navigate('/(customerTabs)/settings')} style={styles.backButton}>
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
         <Text style={styles.header}>Edit Profile</Text>
         <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
           {image ? (
@@ -168,6 +172,15 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: "white",
     fontSize: 16,
+    fontWeight: "600",
+  },
+  backButton: {
+    alignSelf: "flex-start",
+    marginBottom: 8,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: "#007AFF",
     fontWeight: "600",
   },
 });

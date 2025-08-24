@@ -172,7 +172,6 @@ const CustomerProfile: React.FC = () => {
         // store the component constructor
         setDateTimePickerComponent(() => (dtp as any).default || dtp);
       } catch (e) {
-        console.log("DateTimePicker not available; falling back to text inputs.");
       }
     })();
 
