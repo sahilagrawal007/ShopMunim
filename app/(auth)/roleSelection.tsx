@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  SafeAreaView,
   Image,
+  ScrollView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { doc, setDoc } from "firebase/firestore";
 import { LinearGradient } from "expo-linear-gradient";
 import { auth, db } from "../../firebaseConfig";
@@ -146,235 +147,237 @@ export default function RoleSelection() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <LinearGradient
-        colors={["#DBEAFE", "#F3F4F6", "#FFFFFF"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="flex-1"
-      >
-        {/* Header Section */}
-        <View className="flex-1 justify-center items-center px-8">
-          {/* App Logo and Name */}
-          <View className="items-center mb-8">
-            <View className="bg-blue-100 rounded-3xl p-6 mb-4">
-              <Icon name="storefront" size={60} color="#3B82F6" />
-            </View>
-            <Text className="text-3xl font-bold text-blue-900 mb-2">ShopMunim</Text>
-            <Text className="text-blue-700 text-base text-center">
-              Choose your role to get started
-            </Text>
-          </View>
-
-          {/* Role Selection Form */}
-          <View className="w-full max-w-sm">
-            <View className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-blue-200 shadow-lg">
-              <Text className="text-2xl font-bold text-blue-900 text-center mb-6">
-                Complete Your Profile
+    <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-[#DBEAFE]">
+      <ScrollView>
+        <LinearGradient
+          colors={["#DBEAFE", "#F3F4F6", "#FFFFFF"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="flex-1"
+        >
+          {/* Header Section */}
+          <View className="flex-1 justify-center items-center px-8">
+            {/* App Logo and Name */}
+            <View className="items-center mb-8">
+              <View className="bg-blue-100 rounded-3xl p-6 mb-4">
+                <Icon name="storefront" size={60} color="#3B82F6" />
+              </View>
+              <Text className="text-3xl font-bold text-blue-900 mb-2">ShopMunim</Text>
+              <Text className="text-blue-700 text-base text-center">
+                Choose your role to get started
               </Text>
+            </View>
 
-              {/* Role Selection */}
-              <View className="mb-6">
-                <Text className="text-blue-800 text-sm font-medium mb-3 ml-1">
-                  Choose Your Role
+            {/* Role Selection Form */}
+            <View className="w-full max-w-sm">
+              <View className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-blue-200 shadow-lg">
+                <Text className="text-2xl font-bold text-blue-900 text-center mb-6">
+                  Complete Your Profile
                 </Text>
-                <View className="flex-row space-x-3">
-                  <TouchableOpacity
-                    style={[styles.roleButton, role === "owner" && styles.roleButtonSelected]}
-                    onPress={() => setRole("owner")}
-                  >
-                    <Icon name="storefront" size={60} color="#3B82F6" />
-                    <Text
-                      style={[
-                        styles.roleButtonText,
-                        role === "owner" && styles.roleButtonTextSelected,
-                      ]}
-                    >
-                      Shop Owner
-                    </Text>
-                  </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={[styles.roleButton, role === "customer" && styles.roleButtonSelected]}
-                    onPress={() => setRole("customer")}
-                  >
-                    <Feather name="user" size={60} color="#3B82F6" />
-                    <Text
-                      style={[
-                        styles.roleButtonText,
-                        role === "customer" && styles.roleButtonTextSelected,
-                      ]}
-                    >
-                      Customer
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Name Input */}
-              <View className="mb-4">
-                <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Full Name</Text>
-                <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter your full name"
-                    placeholderTextColor="#9CA3AF"
-                    value={name}
-                    onChangeText={setName}
-                  />
-                </View>
-              </View>
-
-              {/* Phone Input */}
-              <View className="mb-4">
-                <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Phone Number</Text>
-                <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter 10-digit phone number"
-                    placeholderTextColor="#9CA3AF"
-                    value={phone}
-                    onChangeText={(text) => {
-                      // Only allow numbers and limit to 10 characters
-                      const numericText = text.replace(/[^0-9]/g, "");
-                      if (numericText.length <= 10) {
-                        setPhone(numericText);
-                      }
-                    }}
-                    keyboardType="phone-pad"
-                    maxLength={10}
-                  />
-                </View>
-                {phone.length > 0 && phone.length !== 10 && (
-                  <Text className="text-red-500 text-xs ml-1 mt-1">
-                    Phone number must be exactly 10 digits
+                {/* Role Selection */}
+                <View className="mb-6">
+                  <Text className="text-blue-800 text-sm font-medium mb-3 ml-1">
+                    Choose Your Role
                   </Text>
-                )}
-              </View>
-
-              {/* Owner-specific fields */}
-              {role === "owner" && (
-                <>
-                  {/* Shop Name Input */}
-                  <View className="mb-4">
-                    <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Shop Name</Text>
-                    <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
-                      <TextInput
-                        style={styles.input}
-                        placeholder="Enter your shop name"
-                        placeholderTextColor="#9CA3AF"
-                        value={shopName}
-                        onChangeText={setShopName}
-                      />
-                    </View>
-                  </View>
-
-                  {/* Pincode Input */}
-                  <View className="mb-4">
-                    <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Pincode</Text>
-                    <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
-                      <TextInput
-                        style={styles.input}
-                        placeholder="Enter 6-digit pincode"
-                        placeholderTextColor="#9CA3AF"
-                        value={pincode}
-                        onChangeText={(text) => {
-                          // Only allow numbers and limit to 6 characters
-                          const numericText = text.replace(/[^0-9]/g, "");
-                          if (numericText.length <= 6) {
-                            setPincode(numericText);
-                            if (numericText.length === 6) {
-                              detectCityFromPincode(numericText);
-                            }
-                          }
-                        }}
-                        keyboardType="numeric"
-                        maxLength={6}
-                      />
-                    </View>
-                    {pincode.length > 0 && pincode.length !== 6 && (
-                      <Text className="text-red-500 text-xs ml-1 mt-1">
-                        Pincode must be exactly 6 digits
+                  <View className="flex-row space-x-3">
+                    <TouchableOpacity
+                      style={[styles.roleButton, role === "owner" && styles.roleButtonSelected]}
+                      onPress={() => setRole("owner")}
+                    >
+                      <Icon name="storefront" size={60} color="#3B82F6" />
+                      <Text
+                        style={[
+                          styles.roleButtonText,
+                          role === "owner" && styles.roleButtonTextSelected,
+                        ]}
+                      >
+                        Shop Owner
                       </Text>
-                    )}
-                  </View>
+                    </TouchableOpacity>
 
-                  {/* City Input (Auto-detected) */}
-                  {city && (
+                    <TouchableOpacity
+                      style={[styles.roleButton, role === "customer" && styles.roleButtonSelected]}
+                      onPress={() => setRole("customer")}
+                    >
+                      <Feather name="user" size={60} color="#3B82F6" />
+                      <Text
+                        style={[
+                          styles.roleButtonText,
+                          role === "customer" && styles.roleButtonTextSelected,
+                        ]}
+                      >
+                        Customer
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* Name Input */}
+                <View className="mb-4">
+                  <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Full Name</Text>
+                  <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter your full name"
+                      placeholderTextColor="#9CA3AF"
+                      value={name}
+                      onChangeText={setName}
+                    />
+                  </View>
+                </View>
+
+                {/* Phone Input */}
+                <View className="mb-4">
+                  <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Phone Number</Text>
+                  <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter 10-digit phone number"
+                      placeholderTextColor="#9CA3AF"
+                      value={phone}
+                      onChangeText={(text) => {
+                        // Only allow numbers and limit to 10 characters
+                        const numericText = text.replace(/[^0-9]/g, "");
+                        if (numericText.length <= 10) {
+                          setPhone(numericText);
+                        }
+                      }}
+                      keyboardType="phone-pad"
+                      maxLength={10}
+                    />
+                  </View>
+                  {phone.length > 0 && phone.length !== 10 && (
+                    <Text className="text-red-500 text-xs ml-1 mt-1">
+                      Phone number must be exactly 10 digits
+                    </Text>
+                  )}
+                </View>
+
+                {/* Owner-specific fields */}
+                {role === "owner" && (
+                  <>
+                    {/* Shop Name Input */}
                     <View className="mb-4">
-                      <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">City</Text>
-                      <View className="bg-gray-100 rounded-xl border border-gray-300 shadow-sm">
+                      <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Shop Name</Text>
+                      <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
                         <TextInput
-                          style={[styles.input, { color: "#6B7280" }]}
-                          value={city}
-                          editable={false}
+                          style={styles.input}
+                          placeholder="Enter your shop name"
+                          placeholderTextColor="#9CA3AF"
+                          value={shopName}
+                          onChangeText={setShopName}
                         />
                       </View>
                     </View>
-                  )}
 
-                  {/* Address Input */}
-                  <View className="mb-6">
-                    <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Address</Text>
-                    <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
-                      <TextInput
-                        style={[styles.input, { height: 80, textAlignVertical: "top" }]}
-                        placeholder="Enter your complete address"
-                        placeholderTextColor="#9CA3AF"
-                        value={address}
-                        onChangeText={setAddress}
-                        multiline
-                        numberOfLines={3}
-                      />
+                    {/* Pincode Input */}
+                    <View className="mb-4">
+                      <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Pincode</Text>
+                      <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
+                        <TextInput
+                          style={styles.input}
+                          placeholder="Enter 6-digit pincode"
+                          placeholderTextColor="#9CA3AF"
+                          value={pincode}
+                          onChangeText={(text) => {
+                            // Only allow numbers and limit to 6 characters
+                            const numericText = text.replace(/[^0-9]/g, "");
+                            if (numericText.length <= 6) {
+                              setPincode(numericText);
+                              if (numericText.length === 6) {
+                                detectCityFromPincode(numericText);
+                              }
+                            }
+                          }}
+                          keyboardType="numeric"
+                          maxLength={6}
+                        />
+                      </View>
+                      {pincode.length > 0 && pincode.length !== 6 && (
+                        <Text className="text-red-500 text-xs ml-1 mt-1">
+                          Pincode must be exactly 6 digits
+                        </Text>
+                      )}
                     </View>
-                  </View>
-                </>
-              )}
 
-              {/* Continue Button */}
-              <TouchableOpacity
-                style={[
-                  styles.continueButton,
-                  (!role ||
+                    {/* City Input (Auto-detected) */}
+                    {city && (
+                      <View className="mb-4">
+                        <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">City</Text>
+                        <View className="bg-gray-100 rounded-xl border border-gray-300 shadow-sm">
+                          <TextInput
+                            style={[styles.input, { color: "#6B7280" }]}
+                            value={city}
+                            editable={false}
+                          />
+                        </View>
+                      </View>
+                    )}
+
+                    {/* Address Input */}
+                    <View className="mb-6">
+                      <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Address</Text>
+                      <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
+                        <TextInput
+                          style={[styles.input, { height: 80, textAlignVertical: "top" }]}
+                          placeholder="Enter your complete address"
+                          placeholderTextColor="#9CA3AF"
+                          value={address}
+                          onChangeText={setAddress}
+                          multiline
+                          numberOfLines={3}
+                        />
+                      </View>
+                    </View>
+                  </>
+                )}
+
+                {/* Continue Button */}
+                <TouchableOpacity
+                  style={[
+                    styles.continueButton,
+                    (!role ||
+                      !name ||
+                      !phone ||
+                      phone.length !== 10 ||
+                      (role === "owner" &&
+                        (!shopName || !pincode || pincode.length !== 6 || !address.trim())) ||
+                      loading) &&
+                      styles.buttonDisabled,
+                  ]}
+                  onPress={handleRoleSelection}
+                  disabled={
+                    !role ||
                     !name ||
                     !phone ||
                     phone.length !== 10 ||
                     (role === "owner" &&
                       (!shopName || !pincode || pincode.length !== 6 || !address.trim())) ||
-                    loading) &&
-                    styles.buttonDisabled,
-                ]}
-                onPress={handleRoleSelection}
-                disabled={
-                  !role ||
-                  !name ||
-                  !phone ||
-                  phone.length !== 10 ||
-                  (role === "owner" &&
-                    (!shopName || !pincode || pincode.length !== 6 || !address.trim())) ||
-                  loading
-                }
-              >
-                <LinearGradient
-                  colors={loading ? ["#9CA3AF", "#6B7280"] : ["#3B82F6", "#60A5FA"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  className="w-full rounded-xl py-4 items-center"
+                    loading
+                  }
                 >
-                  <Text className="text-white font-bold text-lg">
-                    {loading ? "Setting Up..." : "Continue"}
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
+                  <LinearGradient
+                    colors={loading ? ["#9CA3AF", "#6B7280"] : ["#3B82F6", "#60A5FA"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    className="w-full rounded-xl py-4 items-center"
+                  >
+                    <Text className="text-white font-bold text-lg">
+                      {loading ? "Setting Up..." : "Continue"}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Footer */}
+            <View className="mt-6 items-center">
+              <Text className="text-blue-600 text-sm text-center">Secure • Fast • Reliable</Text>
             </View>
           </View>
-
-          {/* Footer */}
-          <View className="mt-6 items-center">
-            <Text className="text-blue-600 text-sm text-center">Secure • Fast • Reliable</Text>
-          </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
+      </ScrollView>
     </SafeAreaView>
   );
 }
