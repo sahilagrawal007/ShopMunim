@@ -2,9 +2,10 @@ import { useRouter } from 'expo-router';
 import { deleteUser, signOut } from 'firebase/auth';
 import { deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { Alert, SafeAreaView, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import { auth, db } from '../../firebaseConfig';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CustomerSettings() {
   const router = useRouter();
@@ -86,7 +87,7 @@ export default function CustomerSettings() {
   }
 
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
       <ScrollView>
         <View style={styles.container}>
           <Text style={styles.header}>Settings</Text>
@@ -109,20 +110,6 @@ export default function CustomerSettings() {
               <Text style={styles.settingText}>Change Password</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Notifications */}
-          {/* <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Notifications</Text>
-            <View style={styles.settingItem}>
-              <Feather name="bell" size={20} color="#555" style={styles.icon} />
-              <Text style={styles.settingText}>Push Notifications</Text>
-              <Switch
-                value={pushEnabled}
-                onValueChange={handleTogglePush}
-                style={{ marginLeft: "auto" }}
-              />
-            </View>
-          </View> */}
 
           {/* Order & Payment */}
           <View style={styles.section}>

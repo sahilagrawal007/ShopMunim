@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { auth, db } from "../../firebaseConfig";
 import { Transaction } from "../../types";
+import Feather from "react-native-vector-icons/Feather";
 // import * as MailComposer from 'expo-mail-composer';
 
 interface TransactionWithShop extends Transaction {
@@ -119,32 +120,11 @@ export default function CustomerHistory() {
     return typeMatch && shopMatch;
   });
 
-  // Get unique shop names for filter suggestions
-  const uniqueShopNames = [...new Set(transactions.map(t => t.shopName).filter(Boolean))];
-
-  // const handleDownloadReceipt = async (transaction: Transaction) => {
-  //   const receiptText = `Receipt\n\nTransaction ID: ${transaction.id}\nDate: ${new Date(transaction.createdAt).toLocaleString()}\nType: ${transaction.type}\nAmount: ₹${transaction.amount.toFixed(2)}\nDescription: ${transaction.description || 'N/A'}`;
-  //   const fileUri = FileSystem.cacheDirectory + `receipt-${transaction.id}.txt`;
-  //   await FileSystem.writeAsStringAsync(fileUri, receiptText);
-  //   await Sharing.shareAsync(fileUri, { dialogTitle: 'Share or Save Receipt' });
-  // };
-
-  // const handleEmailReceipt = async (transaction: Transaction) => {
-  //   const receiptText = `Receipt\n\nTransaction ID: ${transaction.id}\nDate: ${new Date(transaction.createdAt).toLocaleString()}\nType: ${transaction.type}\nAmount: ₹${transaction.amount.toFixed(2)}\nDescription: ${transaction.description || 'N/A'}`;
-  //   await MailComposer.composeAsync({
-  //     subject: `Receipt for Transaction ${transaction.id}`,
-  //     body: receiptText,
-  //   });
-  // };
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Text style={styles.backButtonText}>← Back</Text>
+      <TouchableOpacity onPress={() => router.navigate('/(customerTabs)/settings')} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.title}>Transaction History</Text>
         {shopFilter && (
@@ -226,20 +206,7 @@ export default function CustomerHistory() {
                 >
                   {transaction.type === "paid" || transaction.type === "advance" ? "+" : "-"}₹{transaction.amount.toFixed(2)}
                 </Text>
-                {/* <TouchableOpacity
-                <TouchableOpacity
-                  style={styles.downloadButton}
-                  onPress={() => handleDownloadReceipt(transaction)}
-                >
-                  <Text style={styles.downloadButtonText}>Download Receipt</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.downloadButton, { backgroundColor: '#34C759', marginTop: 4 }]}
-                  onPress={() => handleEmailReceipt(transaction)}
-                >
-                  <Text style={styles.downloadButtonText}>Email Receipt</Text>
-                </TouchableOpacity> */}
-                {/* </TouchableOpacity> */}
+
               </View>
             </View>
           ))
@@ -497,12 +464,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   backButton: {
-    alignSelf: "flex-start",
-    marginBottom: 8,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: "#007AFF",
-    fontWeight: "600",
+    width: 40,
+    height: 40,
   },
 });

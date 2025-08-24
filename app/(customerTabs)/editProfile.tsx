@@ -2,11 +2,11 @@ import * as ImagePicker from "expo-image-picker";
 import { updateProfile } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ActivityIndicator,
   Alert,
   Image,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { auth, db } from "../../firebaseConfig";
 import { router } from "expo-router";
+import Feather from "react-native-vector-icons/Feather";
 
 export default function EditProfile() {
   const [name, setName] = useState("");
@@ -84,10 +85,10 @@ export default function EditProfile() {
   }
 
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => router.navigate('/(customerTabs)/settings')} style={styles.backButton}>
-          <Text style={styles.backButtonText}>← Back</Text>
+      <TouchableOpacity onPress={() => router.navigate('/(customerTabs)/settings')} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.header}>Edit Profile</Text>
         <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
@@ -175,8 +176,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   backButton: {
-    alignSelf: "flex-start",
-    marginBottom: 8,
+    width: 40,
+    height: 40,
   },
   backButtonText: {
     fontSize: 16,

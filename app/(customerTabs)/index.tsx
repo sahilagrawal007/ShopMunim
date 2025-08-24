@@ -23,9 +23,9 @@ import {
   View,
   Alert,
 } from "react-native";
-import { PieChart } from "react-native-chart-kit";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../../firebaseConfig";
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -356,7 +356,7 @@ export default function CustomerHomeScreen() {
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center">
-            <Image source={iconMap["shop.png"]} className="w-6 h-6 mr-2" />
+          <Icon name="storefront" size={30} color="#4B82F6" />
             <Text className="text-xl font-bold text-gray-900">ShopMunim</Text>
           </View>
           <TouchableOpacity 

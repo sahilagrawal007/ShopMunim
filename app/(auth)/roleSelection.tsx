@@ -21,11 +21,37 @@ export default function RoleSelection() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [shopName, setShopName] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [city, setCity] = useState("");
+  const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const generateShopLink = (shopName: string) => {
     return shopName.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now();
+  };
+
+  // Function to detect city from pincode
+  const detectCityFromPincode = async (pincode: string) => {
+    if (pincode.length === 6) {
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+        const data = await response.json();
+        
+        if (data[0]?.Status === "Success" && data[0]?.PostOffice?.[0]) {
+          const postOffice = data[0].PostOffice[0];
+          const detectedCity = postOffice.District || postOffice.City || postOffice.State;
+          setCity(detectedCity);
+        } else {
+          setCity("");
+        }
+      } catch (error) {
+        console.log("Could not detect city from pincode");
+        setCity("");
+      }
+    } else {
+      setCity("");
+    }
   };
 
   const handleRoleSelection = async () => {
@@ -40,9 +66,24 @@ export default function RoleSelection() {
       return;
     }
 
-    if (role === "owner" && !shopName) {
-      Alert.alert("Error", "Shop name is required for owners");
+    if (phone.length !== 10) {
+      Alert.alert("Error", "Phone number must be exactly 10 characters");
       return;
+    }
+
+    if (role === "owner") {
+      if (!shopName) {
+        Alert.alert("Error", "Shop name is required for owners");
+        return;
+      }
+      if (!pincode || pincode.length !== 6) {
+        Alert.alert("Error", "Valid 6-digit pincode is required for owners");
+        return;
+      }
+      if (!address.trim()) {
+        Alert.alert("Error", "Address is required for owners");
+        return;
+      }
     }
 
     setLoading(true);
@@ -58,6 +99,9 @@ export default function RoleSelection() {
           phone,
           shopName,
           shopLink,
+          pincode,
+          city,
+          address: address.trim(),
           createdAt: now,
           updatedAt: now,
         };
@@ -70,6 +114,9 @@ export default function RoleSelection() {
           ownerId: user.uid,
           name: shopName,
           link: shopLink,
+          pincode,
+          city,
+          address: address.trim(),
           customers: [],
           createdAt: now,
           updatedAt: now,
@@ -195,36 +242,120 @@ export default function RoleSelection() {
                 <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
                   <TextInput
                     style={styles.input}
-                    placeholder="Enter your phone number"
+                    placeholder="Enter 10-digit phone number"
                     placeholderTextColor="#9CA3AF"
                     value={phone}
-                    onChangeText={setPhone}
+                    onChangeText={(text) => {
+                      // Only allow numbers and limit to 10 characters
+                      const numericText = text.replace(/[^0-9]/g, '');
+                      if (numericText.length <= 10) {
+                        setPhone(numericText);
+                      }
+                    }}
                     keyboardType="phone-pad"
+                    maxLength={10}
                   />
                 </View>
+                {phone.length > 0 && phone.length !== 10 && (
+                  <Text className="text-red-500 text-xs ml-1 mt-1">
+                    Phone number must be exactly 10 digits
+                  </Text>
+                )}
               </View>
 
-              {/* Shop Name Input (only for owners) */}
+              {/* Owner-specific fields */}
               {role === "owner" && (
-                <View className="mb-6">
-                  <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Shop Name</Text>
-                  <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Enter your shop name"
-                      placeholderTextColor="#9CA3AF"
-                      value={shopName}
-                      onChangeText={setShopName}
-                    />
+                <>
+                  {/* Shop Name Input */}
+                  <View className="mb-4">
+                    <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Shop Name</Text>
+                    <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Enter your shop name"
+                        placeholderTextColor="#9CA3AF"
+                        value={shopName}
+                        onChangeText={setShopName}
+                      />
+                    </View>
                   </View>
-                </View>
+
+                  {/* Pincode Input */}
+                  <View className="mb-4">
+                    <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Pincode</Text>
+                    <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Enter 6-digit pincode"
+                        placeholderTextColor="#9CA3AF"
+                        value={pincode}
+                        onChangeText={(text) => {
+                          // Only allow numbers and limit to 6 characters
+                          const numericText = text.replace(/[^0-9]/g, '');
+                          if (numericText.length <= 6) {
+                            setPincode(numericText);
+                            if (numericText.length === 6) {
+                              detectCityFromPincode(numericText);
+                            }
+                          }
+                        }}
+                        keyboardType="numeric"
+                        maxLength={6}
+                      />
+                    </View>
+                    {pincode.length > 0 && pincode.length !== 6 && (
+                      <Text className="text-red-500 text-xs ml-1 mt-1">
+                        Pincode must be exactly 6 digits
+                      </Text>
+                    )}
+                  </View>
+
+                  {/* City Input (Auto-detected) */}
+                  {city && (
+                    <View className="mb-4">
+                      <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">City</Text>
+                      <View className="bg-gray-100 rounded-xl border border-gray-300 shadow-sm">
+                        <TextInput
+                          style={[styles.input, { color: '#6B7280' }]}
+                          value={city}
+                          editable={false}
+                        />
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Address Input */}
+                  <View className="mb-6">
+                    <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Address</Text>
+                    <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                      <TextInput
+                        style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
+                        placeholder="Enter your complete address"
+                        placeholderTextColor="#9CA3AF"
+                        value={address}
+                        onChangeText={setAddress}
+                        multiline
+                        numberOfLines={3}
+                      />
+                    </View>
+                  </View>
+                </>
               )}
 
               {/* Continue Button */}
               <TouchableOpacity
-                style={[styles.continueButton, (!role || !name || !phone || (role === "owner" && !shopName) || loading) && styles.buttonDisabled]}
+                style={[
+                  styles.continueButton, 
+                  (!role || !name || !phone || phone.length !== 10 || 
+                   (role === "owner" && (!shopName || !pincode || pincode.length !== 6 || !address.trim())) || 
+                   loading) && styles.buttonDisabled
+                ]}
                 onPress={handleRoleSelection}
-                disabled={!role || !name || !phone || (role === "owner" && !shopName) || loading}
+                disabled={
+                  !role || !name || !phone || phone.length !== 10 || 
+                  (role === "owner" && (!shopName || !pincode || pincode.length !== 6 || !address.trim())) || 
+                  loading
+                }
               >
                 <LinearGradient
                   colors={loading ? ['#9CA3AF', '#6B7280'] : ['#4F46E5', '#6366F1']}

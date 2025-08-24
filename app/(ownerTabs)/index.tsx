@@ -618,18 +618,6 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* Quick Actions */}
-        {/* <View className="flex-row justify-between mb-6">
-          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[49%]">
-            <Image source={iconMap["rupee-circle.png"]} className="w-6 h-6 mb-1" />
-            <Text className="text-xs text-center p-2 text-gray-700">New Credit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="items-center bg-white p-3 rounded-xl w-[49%]">
-            <Ionicons name="cube" size={24} color="#3b91f3" style={{ marginBottom: 4 }} />
-            <Text className="text-xs text-center p-2 text-gray-700">Shop QR</Text>
-          </TouchableOpacity>
-        </View> */}
-
         {/* Analytics Grid */}
         <Text className="text-gray-700 font-semibold mb-2">Analytics</Text>
 
@@ -669,59 +657,6 @@ export default function DashboardScreen() {
             <Text className="text-sm text-gray-500">Total Due</Text>
           </View>
         </View>
-
-        {/* Debug Section */}
-        {/* <View className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-          <Text className="text-yellow-800 text-sm font-semibold mb-2">🔍 Debug Info</Text>
-          <Text className="text-yellow-700 text-xs">
-            Customers: {Array.isArray(customers) ? customers.length : 'Loading...'} | 
-            Transactions: {Array.isArray(allTransactions) ? allTransactions.length : 'Loading...'} | 
-            Total Credit: ₹{analyticsData.totalCreditGiven?.toFixed(2) || '0.00'}
-          </Text>
-          <Text className="text-yellow-600 text-xs mt-1">
-            Last Update: {new Date().toLocaleTimeString()}
-          </Text>
-          <View className="flex-row space-x-2 mt-2">
-            <TouchableOpacity 
-              className="bg-yellow-600 px-3 py-1 rounded"
-              onPress={() => {
-                if (Array.isArray(allTransactions) && allTransactions.length > 0 && Array.isArray(customers) && customers.length > 0) {
-                  calculateAnalyticsFromTransactions(allTransactions, customers);
-                } else if (Array.isArray(customers) && customers.length > 0) {
-                  calculateAnalyticsFromCustomers(customers);
-                } else {
-                  Alert.alert('No Data', 'Customers or transactions not loaded yet');
-                }
-              }}
-            >
-              <Text className="text-white text-xs">Recalculate Analytics</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              className="bg-blue-600 px-3 py-1 rounded"
-              onPress={() => {
-                Alert.alert('State Logged', 'Check console for current state');
-              }}
-            >
-              <Text className="text-white text-xs">Log State</Text>
-            </TouchableOpacity>
-          </View>
-          <View className="flex-row space-x-2 mt-2">
-            <TouchableOpacity 
-              className="bg-green-600 px-3 py-1 rounded"
-              onPress={addTestTransactions}
-              disabled={!Array.isArray(customers) || customers.length === 0}
-            >
-              <Text className="text-white text-xs">Add Test Dues</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              className="bg-purple-600 px-3 py-1 rounded"
-              onPress={addTestPaymentTransactions}
-              disabled={!Array.isArray(customers) || customers.length === 0}
-            >
-              <Text className="text-white text-xs">Add Test Payments</Text>
-            </TouchableOpacity>
-          </View>
-        </View> */}
 
         {/* Credit Summary */}
         <LinearGradient

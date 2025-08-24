@@ -21,18 +21,6 @@ export default function OwnerSettings() {
     }
   };
 
-  const handleTogglePush = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-    const newValue = !pushEnabled;
-    setPushEnabled(newValue);
-    try {
-      await updateDoc(doc(db, "customers", user.uid), { notificationsEnabled: newValue });
-    } catch (e) {
-      // Optionally show error
-    }
-  };
-
   const handleDeleteAccount = async () => {
     Alert.alert(
       "Delete Account",
@@ -93,19 +81,6 @@ export default function OwnerSettings() {
             </TouchableOpacity>
           </View>
 
-          {/* <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Notifications</Text>
-            <View style={styles.settingItem}>
-              <Feather name="bell" size={20} color="#555" style={styles.icon} />
-              <Text style={styles.settingText}>Push Notifications</Text>
-              <Switch
-                value={pushEnabled}
-                onValueChange={handleTogglePush}
-                style={{ marginLeft: "auto" }}
-              />
-            </View>
-          </View> */}
-
           {/* Shop Details */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Shop Details</Text>
@@ -118,15 +93,7 @@ export default function OwnerSettings() {
                 <Text style={styles.settingText}>Shop Information</Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.settingItem}
-              onPress={() => router.navigate("/(ownerTabs)/Notifications" as any)}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Feather name="bell" size={20} color="#555" style={{ marginRight: 12 }} />
-                <Text style={styles.settingText}>Notifications</Text>
-              </View>
-            </TouchableOpacity>
+            
           </View>
 
           {/* Account */}

@@ -5,6 +5,9 @@ export interface Owner {
   phone: string;
   shopName: string;
   shopLink: string;
+  pincode: string;
+  city: string;
+  address: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +28,9 @@ export interface Shop {
   ownerId: string;
   name: string;
   link: string;
+  pincode: string;
+  city: string;
+  address: string;
   customers: string[];
   createdAt: Date;
   updatedAt: Date;
