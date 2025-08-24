@@ -148,7 +148,7 @@ export default function RoleSelection() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <LinearGradient
-        colors={["#E0E7FF", "#F3F4F6", "#FFFFFF"]}
+        colors={["#DBEAFE", "#F3F4F6", "#FFFFFF"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="flex-1"
@@ -157,25 +157,25 @@ export default function RoleSelection() {
         <View className="flex-1 justify-center items-center px-8">
           {/* App Logo and Name */}
           <View className="items-center mb-8">
-            <View className="bg-indigo-100 rounded-3xl p-6 mb-4">
-              <Icon name="storefront" size={60} color="#4B82F6" />
+            <View className="bg-blue-100 rounded-3xl p-6 mb-4">
+              <Icon name="storefront" size={60} color="#3B82F6" />
             </View>
-            <Text className="text-3xl font-bold text-indigo-900 mb-2">ShopMunim</Text>
-            <Text className="text-indigo-700 text-base text-center">
+            <Text className="text-3xl font-bold text-blue-900 mb-2">ShopMunim</Text>
+            <Text className="text-blue-700 text-base text-center">
               Choose your role to get started
             </Text>
           </View>
 
           {/* Role Selection Form */}
           <View className="w-full max-w-sm">
-            <View className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-indigo-200 shadow-lg">
-              <Text className="text-2xl font-bold text-indigo-900 text-center mb-6">
+            <View className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-blue-200 shadow-lg">
+              <Text className="text-2xl font-bold text-blue-900 text-center mb-6">
                 Complete Your Profile
               </Text>
 
               {/* Role Selection */}
               <View className="mb-6">
-                <Text className="text-indigo-800 text-sm font-medium mb-3 ml-1">
+                <Text className="text-blue-800 text-sm font-medium mb-3 ml-1">
                   Choose Your Role
                 </Text>
                 <View className="flex-row space-x-3">
@@ -183,7 +183,7 @@ export default function RoleSelection() {
                     style={[styles.roleButton, role === "owner" && styles.roleButtonSelected]}
                     onPress={() => setRole("owner")}
                   >
-                    <Icon name="storefront" size={60} color="#4B82F6" />
+                    <Icon name="storefront" size={60} color="#3B82F6" />
                     <Text
                       style={[
                         styles.roleButtonText,
@@ -198,7 +198,7 @@ export default function RoleSelection() {
                     style={[styles.roleButton, role === "customer" && styles.roleButtonSelected]}
                     onPress={() => setRole("customer")}
                   >
-                    <Feather name="user" size={60} color="#4B82F6" />
+                    <Feather name="user" size={60} color="#3B82F6" />
                     <Text
                       style={[
                         styles.roleButtonText,
@@ -213,8 +213,8 @@ export default function RoleSelection() {
 
               {/* Name Input */}
               <View className="mb-4">
-                <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Full Name</Text>
-                <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Full Name</Text>
+                <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
                   <TextInput
                     style={styles.input}
                     placeholder="Enter your full name"
@@ -227,8 +227,8 @@ export default function RoleSelection() {
 
               {/* Phone Input */}
               <View className="mb-4">
-                <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Phone Number</Text>
-                <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Phone Number</Text>
+                <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
                   <TextInput
                     style={styles.input}
                     placeholder="Enter 10-digit phone number"
@@ -257,8 +257,8 @@ export default function RoleSelection() {
                 <>
                   {/* Shop Name Input */}
                   <View className="mb-4">
-                    <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Shop Name</Text>
-                    <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                    <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Shop Name</Text>
+                    <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
                       <TextInput
                         style={styles.input}
                         placeholder="Enter your shop name"
@@ -271,8 +271,8 @@ export default function RoleSelection() {
 
                   {/* Pincode Input */}
                   <View className="mb-4">
-                    <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Pincode</Text>
-                    <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                    <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Pincode</Text>
+                    <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
                       <TextInput
                         style={styles.input}
                         placeholder="Enter 6-digit pincode"
@@ -302,7 +302,7 @@ export default function RoleSelection() {
                   {/* City Input (Auto-detected) */}
                   {city && (
                     <View className="mb-4">
-                      <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">City</Text>
+                      <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">City</Text>
                       <View className="bg-gray-100 rounded-xl border border-gray-300 shadow-sm">
                         <TextInput
                           style={[styles.input, { color: "#6B7280" }]}
@@ -315,8 +315,8 @@ export default function RoleSelection() {
 
                   {/* Address Input */}
                   <View className="mb-6">
-                    <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Address</Text>
-                    <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                    <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Address</Text>
+                    <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
                       <TextInput
                         style={[styles.input, { height: 80, textAlignVertical: "top" }]}
                         placeholder="Enter your complete address"
@@ -356,7 +356,7 @@ export default function RoleSelection() {
                 }
               >
                 <LinearGradient
-                  colors={loading ? ["#9CA3AF", "#6B7280"] : ["#4F46E5", "#6366F1"]}
+                  colors={loading ? ["#9CA3AF", "#6B7280"] : ["#3B82F6", "#60A5FA"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   className="w-full rounded-xl py-4 items-center"
@@ -371,7 +371,7 @@ export default function RoleSelection() {
 
           {/* Footer */}
           <View className="mt-6 items-center">
-            <Text className="text-indigo-600 text-sm text-center">Secure • Fast • Reliable</Text>
+            <Text className="text-blue-600 text-sm text-center">Secure • Fast • Reliable</Text>
           </View>
         </View>
       </LinearGradient>
@@ -388,21 +388,21 @@ const styles = StyleSheet.create({
   },
   roleButton: {
     flex: 1,
-    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: 'rgba(79, 70, 229, 0.3)',
+    borderColor: 'rgba(59, 130, 246, 0.3)',
   },
   roleButtonSelected: {
-    backgroundColor: '#4F46E5',
-    borderColor: '#4F46E5',
+    backgroundColor: '#3B82F6',
+    borderColor: '#3B82F6',
   },
   roleButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4F46E5',
+    color: '#3B82F6',
     textAlign: 'center',
   },
   roleButtonTextSelected: {

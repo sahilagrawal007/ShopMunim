@@ -34,7 +34,7 @@ export default function Login() {
   return (
     <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
       <LinearGradient
-        colors={["#E0E7FF", "#F3F4F6", "#FFFFFF"]}
+        colors={["#DBEAFE", "#F3F4F6", "#FFFFFF"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="flex-1"
@@ -43,30 +43,30 @@ export default function Login() {
         <View className="flex-1 justify-center items-center px-8">
           {/* App Logo and Name */}
           <View className="items-center mb-12">
-            <View className="bg-indigo-100 rounded-3xl p-6 mb-6">
-              <Icon name="storefront" size={60} color="#4B82F6" />
+            <View className="bg-blue-100 rounded-3xl p-6 mb-6">
+              <Icon name="storefront" size={60} color="#3B82F6" />
             </View>
-            <Text className="text-4xl font-bold text-indigo-900 mb-2">ShopMunim</Text>
-            <Text className="text-indigo-700 text-lg text-center">
+            <Text className="text-4xl font-bold text-blue-900 mb-2">ShopMunim</Text>
+            <Text className="text-blue-700 text-lg text-center">
               Your Smart Shop Management Solution
             </Text>
           </View>
 
           {/* Login Form */}
           <View className="w-full max-w-sm">
-            <View className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-indigo-200 shadow-lg">
-              <Text className="text-2xl font-bold text-indigo-900 text-center mb-6">
+            <View className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-blue-200 shadow-lg">
+              <Text className="text-2xl font-bold text-blue-900 text-center mb-6">
                 Welcome Back
               </Text>
 
-              <Text className="text-indigo-700 text-center mb-6">
+              <Text className="text-blue-700 text-center mb-6">
                 Sign in to manage your shop or track your purchases
               </Text>
 
               {/* Email Input */}
               <View className="mb-4">
-                <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Email</Text>
-                <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Email</Text>
+                <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
                   <TextInput
                     style={styles.input}
                     placeholder="Enter your email"
@@ -81,8 +81,8 @@ export default function Login() {
 
               {/* Password Input */}
               <View className="mb-6">
-                <Text className="text-indigo-800 text-sm font-medium mb-2 ml-1">Password</Text>
-                <View className="bg-white rounded-xl border border-indigo-300 shadow-sm">
+                <Text className="text-blue-800 text-sm font-medium mb-2 ml-1">Password</Text>
+                <View className="bg-white rounded-xl border border-blue-300 shadow-sm">
                   <TextInput
                     style={styles.input}
                     placeholder="Enter your password"
@@ -101,7 +101,7 @@ export default function Login() {
                 disabled={loading}
               >
                 <LinearGradient
-                  colors={loading ? ["#9CA3AF", "#6B7280"] : ["#4F46E5", "#6366F1"]}
+                  colors={loading ? ["#9CA3AF", "#6B7280"] : ["#3B82F6", "#60A5FA"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   className="w-full rounded-xl py-4 items-center"
@@ -117,9 +117,9 @@ export default function Login() {
                 className="mt-6 items-center"
                 onPress={() => router.push("/(auth)/register")}
               >
-                <Text className="text-indigo-700 text-center">
+                <Text className="text-blue-700 text-center">
                   Don't have an account?{" "}
-                  <Text className="text-indigo-600 font-semibold underline">Create one here</Text>
+                  <Text className="text-blue-600 font-semibold underline">Create one here</Text>
                 </Text>
               </TouchableOpacity>
             </View>
@@ -127,8 +127,8 @@ export default function Login() {
 
           {/* Footer */}
           <View className="mt-8 items-center">
-            <Text className="text-indigo-600 text-sm text-center">Secure • Fast • Reliable</Text>
-            <Text className="text-indigo-500 text-xs text-center mt-2">
+            <Text className="text-blue-600 text-sm text-center">Secure • Fast • Reliable</Text>
+            <Text className="text-blue-500 text-xs text-center mt-2">
               © 2024 ShopMunim. All rights reserved.
             </Text>
           </View>
