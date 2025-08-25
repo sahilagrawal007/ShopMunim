@@ -448,7 +448,7 @@ export default function CustomerHomeScreen() {
                 }
               >
                 <View className="flex-row items-center">
-                  <Icon name="storefront" size={30} color="#4B82F6" />
+                  <Icon name="storefront" size={20}color="#4B82F6" />
                   <View>
                     <Text className="text-gray-700 text-base font-medium ml-2">{shop.name}</Text>
                   </View>

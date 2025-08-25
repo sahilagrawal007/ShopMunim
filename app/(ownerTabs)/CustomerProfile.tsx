@@ -25,6 +25,7 @@ import {
   StyleSheet,
   Platform,
   KeyboardAvoidingView,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { db } from "../../firebaseConfig";
@@ -540,6 +541,7 @@ const CustomerProfile: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F7F7]">
+    <ScrollView>
       <View className="flex-1 p-4">
         <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color="#333" />
@@ -746,6 +748,7 @@ const CustomerProfile: React.FC = () => {
           </KeyboardAvoidingView>
         </Modal>
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
