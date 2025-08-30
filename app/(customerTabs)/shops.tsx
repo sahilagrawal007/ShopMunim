@@ -174,9 +174,6 @@ export default function CustomerShops() {
             <View key={shop.id} style={styles.shopCard}>
               <Text style={styles.shopName}>{shop.name}</Text>
               <Text style={styles.shopLink}>Link: {shop.link}</Text>
-              <TouchableOpacity style={styles.viewButton}>
-                <Text style={styles.viewButtonText}>View Details</Text>
-              </TouchableOpacity>
             </View>
           ))
         )}
