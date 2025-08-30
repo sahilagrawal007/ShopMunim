@@ -1,4 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -7,7 +8,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { db } from "../../firebaseConfig";
 import Feather from "react-native-vector-icons/Feather";
-import { router } from "expo-router";
 
 export default function CustomersScreen() {
   const [productName, setProductName] = useState("");
@@ -124,6 +124,9 @@ export default function CustomersScreen() {
 
         {/* Title */}
         <View className="flex-row items-center mb-6"> 
+          <TouchableOpacity onPress={() => router.navigate('/(ownerTabs)')} >
+            <Feather name="arrow-left" size={24} color="#333" />
+          </TouchableOpacity>
           <Text className="text-xl font-bold text-gray-900">Products</Text>
         </View>
 
