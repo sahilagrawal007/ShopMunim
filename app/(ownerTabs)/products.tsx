@@ -2,10 +2,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { db } from "../../firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { db } from "../../firebaseConfig";
+import Feather from "react-native-vector-icons/Feather";
+import { router } from "expo-router";
 
 export default function CustomersScreen() {
   const [productName, setProductName] = useState("");
@@ -58,7 +60,7 @@ export default function CustomersScreen() {
       if (docSnap.exists()) {
         const prevProducts = docSnap.data().products || [];
         await setDoc(docRef, {
-          products: [...prevProducts, newProduct],
+          products: [newProduct, ...prevProducts],
         });
       } else {
         await setDoc(docRef, {
@@ -67,11 +69,11 @@ export default function CustomersScreen() {
       }
 
       setProducts((prev) => [
-        ...prev,
         {
           ...newProduct,
           price: `₹${price}`,
         },
+        ...prev,
       ]);
 
       setProductName("");
@@ -110,7 +112,9 @@ export default function CustomersScreen() {
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center">
+          <TouchableOpacity onPress={() => router.navigate('/(ownerTabs)')} >
             <Icon name="storefront" size={30} color="#4B82F6" />
+          </TouchableOpacity>
             <Text className="text-xl font-bold text-gray-900 ml-2">ShopMunim</Text>
           </View>
           <TouchableOpacity>
@@ -119,7 +123,7 @@ export default function CustomersScreen() {
         </View>
 
         {/* Title */}
-        <View className="flex-row items-center mb-6">
+        <View className="flex-row items-center mb-6"> 
           <Text className="text-xl font-bold text-gray-900">Products</Text>
         </View>
 
