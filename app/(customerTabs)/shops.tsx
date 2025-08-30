@@ -1,27 +1,29 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  TextInput,
+    arrayUnion,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    updateDoc,
+    where,
+} from "firebase/firestore";
+import React, { useCallback, useState } from "react";
+import {
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig";
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  arrayUnion,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
 import { Customer, Shop } from "../../types";
-import { useRouter } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CustomerShops() {
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -130,7 +132,15 @@ export default function CustomerShops() {
   
 
       <View style={styles.header}>
-        <Text style={styles.title}>My Shops</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>My Shops</Text>
+          <TouchableOpacity
+            onPress={() => router.push("/(customerTabs)/notifications")}
+            style={styles.notificationButton}
+          >
+            <Icon name="notifications-active" size={30} color="#3B82F6" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.section}>
@@ -386,5 +396,16 @@ const styles = StyleSheet.create({
   },
   scanButton: {
     backgroundColor: "#4B91F3",
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  notificationButton: {
+    padding: 8,
+  },
+  notificationIcon: {
+    fontSize: 24,
   },
 });

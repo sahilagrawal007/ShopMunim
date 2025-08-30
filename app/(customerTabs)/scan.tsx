@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-  ActivityIndicator,
-  Dimensions,
-} from "react-native";
-import { CameraView, Camera } from "expo-camera";
+import { BarCodeScannerResult } from "expo-barcode-scanner";
+import { Camera, CameraView } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { auth } from "../../firebaseConfig"; // Import Firebase auth directly
 import { handleJoinResult, joinShopByQR } from "../../utils/shopUtils";
-import { BarCodeScannerResult } from "expo-barcode-scanner";
 
 const { width } = Dimensions.get("window");
 

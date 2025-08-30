@@ -5,27 +5,26 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   onSnapshot,
   query,
-  where,
-  orderBy,
   updateDoc,
-  getDocs,
+  where
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Dimensions,
   Image,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
-  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { db } from "../../firebaseConfig";
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import Feather from "react-native-vector-icons/Feather";
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { db } from "../../firebaseConfig";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -360,13 +359,7 @@ export default function CustomerHomeScreen() {
             <Text className="text-xl font-bold text-gray-900 ml-2">ShopMunim</Text>
           </View>
           <TouchableOpacity
-            onPress={() => {
-              if (notifications.length > 0) {
-                showNotificationsModal();
-              } else {
-                Alert.alert("No Notifications", "You don't have any notifications yet.");
-              }
-            }}
+            onPress={() => router.push("/(customerTabs)/notifications")}
             className="relative"
           >
             <Icon name="notifications-active" size={30} color="#3B82F6" />
@@ -458,6 +451,79 @@ export default function CustomerHomeScreen() {
             ))
           ) : (
             <Text className="text-gray-500">No shops joined yet.</Text>
+          )}
+        </View>
+
+        {/* Notifications Section */}
+        <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-lg font-bold text-gray-800">Notifications</Text>
+            <TouchableOpacity
+              onPress={() => router.push("/(customerTabs)/notifications")}
+              className="bg-blue-50 px-3 py-2 rounded-lg"
+            >
+              <Text className="text-blue-600 text-sm font-medium">View All</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {notifications.length > 0 ? (
+            <View>
+              {/* Summary */}
+              <View className="bg-blue-50 p-3 rounded-lg mb-3">
+                <Text className="text-blue-800 text-sm font-medium">
+                  📱 {notifications.length} total notifications • {unreadCount} unread
+                </Text>
+              </View>
+              
+              {/* Recent Notifications Preview */}
+              {notifications.slice(0, 2).map((notification, index) => {
+                const isNew = !(notification as any).read;
+                return (
+                  <TouchableOpacity
+                    key={notification.id}
+                    className={`p-3 border-l-4 mb-2 rounded-lg ${
+                      isNew ? "bg-blue-50 border-blue-500" : "bg-gray-50 border-gray-300"
+                    }`}
+                    onPress={() => router.push("/(customerTabs)/notifications")}
+                  >
+                    <View className="flex-row justify-between items-start">
+                      <View className="flex-1">
+                        <Text className="font-medium text-gray-900 text-sm mb-1">
+                          {notification.title || "Payment Reminder"}
+                        </Text>
+                        <Text className="text-gray-600 text-xs" numberOfLines={2}>
+                          {notification.message}
+                        </Text>
+                      </View>
+                      {isNew && (
+                        <View className="ml-2 bg-blue-500 px-2 py-1 rounded-full">
+                          <Text className="text-white text-xs font-bold">NEW</Text>
+                        </View>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+              
+              {notifications.length > 2 && (
+                <TouchableOpacity
+                  onPress={() => router.push("/(customerTabs)/notifications")}
+                  className="bg-gray-50 p-3 rounded-lg border border-gray-200"
+                >
+                  <Text className="text-gray-600 text-sm text-center">
+                    +{notifications.length - 2} more notifications
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ) : (
+            <View className="py-4 items-center">
+              <Icon name="notifications-off" size={32} color="#9CA3AF" />
+              <Text className="text-gray-500 text-sm mt-2">No notifications yet</Text>
+              <Text className="text-gray-400 text-xs text-center">
+                You'll see payment reminders and updates here
+              </Text>
+            </View>
           )}
         </View>
       </ScrollView>

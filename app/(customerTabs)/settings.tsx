@@ -3,9 +3,9 @@ import { deleteUser, signOut } from 'firebase/auth';
 import { deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from 'react-native-vector-icons/Feather';
 import { auth, db } from '../../firebaseConfig';
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CustomerSettings() {
   const router = useRouter();
@@ -121,6 +121,28 @@ export default function CustomerSettings() {
               <Feather name="list" size={20} color="#555" style={styles.icon} />
               <Text style={styles.settingText}>Order History</Text>
             </TouchableOpacity>
+          </View>
+
+          {/* Notifications */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Notifications</Text>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => router.navigate("/(customerTabs)/notifications")}
+            >
+              <Feather name="bell" size={20} color="#555" style={styles.icon} />
+              <Text style={styles.settingText}>View All Notifications</Text>
+            </TouchableOpacity>
+            <View style={styles.settingItem}>
+              <Feather name="bell" size={20} color="#555" style={styles.icon} />
+              <Text style={styles.settingText}>Push Notifications</Text>
+              <Switch
+                value={pushEnabled}
+                onValueChange={handleTogglePush}
+                trackColor={{ false: '#767577', true: '#81b0ff' }}
+                thumbColor={pushEnabled ? '#007AFF' : '#f4f3f4'}
+              />
+            </View>
           </View>
 
           {/* Account Management */}

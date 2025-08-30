@@ -4,9 +4,10 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { collection, doc, getDoc, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Feather from "react-native-vector-icons/Feather";
 import { auth, db } from "../../firebaseConfig";
 import { Transaction } from "../../types";
-import Feather from "react-native-vector-icons/Feather";
+import Icon from "react-native-vector-icons/MaterialIcons";
 // import * as MailComposer from 'expo-mail-composer';
 
 interface TransactionWithShop extends Transaction {
@@ -123,14 +124,20 @@ export default function CustomerHistory() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-      <TouchableOpacity onPress={() => router.navigate('/(customerTabs)/settings')} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.navigate('/(customerTabs)/settings')} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.title}>Transaction History</Text>
-        {shopFilter && (
-          <Text style={styles.subtitle}>Filtered by: {shopFilter}</Text>
-        )}
+        <TouchableOpacity
+          onPress={() => router.navigate("/(customerTabs)/notifications")}
+          style={styles.notificationButton}
+        >
+          <Icon name="notifications-active" size={30} color="#3B82F6" />
+        </TouchableOpacity>
       </View>
+      {shopFilter && (
+        <Text style={styles.subtitle}>Filtered by: {shopFilter}</Text>
+      )}
 
       {/* Shop Filter - Only show if not pre-filtered */}
       {!params.shopFilter && (
@@ -297,6 +304,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 24,
     paddingTop: 40,
   },
@@ -466,5 +476,11 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
     height: 40,
+  },
+  notificationButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
