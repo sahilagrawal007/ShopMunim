@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { getAuth } from "firebase/auth";
 import {
   collection,
@@ -332,22 +332,6 @@ export default function CustomerHomeScreen() {
     };
   }, []);
 
-  const spendingChartData = [
-    {
-      name: "Total Spent",
-      population: spent,
-      color: "#3B82F6", // blue-500
-      legendFontColor: "#3B82F6",
-      legendFontSize: 14,
-    },
-    {
-      name: "Due",
-      population: due,
-      color: "#60A5FA", // blue-400
-      legendFontColor: "#60A5FA",
-      legendFontSize: 14,
-    },
-  ];
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-white">
@@ -441,7 +425,7 @@ export default function CustomerHomeScreen() {
                 }
               >
                 <View className="flex-row items-center">
-                  <Icon name="storefront" size={20}color="#4B82F6" />
+                  <Icon name="storefront" size={20} color="#4B82F6" />
                   <View>
                     <Text className="text-gray-700 text-base font-medium ml-2">{shop.name}</Text>
                   </View>
@@ -452,20 +436,23 @@ export default function CustomerHomeScreen() {
           ) : (
             <Text className="text-gray-500">No shops joined yet.</Text>
           )}
+          <Link href="/(customerTabs)/shops" className="text-blue-600 text-sm mt-3 self-end">
+            View All
+          </Link>
         </View>
 
         {/* Notifications Section */}
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-bold text-gray-800">Notifications</Text>
-            <TouchableOpacity
-              onPress={() => router.push("/(customerTabs)/notifications")}
-              className="bg-blue-50 px-3 py-2 rounded-lg"
+            <Link
+              href="/(customerTabs)/notifications"
+              className="text-blue-600 text-sm mt-3 self-end"
             >
-              <Text className="text-blue-600 text-sm font-medium">View All</Text>
-            </TouchableOpacity>
+              View All
+            </Link>
           </View>
-          
+
           {notifications.length > 0 ? (
             <View>
               {/* Summary */}
@@ -474,7 +461,7 @@ export default function CustomerHomeScreen() {
                   📱 {notifications.length} total notifications • {unreadCount} unread
                 </Text>
               </View>
-              
+
               {/* Recent Notifications Preview */}
               {notifications.slice(0, 2).map((notification, index) => {
                 const isNew = !(notification as any).read;
@@ -504,7 +491,7 @@ export default function CustomerHomeScreen() {
                   </TouchableOpacity>
                 );
               })}
-              
+
               {notifications.length > 2 && (
                 <TouchableOpacity
                   onPress={() => router.push("/(customerTabs)/notifications")}

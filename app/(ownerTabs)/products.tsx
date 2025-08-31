@@ -112,9 +112,9 @@ export default function CustomersScreen() {
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center">
-          <TouchableOpacity onPress={() => router.navigate('/(ownerTabs)')} >
-            <Icon name="storefront" size={30} color="#4B82F6" />
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")}>
+              <Icon name="storefront" size={30} color="#4B82F6" />
+            </TouchableOpacity>
             <Text className="text-xl font-bold text-gray-900 ml-2">ShopMunim</Text>
           </View>
           <TouchableOpacity>
@@ -123,11 +123,11 @@ export default function CustomersScreen() {
         </View>
 
         {/* Title */}
-        <View className="flex-row items-center mb-6"> 
-          <TouchableOpacity onPress={() => router.navigate('/(ownerTabs)')} >
+        <View className="flex-row items-center mb-6">
+          <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")}>
             <Feather name="arrow-left" size={24} color="#333" />
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900">Products</Text>
+          <Text className="text-xl font-bold text-gray-900 ml-4">Products</Text>
         </View>
 
         {/* Add Product Form */}

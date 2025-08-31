@@ -133,16 +133,6 @@ export default function CustomerSettings() {
               <Feather name="bell" size={20} color="#555" style={styles.icon} />
               <Text style={styles.settingText}>View All Notifications</Text>
             </TouchableOpacity>
-            <View style={styles.settingItem}>
-              <Feather name="bell" size={20} color="#555" style={styles.icon} />
-              <Text style={styles.settingText}>Push Notifications</Text>
-              <Switch
-                value={pushEnabled}
-                onValueChange={handleTogglePush}
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={pushEnabled ? '#007AFF' : '#f4f3f4'}
-              />
-            </View>
           </View>
 
           {/* Account Management */}

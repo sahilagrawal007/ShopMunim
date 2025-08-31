@@ -128,57 +128,68 @@ export default function CustomerShops() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-  
+    <SafeAreaView edges={["top", "left", "right"]} className="flex-1">
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>My Shops</Text>
+            <TouchableOpacity
+              onPress={() => router.push("/(customerTabs)/notifications")}
+              style={styles.notificationButton}
+            >
+              <Icon name="notifications-active" size={30} color="#3B82F6" />
+            </TouchableOpacity>
+          </View>
+        </View>
 
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <Text style={styles.title}>My Shops</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Join New Shop</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter shop link"
+            value={shopLink}
+            onChangeText={setShopLink}
+            autoCapitalize="none"
+          />
           <TouchableOpacity
-            onPress={() => router.push("/(customerTabs)/notifications")}
-            style={styles.notificationButton}
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={joinShop}
+            disabled={loading}
           >
-            <Icon name="notifications-active" size={30} color="#3B82F6" />
+            <Text style={styles.buttonText}>{loading ? "Joining..." : "Join Shop"}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.button]} onPress={handleQRScan}>
+            <Text style={styles.buttonText}>Join via QR</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Join New Shop</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter shop link"
-          value={shopLink}
-          onChangeText={setShopLink}
-          autoCapitalize="none"
-        />
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={joinShop}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>{loading ? "Joining..." : "Join Shop"}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.button, styles.scanButton]} onPress={handleQRScan}>
-          <Text style={styles.buttonText}>Join via QR</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Joined Shops</Text>
-        {shops.length === 0 ? (
-          <Text style={styles.emptyText}>No shops joined yet</Text>
-        ) : (
-          shops.map((shop) => (
-            <View key={shop.id} style={styles.shopCard}>
-              <Text style={styles.shopName}>{shop.name}</Text>
-              <Text style={styles.shopLink}>Link: {shop.link}</Text>
-            </View>
-          ))
-        )}
-      </View>
-    </ScrollView>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Joined Shops</Text>
+          {shops.length === 0 ? (
+            <Text style={styles.emptyText}>No shops joined yet</Text>
+          ) : (
+            shops.map((shop) => (
+              <View key={shop.id} style={styles.shopCard}>
+                <TouchableOpacity
+                  key={shop.id}
+                  className="flex-row justify-between items-center py-2 border-gray-100"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(customerTabs)/shopDetails",
+                      params: { shopId: shop.id },
+                    })
+                  }
+                >
+                  <Text style={styles.shopName}>{shop.name}</Text>
+                </TouchableOpacity>
+                <Text style={styles.shopLink}>Link: {shop.link}</Text>
+              </View>
+            ))
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -263,8 +274,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   header: {
-    marginBottom: 24,
-    paddingTop: 40,
+    marginBottom: 10,
   },
   welcomeText: {
     fontSize: 16,
@@ -390,9 +400,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "600",
-  },
-  scanButton: {
-    backgroundColor: "#4B91F3",
   },
   headerRow: {
     flexDirection: "row",
