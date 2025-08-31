@@ -702,7 +702,7 @@ export default function DashboardScreen() {
                   ? "Sending..."
                   : !canSendNotifications()
                   ? "Recently Sent"
-                  : "Collect Payment"}
+                  : "Send Reminder"}
               </Text>
             </TouchableOpacity>
             {analyticsData.customersWithDue > 0 && (

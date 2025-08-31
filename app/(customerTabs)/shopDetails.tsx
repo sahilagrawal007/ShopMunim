@@ -2,35 +2,34 @@ import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { getAuth } from "firebase/auth";
 import {
+  addDoc,
   collection,
   doc,
+  getDoc,
   onSnapshot,
   query,
-  where,
-  addDoc,
   serverTimestamp,
-  getDoc
+  where
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
-  Image,
+  Modal,
+  Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  Modal,
-  Pressable,
-  Platform,
-  Alert
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "react-native-vector-icons/Feather";
-import { db } from "../../firebaseConfig";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { db } from "../../firebaseConfig";
 
 interface RouteParams {
   shopId: string;
@@ -151,12 +150,40 @@ const JoinedShopDetails: React.FC = () => {
   useEffect(() => {
   }, [shopDetails?.name]);
 
-  const calculateDue = () => {
-    return transactions.reduce((total, txn) => {
-      if (txn.type === "paid" || txn.type === "advance") return total + txn.amount;
-      if (txn.type === "due") return total - txn.amount;
-      return total;
-    }, 0);
+  const calculateBalance = () => {
+    let runningBalance = 0;
+    
+    // Process transactions in chronological order to maintain running balance
+    const sortedTransactions = [...transactions].sort((a, b) => {
+      const timeA = getTimeFromCreatedAt(a.createdAt);
+      const timeB = getTimeFromCreatedAt(b.createdAt);
+      return timeA - timeB;
+    });
+
+    sortedTransactions.forEach((txn) => {
+      if (txn.type === "due") {
+        runningBalance += Number(txn.amount || 0);
+      } else if (txn.type === "paid" || txn.type === "advance") {
+        runningBalance -= Number(txn.amount || 0);
+      }
+    });
+
+    // Calculate final due and advance based on running balance
+    if (runningBalance > 0) {
+      // User owes money
+      return { due: runningBalance, advance: 0 };
+    } else if (runningBalance < 0) {
+      // User has paid more than owed (has credit)
+      return { due: 0, advance: Math.abs(runningBalance) };
+    } else {
+      // Perfect balance
+      return { due: 0, advance: 0 };
+    }
+  };
+
+  const calculateNetBalance = () => {
+    const balance = calculateBalance();
+    return balance.due - balance.advance;
   };
 
   const getDisplayProducts = () => {
@@ -497,9 +524,36 @@ const JoinedShopDetails: React.FC = () => {
                 {shopDetails?.name || "Shop"}
               </Text>
               <Text className="text-xs text-gray-500 mb-1">Shop ID: {shopDetails?.id}</Text>
-              <Text className="text-base font-semibold text-blue-600">
-                Your Balance: ₹{calculateDue().toFixed(2)}
-              </Text>
+              
+                             {/* Balance Section */}
+               <View className="mt-3">
+                 <Text className="text-sm font-semibold text-gray-700 mb-2">Current Balance</Text>
+                 <View className="flex-row justify-between">
+                   {/* Due Section */}
+                   <View className="flex-1 bg-red-50 p-3 rounded-lg mr-2">
+                     <Text className="text-xs text-gray-600 mb-1">Amount Due</Text>
+                     <Text className="text-lg font-bold text-red-600">
+                       ₹{calculateBalance().due.toFixed(2)}
+                     </Text>
+                     <Text className="text-xs text-gray-500 mt-1">
+                       {calculateBalance().due > 0 ? 'You owe this amount' : 'No amount due'}
+                     </Text>
+                   </View>
+                   
+                   {/* Advance Section */}
+                   <View className="flex-1 bg-green-50 p-3 rounded-lg ml-2">
+                     <Text className="text-xs text-gray-600 mb-1">Credit Balance</Text>
+                     <Text className="text-lg font-bold text-green-600">
+                       ₹{calculateBalance().advance.toFixed(2)}
+                     </Text>
+                     <Text className="text-xs text-gray-500 mt-1">
+                       {calculateBalance().advance > 0 ? 'You have credit' : 'No credit'}
+                     </Text>
+                   </View>
+                 </View>
+                 
+                 
+               </View>
             </View>
 
             {/* Product List */}

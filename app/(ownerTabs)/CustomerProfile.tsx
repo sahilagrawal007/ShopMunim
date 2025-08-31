@@ -1,36 +1,38 @@
 import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import {
+  addDoc,
   collection,
   doc,
   getDoc,
+  getDocs,
   onSnapshot,
-  query,
-  where,
   orderBy,
-  addDoc,
+  query,
   serverTimestamp,
+  updateDoc,
+  where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   FlatList,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  StyleSheet,
-  Platform,
-  KeyboardAvoidingView,
-  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Feather from "react-native-vector-icons/Feather";
 import { db } from "../../firebaseConfig";
 import { Customer, Transaction } from "../../types";
-import Feather from "react-native-vector-icons/Feather";
 
 interface RouteParams {
   customerId: string;
@@ -64,6 +66,10 @@ const CustomerProfile: React.FC = () => {
   const [DateTimePickerComponent, setDateTimePickerComponent] = useState<any>(null);
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
+
+  // Reminder functionality states
+  const [sendingReminder, setSendingReminder] = useState(false);
+  const [lastReminderSent, setLastReminderSent] = useState<string | null>(null);
 
   // Helper to convert different createdAt formats -> JS timestamp ms
   const getTimeFromCreatedAt = (createdAt: any) => {
@@ -105,7 +111,13 @@ const CustomerProfile: React.FC = () => {
         const customerSnap = await getDoc(customerRef);
         if (!cancelled) {
           if (customerSnap.exists()) {
-            setCustomer({ uid: customerSnap.id, ...(customerSnap.data() as any) } as Customer);
+            const customerData = customerSnap.data();
+            setCustomer({ uid: customerSnap.id, ...customerData } as Customer);
+            
+            // Load customer's last reminder sent time
+            if (customerData.lastPaymentReminder) {
+              setLastReminderSent(customerData.lastPaymentReminder);
+            }
           } else {
             setCustomer(null);
           }
@@ -200,13 +212,198 @@ const CustomerProfile: React.FC = () => {
     };
   }, [customerId, shopId]);
 
-  const calculateDue = () => {
-    return transactions.reduce((sum, txn) => {
-      if (txn.type === "due") return sum + (txn.amount || 0);
-      if (txn.type === "paid" || txn.type === "advance") return sum - (txn.amount || 0);
-      return sum;
-    }, 0);
+  const calculateBalance = () => {
+    let runningBalance = 0;
+    
+    // Process transactions in chronological order to maintain running balance
+    const sortedTransactions = [...transactions].sort((a, b) => {
+      const timeA = getTimeFromCreatedAt(a.createdAt);
+      const timeB = getTimeFromCreatedAt(b.createdAt);
+      return timeA - timeB;
+    });
+
+    sortedTransactions.forEach((txn) => {
+      if (txn.type === "due") {
+        runningBalance += Number(txn.amount || 0);
+      } else if (txn.type === "paid" || txn.type === "advance") {
+        runningBalance -= Number(txn.amount || 0);
+      }
+    });
+
+    // Calculate final due and advance based on running balance
+    if (runningBalance > 0) {
+      // Customer owes money
+      return { due: runningBalance, advance: 0 };
+    } else if (runningBalance < 0) {
+      // Customer has paid more than owed (has credit)
+      return { due: 0, advance: Math.abs(runningBalance) };
+    } else {
+      // Perfect balance
+      return { due: 0, advance: 0 };
+    }
   };
+
+  // Function to check if reminder can be sent (spam prevention - 6 hours)
+  const canSendReminder = () => {
+    if (!lastReminderSent) return true;
+    
+    const lastSent = new Date(lastReminderSent);
+    const now = new Date();
+    const timeDiff = now.getTime() - lastSent.getTime();
+    const hoursDiff = timeDiff / (1000 * 60 * 60);
+    
+    // Allow sending reminders only once every 6 hours
+    return hoursDiff >= 6;
+  };
+
+  // Function to check if customer has recent notifications (additional spam prevention)
+  const hasRecentNotifications = async () => {
+    try {
+      const now = new Date();
+      const sixHoursAgo = new Date(now.getTime() - (6 * 60 * 60 * 1000));
+      
+      const q = query(
+        collection(db, 'notifications'),
+        where('customerId', '==', customer?.uid),
+        where('shopId', '==', shopId),
+        where('type', '==', 'payment_reminder'),
+        where('createdAt', '>=', sixHoursAgo.toISOString())
+      );
+      
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
+    } catch (error) {
+      console.warn('Failed to check recent notifications:', error);
+      return false; // Allow sending if check fails
+    }
+  };
+
+  // Function to send reminder notification to specific customer
+  const sendReminderNotification = async () => {
+    if (!customer || !shopInfo) {
+      Alert.alert('Error', 'Customer or shop information not available. Please try again.');
+      return;
+    }
+
+    // Check if reminder was recently sent (spam prevention)
+    if (!canSendReminder()) {
+      const lastSent = new Date(lastReminderSent!);
+      const nextAllowed = new Date(lastSent.getTime() + (6 * 60 * 60 * 1000));
+      const hoursLeft = Math.ceil((nextAllowed.getTime() - new Date().getTime()) / (1000 * 60 * 60));
+      
+      Alert.alert(
+        'Reminder Recently Sent', 
+        `A reminder was sent recently. You can send a new reminder in ${hoursLeft} hour(s).`,
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    // Additional check for recent notifications in database
+    const hasRecent = await hasRecentNotifications();
+    if (hasRecent) {
+      Alert.alert(
+        'Reminder Recently Sent', 
+        'A reminder was sent recently to this customer. Please wait 6 hours before sending another.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    setSendingReminder(true);
+    
+    try {
+      const calculatedBalance = calculateBalance();
+      
+      if (calculatedBalance.due <= 0) {
+        Alert.alert('No Dues', 'This customer has no pending payments.');
+        return;
+      }
+
+      // Create notification record in Firestore
+      const notificationData = {
+        shopId: shopId,
+        shopName: shopInfo.shopName || 'Shop',
+        customerId: customer.uid,
+        customerName: customer.name,
+        customerPhone: customer.phone,
+        type: 'payment_reminder',
+        title: 'Payment Reminder',
+        message: `Dear ${customer.name}, you have a pending payment of ₹${calculatedBalance.due.toFixed(2)} at ${shopInfo.shopName || 'our shop'}. Please clear your dues at your earliest convenience.`,
+        amount: calculatedBalance.due,
+        status: 'sent',
+        createdAt: new Date().toISOString(),
+        read: false,
+        shopOwnerName: shopInfo.name || 'Shop Owner',
+        // Additional fields for better customer targeting
+        customerEmail: customer.email || null,
+        reminderType: 'individual_customer',
+        source: 'CustomerProfile'
+      };
+
+      // Add to notifications collection
+      const notificationRef = await addDoc(collection(db, 'notifications'), notificationData);
+      console.log('✅ Reminder notification sent successfully:', {
+        notificationId: notificationRef.id,
+        customerId: customer.uid,
+        customerName: customer.name,
+        amount: calculatedBalance.due,
+        timestamp: new Date().toISOString()
+      });
+
+      // Update customer's last reminder sent
+      if (customer.uid) {
+        try {
+          await updateDoc(doc(db, 'customers', customer.uid), {
+            lastPaymentReminder: new Date().toISOString(),
+            lastReminderAmount: calculatedBalance.due
+          });
+        } catch (updateError) {
+          console.warn('Failed to update customer reminder timestamp:', updateError);
+        }
+      }
+
+      // Update last reminder sent time in local state
+      setLastReminderSent(new Date().toISOString());
+
+      // Log the action for analytics
+      await addDoc(collection(db, 'notificationLogs'), {
+        shopId: shopId,
+        action: 'individual_payment_reminder',
+        customerId: customer.uid,
+        customerName: customer.name,
+        amount: calculatedBalance.due,
+        timestamp: new Date().toISOString(),
+        notificationId: notificationRef.id
+      });
+
+      // Verify notification was saved (optional verification)
+      try {
+        const savedNotification = await getDoc(doc(db, 'notifications', notificationRef.id));
+        if (savedNotification.exists()) {
+          console.log('✅ Notification verified in database:', savedNotification.data());
+        } else {
+          console.warn('⚠️ Notification not found in database after saving');
+        }
+      } catch (verifyError) {
+        console.warn('⚠️ Could not verify notification in database:', verifyError);
+      }
+
+      Alert.alert(
+        'Reminder Sent Successfully!', 
+        `Payment reminder sent to ${customer.name} (${customer.uid}) for ₹${calculatedBalance.due.toFixed(2)}.\n\nNotification ID: ${notificationData.customerId}\nShop: ${shopInfo.shopName}`,
+        [{ text: 'OK' }]
+      );
+
+    } catch (error) {
+      console.error('Failed to send reminder:', error);
+      Alert.alert('Error', 'Failed to send reminder. Please try again.');
+    } finally {
+      setSendingReminder(false);
+    }
+  };
+
+
 
   // Open small modal to record offline payment
   const openPaymentModal = () => {
@@ -551,19 +748,44 @@ const CustomerProfile: React.FC = () => {
         <View className="mb-4 bg-white p-4 rounded-lg shadow">
           <Text className="text-xl font-bold text-gray-800">{customer.name}</Text>
           <Text className="text-xs text-gray-500">Customer ID: {customer.uid}</Text>
-          <Text className="text-sm font-semibold text-blue-500 mt-1">
-            Balance: ₹{calculateDue()}
-          </Text>
+          
+          {/* Balance Section */}
+          <View className="mt-3">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">Current Balance</Text>
+            <View className="flex-row justify-between">
+              {/* Due Section */}
+              <View className="flex-1 bg-red-50 p-3 rounded-lg mr-2">
+                <Text className="text-xs text-gray-600 mb-1">Amount Due</Text>
+                <Text className="text-lg font-bold text-red-600">
+                  ₹{calculateBalance().due.toFixed(2)}
+                </Text>
+                <Text className="text-xs text-gray-500 mt-1">
+                  {calculateBalance().due > 0 ? 'Customer owes this amount' : 'No amount due'}
+                </Text>
+              </View>
+              
+              {/* Advance Section */}
+              <View className="flex-1 bg-green-50 p-3 rounded-lg ml-2">
+                <Text className="text-xs text-gray-600 mb-1">Credit Balance</Text>
+                <Text className="text-lg font-bold text-green-600">
+                  ₹{calculateBalance().advance.toFixed(2)}
+                </Text>
+                <Text className="text-xs text-gray-500 mt-1">
+                  {calculateBalance().advance > 0 ? 'Customer has credit' : 'No credit'}
+                </Text>
+              </View>
+            </View>
+          </View>
         </View>
 
-        {/* Row with Add Transaction, Record Payment and Download Statement */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12 }}>
+        {/* Row with Add Transaction, Record Payment, Download Statement and Send Reminder */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap" }}>
           <TouchableOpacity
             className="bg-blue-500 rounded-lg py-2 px-3"
             onPress={() =>
               router.push({ pathname: "/(ownerTabs)/AddTransaction", params: { customerId, shopId } })
             }
-            style={{ flex: 1, marginRight: 6 }}
+            style={{ flex: 1, marginRight: 6, marginBottom: 6, minWidth: "48%" }}
           >
             <Text className="text-white font-bold text-center text-sm">+ Add Transaction</Text>
           </TouchableOpacity>
@@ -572,7 +794,7 @@ const CustomerProfile: React.FC = () => {
             className="bg-blue-500 rounded-lg py-2 px-3"
             onPress={openPaymentModal}
             accessibilityLabel="record-offline-payment"
-            style={{ flex: 1, marginRight: 6 }}
+            style={{ flex: 1, marginLeft: 6, marginBottom: 6, minWidth: "48%" }}
           >
             <Text className="text-white font-bold text-center text-sm">Record Payment</Text>
           </TouchableOpacity>
@@ -581,11 +803,71 @@ const CustomerProfile: React.FC = () => {
             className="bg-blue-500 rounded-lg py-2 px-3"
             onPress={() => setShowStatementModal(true)}
             accessibilityLabel="download-statement"
-            style={{ flex: 1 }}
+            style={{ flex: 1, marginRight: 6, minWidth: "48%" }}
           >
             <Text className="text-white font-bold text-center text-sm">Download Statement</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            className={`rounded-lg py-2 px-3 ${
+              sendingReminder || !canSendReminder() ? "bg-gray-300" : "bg-orange-500"
+            }`}
+            onPress={sendReminderNotification}
+            disabled={sendingReminder || !canSendReminder()}
+            style={{ flex: 1, marginLeft: 6, minWidth: "48%" }}
+          >
+            <Text
+              className={`font-bold text-center text-sm ${
+                sendingReminder || !canSendReminder()
+                  ? "text-gray-500"
+                  : "text-white"
+              }`}
+            >
+              {sendingReminder
+                ? "Sending..."
+                : !canSendReminder()
+                ? "Recently Sent"
+                : "Send Reminder"}
+            </Text>
+          </TouchableOpacity>
         </View>
+
+        {/* Reminder Status */}
+        {calculateBalance().due > 0 && (
+          <View className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+            <View className="flex-row items-center">
+              <Feather name="bell" size={20} color="#F97316" />
+              <View className="ml-2 flex-1">
+                <Text className="text-orange-800 text-sm">
+                  {sendingReminder
+                    ? "Sending payment reminder to customer..."
+                    : `Ready to send payment reminder to ${customer?.name} for ₹${calculateBalance().due.toFixed(2)}.`}
+                </Text>
+                {lastReminderSent && !sendingReminder && (
+                  <View>
+                    <Text className="text-orange-600 text-xs mt-1">
+                      Last sent: {new Date(lastReminderSent).toLocaleString()}
+                    </Text>
+                    {!canSendReminder() && (
+                      <Text className="text-orange-600 text-xs mt-1">
+                        Next reminder available in{" "}
+                        {Math.ceil(
+                          (new Date(lastReminderSent).getTime() +
+                            6 * 60 * 60 * 1000 -
+                            new Date().getTime()) /
+                            (1000 * 60 * 60)
+                        )}{" "}
+                        hour(s)
+                      </Text>
+                    )}
+                  </View>
+                )}
+              </View>
+            </View>
+          </View>
+        )}
+
+
 
         {/* Transaction History */}
         <View className="bg-white rounded-lg p-4 shadow">
