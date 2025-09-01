@@ -41,6 +41,9 @@ export default function CustomerHistory() {
     );
 
     const unsubscribeTransactions = onSnapshot(transactionsQuery, async (snapshot) => {
+      // Check if user is still authenticated before processing data
+      if (!auth.currentUser) return;
+      
       const transactionsData = snapshot.docs.map(
         (doc) => ({ id: doc.id, ...doc.data() } as TransactionWithShop)
       );

@@ -31,7 +31,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "react-native-vector-icons/Feather";
-import { db } from "../../firebaseConfig";
+import { db, auth } from "../../firebaseConfig";
 import { Customer, Transaction } from "../../types";
 
 interface RouteParams {
@@ -155,6 +155,9 @@ const CustomerProfile: React.FC = () => {
           q,
           (snapshot) => {
             if (cancelled) return;
+            // Check if user is still authenticated before processing data
+            if (!auth.currentUser) return;
+            
             const txns: Transaction[] = snapshot.docs.map((d) => ({
               id: d.id,
               ...(d.data() as any),

@@ -1,5 +1,6 @@
 import { useRoute } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import { getAuth } from "firebase/auth";
 import { addDoc, collection, doc, onSnapshot, serverTimestamp } from "firebase/firestore";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
@@ -46,10 +47,13 @@ const AddTransaction: React.FC = () => {
     if (!shopId) return () => {};
 
     const docRef = doc(db, "products", shopId);
-
+    const user = getAuth().currentUser;
     const unsubscribe = onSnapshot(
       docRef,
       (docSnap) => {
+        // Check if user is still authenticated before processing data
+        if (!getAuth().currentUser) return;
+        
         if (docSnap.exists()) {
           const items = docSnap.data().products || [];
           setProducts(

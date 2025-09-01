@@ -67,6 +67,9 @@ const JoinedShopDetails: React.FC = () => {
 
     // Set up real-time listener for shop details
     const shopUnsubscribe = onSnapshot(doc(db, "shops", shopId), (shopDoc) => {
+      // Check if user is still authenticated before processing data
+      if (!getAuth().currentUser) return;
+      
       if (shopDoc.exists()) {
         const shopData = { id: shopDoc.id, ...shopDoc.data() } as any;
         setShopDetails(shopData);
@@ -77,6 +80,9 @@ const JoinedShopDetails: React.FC = () => {
 
     // Set up real-time listener for products
     const productsUnsubscribe = onSnapshot(doc(db, "products", shopId), (productDoc) => {
+      // Check if user is still authenticated before processing data
+      if (!getAuth().currentUser) return;
+      
       if (productDoc.exists()) {
         const productList = productDoc.data().products || [];
         setProducts(productList);
@@ -94,6 +100,9 @@ const JoinedShopDetails: React.FC = () => {
     );
     
     const txnUnsubscribe = onSnapshot(txnQuery, (txnSnap) => {
+      // Check if user is still authenticated before processing data
+      if (!getAuth().currentUser) return;
+      
       const txnList = txnSnap.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),

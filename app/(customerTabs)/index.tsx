@@ -215,6 +215,9 @@ export default function CustomerHomeScreen() {
 
       // Listen for customer profile changes
       customerUnsubscribe = onSnapshot(doc(db, "customers", user.uid), (doc) => {
+        // Check if user is still authenticated before processing data
+        if (!getAuth().currentUser) return;
+        
         if (doc.exists()) {
           const data = doc.data();
           setCustomer(data);
@@ -244,6 +247,9 @@ export default function CustomerHomeScreen() {
           );
 
           notificationsUnsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
+            // Check if user is still authenticated before processing data
+            if (!getAuth().currentUser) return;
+            
             const notificationsList: any[] = [];
             let unread = 0;
 
@@ -291,6 +297,9 @@ export default function CustomerHomeScreen() {
       );
 
       unsubscribe = onSnapshot(txnQuery, (snapshot) => {
+        // Check if user is still authenticated before processing data
+        if (!getAuth().currentUser) return;
+        
         let totalPaid = 0;
         let totalAdvance = 0;
         let totalDue = 0;
@@ -343,7 +352,7 @@ export default function CustomerHomeScreen() {
             <Text className="text-xl font-bold text-gray-900 ml-2">ShopMunim</Text>
           </View>
           <TouchableOpacity
-            onPress={() => router.push("/(customerTabs)/notifications")}
+            onPress={() => router.navigate("./notifications")}
             className="relative"
           >
             <Icon name="notifications-active" size={30} color="#3B82F6" />
@@ -446,7 +455,7 @@ export default function CustomerHomeScreen() {
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-bold text-gray-800">Notifications</Text>
             <Link
-              href="/(customerTabs)/notifications"
+              href="./(customerTabs)/notifications"
               className="text-blue-600 text-sm mt-3 self-end"
             >
               View All
@@ -471,7 +480,7 @@ export default function CustomerHomeScreen() {
                     className={`p-3 border-l-4 mb-2 rounded-lg ${
                       isNew ? "bg-blue-50 border-blue-500" : "bg-gray-50 border-gray-300"
                     }`}
-                    onPress={() => router.push("/(customerTabs)/notifications")}
+                    onPress={() => router.push("./(customerTabs)/notifications")}
                   >
                     <View className="flex-row justify-between items-start">
                       <View className="flex-1">

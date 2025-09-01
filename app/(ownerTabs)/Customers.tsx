@@ -60,6 +60,9 @@ export default function CustomersScreen() {
         );
         
         const unsubCustomers = onSnapshot(customersRef, (querySnapshot) => {
+          // Check if user is still authenticated before processing data
+          if (!auth.currentUser) return;
+          
           const list: any[] = [];
           querySnapshot.forEach((doc) => {
             const data = doc.data();
@@ -69,6 +72,9 @@ export default function CustomersScreen() {
         });
         
         const unsubTransactions = onSnapshot(transactionsRef, (querySnapshot) => {
+          // Check if user is still authenticated before processing data
+          if (!auth.currentUser) return;
+          
           const list: any[] = [];
           querySnapshot.forEach((doc) => {
             const data = doc.data();
