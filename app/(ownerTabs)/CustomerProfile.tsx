@@ -741,150 +741,144 @@ const CustomerProfile: React.FC = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7F7F7]">
-    <ScrollView>
-      <View className="flex-1 p-4">
-        <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")} style={styles.backButton}>
-          <Feather name="arrow-left" size={24} color="#333" />
-        </TouchableOpacity>
+      <ScrollView>
+        <View className="flex-1 p-4">
+          <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")} style={styles.backButton}>
+            <Feather name="arrow-left" size={24} color="#333" />
+          </TouchableOpacity>
 
-        {/* Header */}
-        <View className="mb-4 bg-white p-4 rounded-lg shadow">
-          <Text className="text-xl font-bold text-gray-800">{customer.name}</Text>
-          <Text className="text-xs text-gray-500">Customer ID: {customer.uid}</Text>
-          
-          {/* Balance Section */}
-          <View className="mt-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">Current Balance</Text>
-            <View className="flex-row justify-between">
-              {/* Due Section */}
-              <View className="flex-1 bg-red-50 p-3 rounded-lg mr-2">
-                <Text className="text-xs text-gray-600 mb-1">Amount Due</Text>
-                <Text className="text-lg font-bold text-red-600">
-                  ₹{calculateBalance().due.toFixed(2)}
-                </Text>
-                <Text className="text-xs text-gray-500 mt-1">
-                  {calculateBalance().due > 0 ? 'Customer owes this amount' : 'No amount due'}
-                </Text>
-              </View>
-              
-              {/* Advance Section */}
-              <View className="flex-1 bg-green-50 p-3 rounded-lg ml-2">
-                <Text className="text-xs text-gray-600 mb-1">Credit Balance</Text>
-                <Text className="text-lg font-bold text-green-600">
-                  ₹{calculateBalance().advance.toFixed(2)}
-                </Text>
-                <Text className="text-xs text-gray-500 mt-1">
-                  {calculateBalance().advance > 0 ? 'Customer has credit' : 'No credit'}
-                </Text>
+          {/* Header */}
+          <View className="mb-4 bg-white p-4 rounded-lg shadow">
+            <Text className="text-xl font-bold text-gray-800">{customer.name}</Text>
+            <Text className="text-xs text-gray-500">Customer ID: {customer.uid}</Text>
+            
+            {/* Balance Section */}
+            <View className="mt-3">
+              <Text className="text-sm font-semibold text-gray-700 mb-2">Current Balance</Text>
+              <View className="flex-row justify-between">
+                {/* Due Section */}
+                <View className="flex-1 bg-red-50 p-3 rounded-lg mr-2">
+                  <Text className="text-xs text-gray-600 mb-1">Amount Due</Text>
+                  <Text className="text-lg font-bold text-red-600">
+                    ₹{calculateBalance().due.toFixed(2)}
+                  </Text>
+                  <Text className="text-xs text-gray-500 mt-1">
+                    {calculateBalance().due > 0 ? 'Customer owes this amount' : 'No amount due'}
+                  </Text>
+                </View>
+                
+                {/* Advance Section */}
+                <View className="flex-1 bg-green-50 p-3 rounded-lg ml-2">
+                  <Text className="text-xs text-gray-600 mb-1">Credit Balance</Text>
+                  <Text className="text-lg font-bold text-green-600">
+                    ₹{calculateBalance().advance.toFixed(2)}
+                  </Text>
+                  <Text className="text-xs text-gray-500 mt-1">
+                    {calculateBalance().advance > 0 ? 'Customer has credit' : 'No credit'}
+                  </Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
 
-        {/* Row with Add Transaction, Record Payment, Download Statement and Send Reminder */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap" }}>
-          <TouchableOpacity
-            className="bg-blue-500 rounded-lg py-2 px-3"
-            onPress={() =>
-              router.push({ pathname: "/(ownerTabs)/AddTransaction", params: { customerId, shopId } })
-            }
-            style={{ flex: 1, marginRight: 6, marginBottom: 6, minWidth: "48%" }}
-          >
-            <Text className="text-white font-bold text-center text-sm">+ Add Transaction</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="bg-blue-500 rounded-lg py-2 px-3"
-            onPress={openPaymentModal}
-            accessibilityLabel="record-offline-payment"
-            style={{ flex: 1, marginLeft: 6, marginBottom: 6, minWidth: "48%" }}
-          >
-            <Text className="text-white font-bold text-center text-sm">Record Payment</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="bg-blue-500 rounded-lg py-2 px-3"
-            onPress={() => setShowStatementModal(true)}
-            accessibilityLabel="download-statement"
-            style={{ flex: 1, marginRight: 6, minWidth: "48%" }}
-          >
-            <Text className="text-white font-bold text-center text-sm">Download Statement</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className={`rounded-lg py-2 px-3 ${
-              sendingReminder || !canSendReminder() ? "bg-gray-300" : "bg-orange-500"
-            }`}
-            onPress={sendReminderNotification}
-            disabled={sendingReminder || !canSendReminder()}
-            style={{ flex: 1, marginLeft: 6, minWidth: "48%" }}
-          >
-            <Text
-              className={`font-bold text-center text-sm ${
-                sendingReminder || !canSendReminder()
-                  ? "text-gray-500"
-                  : "text-white"
-              }`}
+          {/* Row with Add Transaction, Record Payment, Download Statement and Send Reminder */}
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap" }}>
+            <TouchableOpacity
+              className="bg-blue-500 rounded-lg py-2 px-3"
+              onPress={() =>
+                router.push({ pathname: "/(ownerTabs)/AddTransaction", params: { customerId, shopId } })
+              }
+              style={{ flex: 1, marginRight: 6, marginBottom: 6, minWidth: "48%" }}
             >
-              {sendingReminder
-                ? "Sending..."
-                : !canSendReminder()
-                ? "Recently Sent"
-                : "Send Reminder"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+              <Text className="text-white font-bold text-center text-sm">+ Add Transaction</Text>
+            </TouchableOpacity>
 
-        {/* Reminder Status */}
-        {calculateBalance().due > 0 && (
-          <View className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
-            <View className="flex-row items-center">
-              <Feather name="bell" size={20} color="#F97316" />
-              <View className="ml-2 flex-1">
-                <Text className="text-orange-800 text-sm">
-                  {sendingReminder
-                    ? "Sending payment reminder to customer..."
-                    : `Ready to send payment reminder to ${customer?.name} for ₹${calculateBalance().due.toFixed(2)}.`}
-                </Text>
-                {lastReminderSent && !sendingReminder && (
-                  <View>
-                    <Text className="text-orange-600 text-xs mt-1">
-                      Last sent: {new Date(lastReminderSent).toLocaleString()}
-                    </Text>
-                    {!canSendReminder() && (
+            <TouchableOpacity
+              className="bg-blue-500 rounded-lg py-2 px-3"
+              onPress={openPaymentModal}
+              accessibilityLabel="record-offline-payment"
+              style={{ flex: 1, marginLeft: 6, marginBottom: 6, minWidth: "48%" }}
+            >
+              <Text className="text-white font-bold text-center text-sm">Record Payment</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="bg-blue-500 rounded-lg py-2 px-3"
+              onPress={() => setShowStatementModal(true)}
+              accessibilityLabel="download-statement"
+              style={{ flex: 1, marginRight: 6, minWidth: "48%" }}
+            >
+              <Text className="text-white font-bold text-center text-sm">Download Statement</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className={`rounded-lg py-2 px-3 ${
+                sendingReminder || !canSendReminder() ? "bg-gray-300" : "bg-orange-500"
+              }`}
+              onPress={sendReminderNotification}
+              disabled={sendingReminder || !canSendReminder()}
+              style={{ flex: 1, marginLeft: 6, minWidth: "48%" }}
+            >
+              <Text
+                className={`font-bold text-center text-sm ${
+                  sendingReminder || !canSendReminder()
+                    ? "text-gray-500"
+                    : "text-white"
+                }`}
+              >
+                {sendingReminder
+                  ? "Sending..."
+                  : !canSendReminder()
+                  ? "Recently Sent"
+                  : "Send Reminder"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Reminder Status */}
+          {calculateBalance().due > 0 && (
+            <View className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+              <View className="flex-row items-center">
+                <Feather name="bell" size={20} color="#F97316" />
+                <View className="ml-2 flex-1">
+                  <Text className="text-orange-800 text-sm">
+                    {sendingReminder
+                      ? "Sending payment reminder to customer..."
+                      : `Ready to send payment reminder to ${customer?.name} for ₹${calculateBalance().due.toFixed(2)}.`}
+                  </Text>
+                  {lastReminderSent && !sendingReminder && (
+                    <View>
                       <Text className="text-orange-600 text-xs mt-1">
-                        Next reminder available in{" "}
-                        {Math.ceil(
-                          (new Date(lastReminderSent).getTime() +
-                            6 * 60 * 60 * 1000 -
-                            new Date().getTime()) /
-                            (1000 * 60 * 60)
-                        )}{" "}
-                        hour(s)
+                        Last sent: {new Date(lastReminderSent).toLocaleString()}
                       </Text>
-                    )}
-                  </View>
-                )}
+                      {!canSendReminder() && (
+                        <Text className="text-orange-600 text-xs mt-1">
+                          Next reminder available in{" "}
+                          {Math.ceil(
+                            (new Date(lastReminderSent).getTime() +
+                              6 * 60 * 60 * 1000 -
+                              new Date().getTime()) /
+                              (1000 * 60 * 60)
+                          )}{" "}
+                          hour(s)
+                        </Text>
+                      )}
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
-          </View>
-        )}
+          )}
 
-
-
-        {/* Transaction History */}
-        <View className="bg-white rounded-lg p-4 shadow">
-          <View className="flex-row justify-between items-center mb-3">
-            <Text className="text-base font-bold text-gray-800">Transaction History</Text>
-            <Text className="text-xs text-gray-500">({transactions.length} transactions)</Text>
-          </View>
-          
-          
-          <FlatList
-            data={transactions} // already returned sorted server-side
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+          {/* Transaction History */}
+          <View className="bg-white rounded-lg p-4 shadow">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-base font-bold text-gray-800">Transaction History</Text>
+              <Text className="text-xs text-gray-500">({transactions.length} transactions)</Text>
+            </View>
+            
+            {transactions.map((item) => (
+              <View key={item.id} className="flex-row justify-between items-center py-3 border-b border-gray-100">
                 <View>
                   <Text className="font-medium text-gray-800">{item.description || "Transaction"}</Text>
                   <Text className="text-xs text-gray-400">
@@ -906,12 +900,16 @@ const CustomerProfile: React.FC = () => {
                   </TouchableOpacity>
                 </View>
               </View>
+            ))}
+            
+            {transactions.length === 0 && (
+              <Text className="text-center text-gray-400 mt-4">No transactions found.</Text>
             )}
-            ListEmptyComponent={<Text className="text-center text-gray-400 mt-4">No transactions found.</Text>}
-          />
+          </View>
         </View>
+      </ScrollView>
 
-        {/* ========== Offline Payment Modal ========== */}
+      {/* ========== Offline Payment Modal ========== */}
         <Modal visible={showPaymentModal} animationType="fade" transparent>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -1032,8 +1030,6 @@ const CustomerProfile: React.FC = () => {
             </View>
           </KeyboardAvoidingView>
         </Modal>
-      </View>
-      </ScrollView>
     </SafeAreaView>
   );
 };

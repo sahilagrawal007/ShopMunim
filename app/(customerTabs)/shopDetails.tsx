@@ -532,7 +532,7 @@ const JoinedShopDetails: React.FC = () => {
               <Text className="text-xl font-bold text-gray-900 mb-1">
                 {shopDetails?.name || "Shop"}
               </Text>
-              <Text className="text-xs text-gray-500 mb-1">Shop ID: {shopDetails?.id}</Text>
+              {/* <Text className="text-xs text-gray-500 mb-1">Shop ID: {shopDetails?.id}</Text> */}
               
                              {/* Balance Section */}
                <View className="mt-3">

@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { db } from "../../firebaseConfig";
@@ -14,10 +14,23 @@ export default function CustomersScreen() {
   const [price, setPrice] = useState("");
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const [products, setProducts] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter((product) =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [searchQuery, products]);
 
   const fetchProducts = async () => {
     const auth = getAuth();
@@ -48,17 +61,29 @@ export default function CustomersScreen() {
     if (!user) return;
 
     const docRef = doc(db, "products", user.uid);
-    const newProduct = {
-      id: Date.now().toString(),
-      name: productName,
-      price: Number(price),
-      createdAt: new Date(),
-    };
 
     try {
       const docSnap = await getDoc(docRef);
+      const prevProducts = docSnap.exists() ? docSnap.data().products || [] : [];
+      
+      // Check if product name already exists
+      const productExists = prevProducts.some((product: any) => 
+        product.name.toLowerCase().trim() === productName.toLowerCase().trim()
+      );
+      
+      if (productExists) {
+        Alert.alert("Product Already Exists", "This product has already been added. Please check your products.");
+        return;
+      }
+
+      const newProduct = {
+        id: Date.now().toString(),
+        name: productName,
+        price: Number(price),
+        createdAt: new Date(),
+      };
+
       if (docSnap.exists()) {
-        const prevProducts = docSnap.data().products || [];
         await setDoc(docRef, {
           products: [newProduct, ...prevProducts],
         });
@@ -109,31 +134,16 @@ export default function CustomersScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#F7F7F7]">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {/* Header */}
-        <View className="flex-row justify-between items-center mb-6">
-          <View className="flex-row items-center">
-            <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")}>
-              <Icon name="storefront" size={30} color="#4B82F6" />
-            </TouchableOpacity>
-            <Text className="text-xl font-bold text-gray-900 ml-2">ShopMunim</Text>
-          </View>
-          <TouchableOpacity>
-            <Icon name="notifications-active" size={30} color="#3B82F6" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color="#333" />
+        </TouchableOpacity>
 
-        {/* Title */}
-        <View className="flex-row items-center mb-6">
-          <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")}>
-            <Feather name="arrow-left" size={24} color="#333" />
-          </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900 ml-4">Products</Text>
-        </View>
+        <Text className="text-2xl font-bold text-gray-900 mb-6">All Products</Text>
 
-        {/* Add Product Form */}
-        <Text className="text-gray-500 mb-2">Manage all your shop's products and prices</Text>
-        <View className="bg-white rounded-xl p-4 mb-6">
-          <Text className="text-gray-700 text-lg font-bold mb-4">+ Add New Product</Text>
+        {/* Add Product Section */}
+        <View className="bg-white rounded-xl p-4 mb-6 shadow-sm border border-gray-100">
+          <Text className="text-gray-700 text-lg font-bold mb-2">+ Add New Product</Text>
+          <Text className="text-gray-500 text-sm mb-4">Manage all your shop's products and prices</Text>
 
           <Text className="text-gray-400 mb-2 text-sm">Product Name</Text>
           <TextInput
@@ -164,31 +174,73 @@ export default function CustomersScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Products List */}
-        <Text className="text-gray-700 font-semibold mb-2">Your Products</Text>
-        {products.map((p) => (
-          <View
-            key={p.id}
-            className="flex-row items-center bg-white p-3 rounded-xl mb-1.5 shadow-sm"
-          >
-            <View className="flex-1">
-              <Text className="text-base text-gray-900 font-medium">{p.name}</Text>
+        {/* Products List Section */}
+        <View className="bg-white rounded-xl p-4 mb-6 shadow-sm border border-gray-100">
+          <Text className="text-gray-700 text-lg font-bold mb-3">Your Products</Text>
+          
+          {/* Search Bar */}
+          <View className="mb-3">
+            <View className="flex-row items-center bg-gray-100 rounded-lg px-3 py-2">
+              <Feather name="search" size={20} color="#666" />
+              <TextInput
+                className="flex-1 ml-2 text-gray-700"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholderTextColor="#999"
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery("")}>
+                  <Feather name="x" size={20} color="#666" />
+                </TouchableOpacity>
+              )}
             </View>
-            <Text className="text-base text-gray-500 mr-4">{p.price}</Text>
-            <TouchableOpacity
-              onPress={() =>
-                Alert.alert("Delete Product", `Are you sure you want to delete "${p.name}"?`, [
-                  { text: "Cancel", style: "cancel" },
-                  { text: "Delete", style: "destructive", onPress: () => deleteProduct(p.id) },
-                ])
-              }
-              className="mx-1"
-            >
-              <Icon name="delete-forever" size={30} color="#EF4444" />
-            </TouchableOpacity>
           </View>
-        ))}
+
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((p, index) => (
+              <TouchableOpacity
+                key={index}
+                className="flex-row justify-between items-center py-3 px-2 mb-2 bg-gray-50 rounded-lg border border-gray-100"
+              >
+                <View className="flex-row items-center">
+                  <Feather name="package" size={30} color="#3B82F6" />
+                  <View>
+                    <Text className="text-gray-700 font-medium ml-2">{p.name}</Text>
+                  </View>
+                </View>
+                <View className="flex-row items-center">
+                  <Text className="text-gray-500 mr-4">{p.price}</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      Alert.alert("Delete Product", `Are you sure you want to delete "${p.name}"?`, [
+                        { text: "Cancel", style: "cancel" },
+                        { text: "Delete", style: "destructive", onPress: () => deleteProduct(p.id) },
+                      ])
+                    }
+                    className="mx-1"
+                  >
+                    <Icon name="delete-forever" size={24} color="#EF4444" />
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <View className="py-6">
+              <Text className="text-gray-500 text-center">
+                {searchQuery.trim() ? `No products found for "${searchQuery}"` : "No products added yet"}
+              </Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  backButton: {
+    width: 40,
+    height: 40,
+  },
+});

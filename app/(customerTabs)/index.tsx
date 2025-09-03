@@ -343,7 +343,7 @@ export default function CustomerHomeScreen() {
 
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-white">
+    <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-[#F7F7F7]">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
@@ -396,9 +396,40 @@ export default function CustomerHomeScreen() {
           </TouchableOpacity>
         </LinearGradient>
 
+        {/* Quick Actions */}
+        <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
+          <Text className="text-lg font-bold text-gray-800 mb-4">Quick Actions</Text>
+          <View className="flex-row justify-between">
+            {/* Scan QR Code */}
+            <TouchableOpacity
+              onPress={() => router.push("/(customerTabs)/scan")}
+              className="w-[48%] bg-white p-4 rounded-xl shadow items-center"
+            >
+              <View className="bg-green-100 p-3 rounded-full mb-2">
+                <Icon name="qr-code-scanner" size={28} color="#10B981" />
+              </View>
+              <Text className="text-lg font-bold text-green-600">Scan QR</Text>
+              <Text className="text-sm text-gray-500 text-center">Join new shops</Text>
+            </TouchableOpacity>
+
+            {/* Browse Shops */}
+            <TouchableOpacity
+              onPress={() => router.push("/(customerTabs)/shops")}
+              className="w-[48%] bg-white p-4 rounded-xl shadow items-center"
+            >
+              <View className="bg-blue-100 p-3 rounded-full mb-2">
+                <Icon name="storefront" size={28} color="#3B82F6" />
+              </View>
+              <Text className="text-lg font-bold text-blue-600">Browse</Text>
+              <Text className="text-sm text-gray-500 text-center">Find shops</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Summary Cards */}
-        <Text className="text-gray-800 text-base font-semibold mb-3">Spending Summary</Text>
-        <View className="flex-row justify-between mb-6">
+        <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
+          <Text className="text-lg font-bold text-gray-800 mb-4">Spending Summary</Text>
+          <View className="flex-row justify-between">
           {/* Total Spent Card (Updated to Red Theme) */}
           <View className="w-[48%] bg-white p-4 rounded-xl shadow items-center">
             <View className="bg-red-100 p-3 rounded-full mb-2">
@@ -416,38 +447,79 @@ export default function CustomerHomeScreen() {
             <Text className="text-lg font-bold text-yellow-600">₹{due}</Text>
             <Text className="text-sm text-gray-500 text-center">Due</Text>
           </View>
+          </View>
         </View>
 
         {/* Shops List */}
         <View className="mb-6 bg-white p-4 rounded-lg shadow-md border border-gray-200">
-          <Text className="text-lg font-bold text-gray-800 mb-4">Your Shops</Text>
-          {shops.length > 0 ? (
-            shops.map((shop) => (
+          <View className="flex-row justify-between items-center mb-4">
+            <Text className="text-lg font-bold text-gray-800">Your Shops</Text>
+            {shops.length > 3 && (
               <TouchableOpacity
-                key={shop.id}
-                className="flex-row justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
-                onPress={() =>
-                  router.push({
-                    pathname: "/(customerTabs)/shopDetails",
-                    params: { shopId: shop.id },
-                  })
-                }
+                onPress={() => router.push("/(customerTabs)/shops")}
+                className="bg-blue-50 px-3 py-1 rounded-full"
               >
-                <View className="flex-row items-center">
-                  <Icon name="storefront" size={20} color="#4B82F6" />
-                  <View>
-                    <Text className="text-gray-700 text-base font-medium ml-2">{shop.name}</Text>
-                  </View>
-                </View>
-                <Icon name="arrow-right" size={30} color="#3B82F6" />
+                <Text className="text-blue-600 text-sm font-medium">
+                  View All ({shops.length})
+                </Text>
               </TouchableOpacity>
-            ))
+            )}
+          </View>
+          {shops.length > 0 ? (
+            <>
+              {shops.slice(0, 3).map((shop) => (
+                <TouchableOpacity
+                  key={shop.id}
+                  className="flex-row justify-between items-center py-3 border-b border-gray-100 last:border-b-0"
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(customerTabs)/shopDetails",
+                      params: { shopId: shop.id },
+                    })
+                  }
+                >
+                  <View className="flex-row items-center">
+                    <View className="bg-blue-100 p-2 rounded-full mr-3">
+                      <Icon name="storefront" size={18} color="#4B82F6" />
+                    </View>
+                    <View>
+                      <Text className="text-gray-700 text-base font-medium">{shop.name}</Text>
+                      {shop.address && (
+                        <Text className="text-gray-500 text-sm" numberOfLines={1}>
+                          📍 {shop.address}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                  <Icon name="arrow-forward-ios" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+              ))}
+              {shops.length > 3 && (
+                <TouchableOpacity
+                  onPress={() => router.push("/(customerTabs)/shops")}
+                  className="mt-3 py-2 items-center bg-gray-50 rounded-lg"
+                >
+                  <Text className="text-blue-600 text-sm font-medium">
+                    +{shops.length - 3} more shops
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </>
           ) : (
-            <Text className="text-gray-500">No shops joined yet.</Text>
+            <View className="py-4 items-center">
+              <Icon name="storefront" size={32} color="#9CA3AF" />
+              <Text className="text-gray-500 mt-2">No shops joined yet</Text>
+              <Text className="text-gray-400 text-sm text-center mt-1">
+                Join shops to start tracking your purchases
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push("/(customerTabs)/shops")}
+                className="mt-3 bg-blue-50 px-4 py-2 rounded-lg"
+              >
+                <Text className="text-blue-600 font-medium">Browse Shops</Text>
+              </TouchableOpacity>
+            </View>
           )}
-          <Link href="/(customerTabs)/shops" className="text-blue-600 text-sm mt-3 self-end">
-            View All
-          </Link>
         </View>
 
         {/* Notifications Section */}
