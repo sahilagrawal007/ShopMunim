@@ -93,6 +93,15 @@ export default function OwnerSettings() {
                 <Text style={styles.settingText}>Shop Information</Text>
               </View>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => router.navigate("/(ownerTabs)/histry" as any)}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Feather name="clock" size={20} color="#555" style={{ marginRight: 12 }} />
+                <Text style={styles.settingText}>Transaction History</Text>
+              </View>
+            </TouchableOpacity>
             
           </View>
 

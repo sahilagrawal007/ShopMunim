@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, Dimensions, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, Dimensions, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -33,8 +33,16 @@ export default function Login() {
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-[#DBEAFE]">
-      <ScrollView>
-        <LinearGradient
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+        style={{ flex: 1 }}
+     >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <LinearGradient
           colors={["#DBEAFE", "#F3F4F6", "#FFFFFF"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -135,7 +143,8 @@ export default function Login() {
             </View>
           </View>
         </LinearGradient>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

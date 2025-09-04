@@ -874,10 +874,19 @@ const CustomerProfile: React.FC = () => {
           <View className="bg-white rounded-lg p-4 shadow">
             <View className="flex-row justify-between items-center mb-3">
               <Text className="text-base font-bold text-gray-800">Transaction History</Text>
-              <Text className="text-xs text-gray-500">({transactions.length} transactions)</Text>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text className="text-xs text-gray-500" style={{ marginRight: 12 }}>({transactions.length} transactions)</Text>
+                {transactions.length > 5 && (
+                  <TouchableOpacity
+                    onPress={() => router.push({ pathname: "/(ownerTabs)/histry", params: { customerId } })}
+                  >
+                    <Text className="text-sm font-semibold text-blue-600">View All</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
             
-            {transactions.map((item) => (
+            {transactions.slice(0, 5).map((item) => (
               <View key={item.id} className="flex-row justify-between items-center py-3 border-b border-gray-100">
                 <View>
                   <Text className="font-medium text-gray-800">{item.description || "Transaction"}</Text>
