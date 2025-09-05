@@ -1,11 +1,21 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { collection, doc, getDocs, onSnapshot, orderBy, query, where, documentId } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+  documentId,
+} from "firebase/firestore";
 import React, { useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { auth, db } from "../../firebaseConfig";
 import { Transaction } from "../../types";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface TransactionWithCustomer extends Transaction {
   customerName?: string;
@@ -35,10 +45,14 @@ export default function OwnerHistory() {
       async (snapshot) => {
         if (!auth.currentUser) return;
 
-        const txData = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as TransactionWithCustomer));
+        const txData = snapshot.docs.map(
+          (d) => ({ id: d.id, ...d.data() } as TransactionWithCustomer)
+        );
 
         // Gather unique customer IDs
-        const uniqueCustomerIds = [...new Set(txData.map((t) => t.customerId).filter(Boolean))] as string[];
+        const uniqueCustomerIds = [
+          ...new Set(txData.map((t) => t.customerId).filter(Boolean)),
+        ] as string[];
 
         // Build a map of id -> name using batched queries that respect security rules:
         // Only read customers that have joined this shop (shopsJoined contains owner uid)
@@ -107,12 +121,15 @@ export default function OwnerHistory() {
   };
 
   const filteredTransactions = useMemo(() => {
-    const typeFiltered = filter === "all" ? transactions : transactions.filter(t => t.type === filter);
+    const typeFiltered =
+      filter === "all" ? transactions : transactions.filter((t) => t.type === filter);
     const byCustomerId = customerIdFilter
-      ? typeFiltered.filter(t => (t as any).customerId === customerIdFilter)
+      ? typeFiltered.filter((t) => (t as any).customerId === customerIdFilter)
       : typeFiltered;
     const nameFiltered = customerFilter.trim().length
-      ? byCustomerId.filter(t => (t.customerName || "").toLowerCase().includes(customerFilter.trim().toLowerCase()))
+      ? byCustomerId.filter((t) =>
+          (t.customerName || "").toLowerCase().includes(customerFilter.trim().toLowerCase())
+        )
       : byCustomerId;
     return nameFiltered;
   }, [transactions, filter, customerFilter, customerIdFilter]);
@@ -140,7 +157,8 @@ export default function OwnerHistory() {
                   tx.type === "due" ? styles.dueAmount : styles.paidAmount,
                 ]}
               >
-                {tx.type === "paid" || tx.type === "advance" ? "+" : "-"}₹{Number(tx.amount).toFixed(2)}
+                {tx.type === "paid" || tx.type === "advance" ? "+" : "-"}₹
+                {Number(tx.amount).toFixed(2)}
               </Text>
               <Text style={styles.transactionType}>{tx.type.toUpperCase()}</Text>
             </View>
@@ -151,57 +169,70 @@ export default function OwnerHistory() {
   }, [loading, filteredTransactions]);
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.navigate('/(ownerTabs)/settings')} style={styles.backButton}>
-          <Feather name="arrow-left" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Transaction History</Text>
-        <View style={styles.headerRight}>
-          <Icon name="history" size={28} color="#3B82F6" />
-        </View>
-      </View>
-      {customerIdFilter ? (
-        <Text style={{ textAlign: "center", color: "#555", marginBottom: 8 }}>
-          Showing transactions for selected customer
-        </Text>
-      ) : null}
-      {/* Customer name search */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search by customer name..."
-          value={customerFilter}
-          onChangeText={setCustomerFilter}
-        />
-        {customerIdFilter ? (
-          <TouchableOpacity style={styles.clearFilterButton} onPress={() => setCustomerIdFilter("")}>
-            <Text style={styles.clearFilterText}>Clear Customer</Text>
-          </TouchableOpacity>
-        ) : null}
-        {customerFilter.length > 0 && (
-          <TouchableOpacity style={styles.clearFilterButton} onPress={() => setCustomerFilter("")}>
-            <Text style={styles.clearFilterText}>Clear</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Type filters */}
-      <View style={styles.filterContainer}>
-        {["all", "paid", "due"].map((f) => (
+    <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-[#F7F7F7]">
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
           <TouchableOpacity
-            key={f}
-            style={[styles.filterButton, filter === f && styles.filterButtonActive]}
-            onPress={() => setFilter(f as any)}
+            onPress={() => router.navigate("/(ownerTabs)/settings")}
+            style={styles.backButton}
           >
-            <Text style={[styles.filterButtonText, filter === f && styles.filterButtonTextActive]}>
-              {f.charAt(0).toUpperCase() + f.slice(1)}
-            </Text>
+            <Feather name="arrow-left" size={24} color="#333" />
           </TouchableOpacity>
-        ))}
-      </View>
-      {content}
-    </ScrollView>
+          <Text style={styles.title}>Transaction History</Text>
+          <View style={styles.headerRight}>
+            <Icon name="history" size={28} color="#3B82F6" />
+          </View>
+        </View>
+        {customerIdFilter ? (
+          <Text style={{ textAlign: "center", color: "#555", marginBottom: 8 }}>
+            Showing transactions for selected customer
+          </Text>
+        ) : null}
+        {/* Customer name search */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by customer name..."
+            value={customerFilter}
+            onChangeText={setCustomerFilter}
+          />
+          {customerIdFilter ? (
+            <TouchableOpacity
+              style={styles.clearFilterButton}
+              onPress={() => setCustomerIdFilter("")}
+            >
+              <Text style={styles.clearFilterText}>Clear Customer</Text>
+            </TouchableOpacity>
+          ) : null}
+          {customerFilter.length > 0 && (
+            <TouchableOpacity
+              style={styles.clearFilterButton}
+              onPress={() => setCustomerFilter("")}
+            >
+              <Text style={styles.clearFilterText}>Clear</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Type filters */}
+        <View style={styles.filterContainer}>
+          {["all", "paid", "due"].map((f) => (
+            <TouchableOpacity
+              key={f}
+              style={[styles.filterButton, filter === f && styles.filterButtonActive]}
+              onPress={() => setFilter(f as any)}
+            >
+              <Text
+                style={[styles.filterButtonText, filter === f && styles.filterButtonTextActive]}
+              >
+                {f.charAt(0).toUpperCase() + f.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        {content}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -216,7 +247,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 24,
-    paddingTop: 40,
   },
   backButton: {
     width: 40,
@@ -342,5 +372,3 @@ const styles = StyleSheet.create({
     color: "#007AFF",
   },
 });
-
-

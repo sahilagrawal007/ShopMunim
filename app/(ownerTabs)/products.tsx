@@ -132,7 +132,7 @@ export default function CustomersScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F7F7]">
+    <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-[#F7F7F7]">
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")} style={styles.backButton}>
           <Feather name="arrow-left" size={24} color="#333" />

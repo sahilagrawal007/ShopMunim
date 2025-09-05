@@ -406,8 +406,6 @@ const CustomerProfile: React.FC = () => {
     }
   };
 
-
-
   // Open small modal to record offline payment
   const openPaymentModal = () => {
     setPaymentAmount("");
@@ -740,12 +738,12 @@ const CustomerProfile: React.FC = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F7F7F7]">
-      <ScrollView>
-        <View className="flex-1 p-4">
-          <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")} style={styles.backButton}>
-            <Feather name="arrow-left" size={24} color="#333" />
-          </TouchableOpacity>
+    <SafeAreaView edges={["top", "left", "right"]} className="flex-1 bg-[#F7F7F7]">
+    <ScrollView>
+      <View className="flex-1 p-4">
+        <TouchableOpacity onPress={() => router.navigate("/(ownerTabs)")} style={styles.backButton}>
+          <Feather name="arrow-left" size={24} color="#333" />
+        </TouchableOpacity>
 
           {/* Header */}
           <View className="mb-4 bg-white p-4 rounded-lg shadow">
@@ -878,7 +876,7 @@ const CustomerProfile: React.FC = () => {
                 <Text className="text-xs text-gray-500" style={{ marginRight: 12 }}>({transactions.length} transactions)</Text>
                 {transactions.length > 5 && (
                   <TouchableOpacity
-                    onPress={() => router.push({ pathname: "/(ownerTabs)/histry", params: { customerId } })}
+                    onPress={() => router.navigate({ pathname: "./history", params: { customerId } } )}
                   >
                     <Text className="text-sm font-semibold text-blue-600">View All</Text>
                   </TouchableOpacity>

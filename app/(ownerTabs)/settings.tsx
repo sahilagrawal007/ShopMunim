@@ -95,7 +95,7 @@ export default function OwnerSettings() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.settingItem}
-              onPress={() => router.navigate("/(ownerTabs)/histry" as any)}
+              onPress={() => router.navigate("/(ownerTabs)/history" as any)}
             >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Feather name="clock" size={20} color="#555" style={{ marginRight: 12 }} />

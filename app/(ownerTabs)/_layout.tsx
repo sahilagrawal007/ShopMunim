@@ -75,7 +75,7 @@ export default function OwnerTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="histry"
+        name="history"
         options={{
           href: null,
         }}
